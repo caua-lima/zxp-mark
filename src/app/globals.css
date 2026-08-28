@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/* Tokens da identidade ZXP Solutions — preto + amarelo + branco.
+   Mesmos valores usados no dashboard de performance. */
+@theme {
+  --font-sans:
+    var(--fonte-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+
+  --color-fundo: #0c0d10;
+  --color-superficie: #16181d;
+  --color-elevado: #1e2127;
+  --color-alt: #1b1e24;
+  --color-borda: #292d35;
+  --color-borda-forte: #363b45;
+
+  --color-tinta: #f2f4f8;
+  --color-suave: #9aa5b8;
+  --color-apagado: #6b7280;
+  --color-fantasma: #4d535f;
+
+  --color-brand: #f7c41c;
+  --color-brand-forte: #ffe37a;
+  --color-brand-ink: #16140a;
+
+  --color-sucesso: #35c46a;
+  --color-perigo: #ff6b6b;
+  --color-info: #4ea1ff;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+}
+
+:root {
+  color-scheme: dark;
+  --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --sombra-md: 0 12px 30px rgba(0, 0, 0, 0.5);
+  --anel-foco: 0 0 0 3px rgba(247, 196, 28, 0.35);
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+  background: var(--color-fundo);
+  color: var(--color-tinta);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+body {
+  /* brilho dourado difuso no topo — profundidade sem pesar */
+  background-image:
+    radial-gradient(60rem 32rem at 50% -12rem, rgba(247, 196, 28, 0.13), transparent 70%),
+    radial-gradient(40rem 24rem at 90% 4rem, rgba(247, 196, 28, 0.05), transparent 70%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea,
+select {
+  /* < 16px faz o Safari dar zoom ao focar */
+  font-size: 16px;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--anel-foco);
+}
+
+@utility area-topo {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility area-baixo {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility cartao {
+  background: color-mix(in srgb, var(--color-superficie) 90%, transparent);
+  border: 1px solid var(--color-borda);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--sombra-sm);
+  backdrop-filter: blur(12px);
+}
+
+@utility numeros {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.02em;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-borda);
+  border-radius: 99px;
+}
+
+@keyframes surge {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.surge {
+  animation: surge 0.28s ease-out both;
+}
+
+@keyframes pulso {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.pulso {
+  animation: pulso 1.6s ease-in-out infinite;
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Marco — hábitos e contagens",
+  "short_name": "Marco",
+  "description": "Cada hora conta. Marcos de hábitos, contagens regressivas e um apoio inteligente quando a vontade bate.",
+  "id": "/",
+  "start_url": "/marcos",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0d10",
+  "theme_color": "#0c0d10",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    { "src": "/icons/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/mascara-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Estou com vontade", "url": "/ajuda?sos=1" },
+    { "name": "Meus marcos", "url": "/marcos" },
+    { "name": "Contagens", "url": "/contagem" }
+  ]
+}

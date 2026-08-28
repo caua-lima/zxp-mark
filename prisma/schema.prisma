@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  nome              String
+  senhaHash         String
+  timezone          String   @default("America/Sao_Paulo")
+
+  // Preferencias de notificacao
+  notifMarcos       Boolean  @default(true)
+  notifResumoDiario Boolean  @default(true)
+  notifNoite        Boolean  @default(true)
+  horaResumo        Int      @default(8)   // 0-23, hora local
+  horaNoite         Int      @default(21)  // 0-23, hora local
+
+  criadoEm          DateTime @default(now())
+
+  marcos        Marco[]
+  contagens     Contagem[]
+  inscricoes    Inscricao[]
+  mensagens     Mensagem[]
+  enviadas      Enviada[]
+
+  @@index([email])
+}
+
+/// Um habito que a pessoa quer largar/manter. O cronometro corre desde `cicloInicio`.
+model Marco {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  titulo        String
+  preset        String   @default("personalizado") // chave em src/lib/habitos.ts
+  emoji         String   @default("🔥")
+  porque        String?  @db.Text                  // motivacao pessoal, entra no prompt do chat
+
+  inicio        DateTime                            // primeira vez que comecou
+  cicloInicio   DateTime                            // reinicia a cada recaida
+  melhorMs      BigInt   @default(0)                // maior sequencia ja alcancada, em ms
+
+  // Economia / impacto
+  unidadesPorDia Float?                             // ex.: 20 cigarros/dia
+  gastoDiario    Float?                             // ex.: 15.00 (R$/dia)
+
+  ativo         Boolean  @default(true)
+  arquivadoEm   DateTime?
+  criadoEm      DateTime @default(now())
+
+  recaidas      Recaida[]
+
+  @@index([userId, ativo])
+}
+
+model Recaida {
+  id        String   @id @default(cuid())
+  marcoId   String
+  marco     Marco    @relation(fields: [marcoId], references: [id], onDelete: Cascade)
+  quando    DateTime @default(now())
+  duracaoMs BigInt   @default(0)  // quanto durou a sequencia que caiu
+  nota      String?  @db.Text
+  gatilho   String?
+
+  @@index([marcoId])
+}
+
+/// Contagem regressiva para uma data futura.
+model Contagem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  titulo    String
+  emoji     String   @default("🎯")
+  descricao String?  @db.Text
+  alvo      DateTime
+  criadoEm  DateTime @default(now())
+
+  /// Dias de antecedencia para avisar. Ex.: [30, 14, 7, 3, 1, 0]
+  avisos    Int[]    @default([30, 14, 7, 3, 1, 0])
+  notificar Boolean  @default(true)
+
+  @@index([userId])
+}
+
+model Inscricao {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique @db.Text
+  p256dh    String
+  auth      String
+  agente    String?  @db.Text
+  criadaEm  DateTime @default(now())
+  usadaEm   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Mensagem {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  papel    String   // "user" | "assistant"
+  conteudo String   @db.Text
+  criadaEm DateTime @default(now())
+
+  @@index([userId, criadaEm])
+}
+
+/// Registro de notificacao enviada — garante que nada e enviado duas vezes.
+model Enviada {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tipo      String   // "marco" | "contagem" | "resumo" | "noite"
+  refId     String   // id do marco/contagem, ou userId para resumos
+  chave     String   // "6h", "d-7", "2026-08-27"
+  ciclo     DateTime // cicloInicio do marco (permite reenviar apos recaida)
+  titulo    String
+  corpo     String   @db.Text
+  enviadaEm DateTime @default(now())
+
+  @@unique([refId, chave, ciclo])
+  @@index([userId, enviadaEm])
+}

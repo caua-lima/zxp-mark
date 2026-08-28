@@ -1,0 +1,152 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Botao, Chave } from "@/components/ui";
+import { CartaoNotificacoes } from "@/components/Push";
+
+export type Preferencias = {
+  nome: string;
+  email: string;
+  timezone: string;
+  notifMarcos: boolean;
+  notifResumoDiario: boolean;
+  notifNoite: boolean;
+  horaResumo: number;
+  horaNoite: number;
+};
+
+export function Perfil({ inicial }: { inicial: Preferencias }) {
+  const router = useRouter();
+  const [prefs, setPrefs] = useState(inicial);
+  const [salvo, setSalvo] = useState(false);
+
+  async function atualizar(patch: Partial<Preferencias>) {
+    const antes = prefs;
+    setPrefs((p) => ({ ...p, ...patch }));
+    const r = await fetch("/api/perfil", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    if (!r.ok) {
+      setPrefs(antes);
+      return;
+    }
+    setSalvo(true);
+    setTimeout(() => setSalvo(false), 1600);
+  }
+
+  async function sair() {
+    await fetch("/api/auth/sair", { method: "POST" });
+    router.replace("/entrar");
+    router.refresh();
+  }
+
+  const fusoDoAparelho = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const fusoDiferente = fusoDoAparelho && fusoDoAparelho !== prefs.timezone;
+
+  return (
+    <main className="space-y-3.5">
+      <header className="mb-5 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-[26px] font-semibold tracking-tight">{prefs.nome}</h1>
+          <p className="truncate text-[13px] text-apagado">{prefs.email}</p>
+        </div>
+        {salvo && <span className="surge shrink-0 text-[12px] text-brand">salvo ✓</span>}
+      </header>
+
+      <CartaoNotificacoes />
+
+      <section className="cartao px-5 py-2">
+        <div className="divide-y divide-white/6">
+          <Chave
+            ligado={prefs.notifMarcos}
+            aoMudar={(v) => atualizar({ notifMarcos: v })}
+            rotulo="Avisar a cada marco"
+            descricao="1h, 6h, 3 dias, 1 mês... no instante em que você bate."
+          />
+          <Chave
+            ligado={prefs.notifResumoDiario}
+            aoMudar={(v) => atualizar({ notifResumoDiario: v })}
+            rotulo="Resumo da manhã"
+            descricao="Onde você está e qual é o próximo marco."
+          />
+          {prefs.notifResumoDiario && (
+            <SeletorHora
+              rotulo="Horário do resumo"
+              valor={prefs.horaResumo}
+              aoMudar={(h) => atualizar({ horaResumo: h })}
+            />
+          )}
+          <Chave
+            ligado={prefs.notifNoite}
+            aoMudar={(v) => atualizar({ notifNoite: v })}
+            rotulo="Fecho da noite"
+            descricao="Um empurrão antes de dormir."
+          />
+          {prefs.notifNoite && (
+            <SeletorHora
+              rotulo="Horário da noite"
+              valor={prefs.horaNoite}
+              aoMudar={(h) => atualizar({ horaNoite: h })}
+            />
+          )}
+        </div>
+      </section>
+
+      <section className="cartao p-5">
+        <h2 className="text-[15px] font-semibold">Fuso horário</h2>
+        <p className="mt-1 text-[13px] text-apagado">
+          Usado para saber que horas são aí quando eu te aviso.
+        </p>
+        <p className="numeros mt-3 text-[14px] text-white">{prefs.timezone}</p>
+        {fusoDiferente && (
+          <button
+            onClick={() => atualizar({ timezone: fusoDoAparelho })}
+            className="mt-3 rounded-xl border border-brand/30 bg-brand/10 px-3.5 py-2 text-[13px] font-medium text-brand"
+          >
+            Usar o do aparelho ({fusoDoAparelho})
+          </button>
+        )}
+      </section>
+
+      <Botao variante="vazio" onClick={sair} className="w-full">
+        Sair da conta
+      </Botao>
+
+      <p className="pt-4 pb-2 text-center text-[12px] leading-relaxed text-fantasma">
+        O Marco não substitui médico, psicólogo ou psiquiatra.
+        <br />
+        Se precisar de ajuda agora: CVV — 188, gratuito, 24 horas.
+      </p>
+    </main>
+  );
+}
+
+function SeletorHora({
+  rotulo,
+  valor,
+  aoMudar,
+}: {
+  rotulo: string;
+  valor: number;
+  aoMudar: (h: number) => void;
+}) {
+  return (
+    <label className="surge flex items-center justify-between gap-4 py-3.5">
+      <span className="text-[14px] text-suave">{rotulo}</span>
+      <select
+        value={valor}
+        onChange={(e) => aoMudar(Number(e.target.value))}
+        className="numeros rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-white outline-none"
+      >
+        {Array.from({ length: 24 }, (_, h) => (
+          <option key={h} value={h} className="bg-[#1e2127]">
+            {String(h).padStart(2, "0")}:00
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
