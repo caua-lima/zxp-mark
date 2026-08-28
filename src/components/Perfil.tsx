@@ -16,7 +16,9 @@ export type Preferencias = {
   horaNoite: number;
 };
 
-export function Perfil({ inicial }: { inicial: Preferencias }) {
+export type Motor = { id: string; rotulo: string; modelo: string; gratuito: boolean };
+
+export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor }) {
   const router = useRouter();
   const [prefs, setPrefs] = useState(inicial);
   const [salvo, setSalvo] = useState(false);
@@ -57,6 +59,8 @@ export function Perfil({ inicial }: { inicial: Preferencias }) {
       </header>
 
       <CartaoNotificacoes />
+
+      <CartaoMotor motor={motor} />
 
       <section className="cartao px-5 py-2">
         <div className="divide-y divide-white/6">
@@ -121,6 +125,32 @@ export function Perfil({ inicial }: { inicial: Preferencias }) {
         Se precisar de ajuda agora: CVV — 188, gratuito, 24 horas.
       </p>
     </main>
+  );
+}
+
+function CartaoMotor({ motor }: { motor: Motor }) {
+  const local = motor.id === "local";
+  return (
+    <section className="cartao p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[15px] font-semibold">Motor da aba Ajuda</h2>
+          <p className="mt-1 text-[13px] text-apagado">{motor.rotulo}</p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${
+            motor.gratuito ? "bg-sucesso/15 text-sucesso" : "bg-brand/15 text-brand"
+          }`}
+        >
+          {motor.gratuito ? "Grátis" : "Pago"}
+        </span>
+      </div>
+      <p className="mt-3 text-[13px] leading-relaxed text-suave">
+        {local
+          ? "Rodando sem nenhuma API: as respostas são montadas aqui mesmo, com os seus números reais. Nunca falha e nunca cobra. Para deixar a conversa mais natural, dá para ligar um provedor com nível gratuito (Groq ou Google Gemini) nas variáveis de ambiente."
+          : `Conversa gerada por ${motor.rotulo} (${motor.modelo}). Se esse provedor cair ou bater o limite diário, o motor local assume na hora — a conversa não para.`}
+      </p>
+    </section>
   );
 }
 

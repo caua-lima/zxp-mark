@@ -16,7 +16,7 @@ Identidade visual ZXP Solutions: preto + amarelo + branco.
 
 **Contagens** — marque uma data (viagem dia 13 de novembro) e ela vira contagem regressiva ao vivo, com aviso em D-30, D-14, D-7, D-3, D-1 e no dia. Os marcos de aviso são configuráveis por contagem.
 
-**Ajuda** — chat com Claude que recebe, a cada mensagem, o seu retrato exato: tempo da sequência atual, próximo marco e quanto falta, dinheiro economizado, histórico de recaídas e gatilhos, o "porquê" que você escreveu, e as contagens em aberto. Pergunte *"por que não devo fumar agora?"* e a resposta usa os seus números, não conselho genérico.
+**Ajuda** — chat que recebe, a cada mensagem, o seu retrato exato: tempo da sequência atual, próximo marco e quanto falta, dinheiro economizado, histórico de recaídas e gatilhos, o "porquê" que você escreveu, e as contagens em aberto. Pergunte *"por que não devo fumar agora?"* e a resposta usa os seus números, não conselho genérico. **Funciona de graça, sem nenhuma API** — veja [Chat: quanto custa](#chat-quanto-custa-nada).
 
 **Recaída** não é fracasso: registra o gatilho, guarda quanto durou a sequência, mantém o recorde pessoal e reinicia o relógio.
 
@@ -31,7 +31,7 @@ Identidade visual ZXP Solutions: preto + amarelo + branco.
 | Banco | PostgreSQL via Prisma 6 |
 | Auth | Sessão própria — scrypt + JWT (`jose`) em cookie httpOnly |
 | Push | Web Push (VAPID) com service worker próprio |
-| Chat | `@anthropic-ai/sdk`, modelo `claude-opus-5`, resposta em streaming |
+| Chat | motor local próprio + provedores opcionais (Groq, Gemini, OpenRouter, Anthropic) em streaming |
 
 Sem dependência de serviço externo de auth ou de push.
 
@@ -50,7 +50,9 @@ npm install
 npm run vapid
 ```
 
-Isso cria o `.env.local` já com `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `AUTH_SECRET` e `CRON_SECRET`. Falta só colar o `DATABASE_URL` e o `ANTHROPIC_API_KEY` (pegue em [console.anthropic.com](https://console.anthropic.com)).
+Isso cria o `.env.local` já com `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `AUTH_SECRET` e `CRON_SECRET`. Falta só colar o `DATABASE_URL`.
+
+Não precisa de chave de IA nenhuma: o chat funciona de graça no motor local.
 
 ### 3. Criar as tabelas
 
@@ -92,7 +94,39 @@ Há ainda uma rede de segurança embutida: toda vez que o app é aberto, ele ver
 https://SEU-APP.vercel.app/api/saude?chave=SEU_CRON_SECRET
 ```
 
-Responde o que está configurado, o que falta e se o banco conecta.
+Responde o que está configurado, o que falta, qual motor de chat está ativo e se o banco conecta.
+
+---
+
+## Chat: quanto custa? Nada.
+
+O chat tem dois níveis, e o de baixo **nunca cobra e nunca cai**.
+
+### Nível 1 — motor local (padrão, sem configurar nada)
+
+Sem nenhuma chave de API, a aba Ajuda já funciona. Não é um modelo de linguagem: é um classificador de intenção em português que monta a resposta com os **seus números reais**. Reconhece fissura, "por que não devo", quanto tempo, seu porquê, o que está acontecendo no corpo, recaída, dinheiro, próximo marco, contagens, desânimo e saudação — e escolhe a ação de 5 minutos pela hora do dia (o que serve às 3 da manhã não é o que serve às 8).
+
+Vantagens que um modelo pago não tem: responde na hora, funciona com internet ruim, custa zero e **nunca inventa um número**.
+
+### Nível 2 — um provedor com nível gratuito (opcional, deixa a conversa mais solta)
+
+Se quiser linguagem mais natural, ligue **uma** chave. Todas as opções abaixo têm nível gratuito e não pedem cartão:
+
+| Provedor | Onde pegar a chave | Variável |
+|---|---|---|
+| **Groq** (recomendado — o mais rápido) | [console.groq.com/keys](https://console.groq.com/keys) | `GROQ_API_KEY` |
+| **Google Gemini** | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) | `GEMINI_API_KEY` |
+| **OpenRouter** (modelos `:free`) | [openrouter.ai/keys](https://openrouter.ai/keys) | `OPENROUTER_API_KEY` |
+
+Cole a variável na Vercel e pronto — nada mais muda no código.
+
+> Os níveis gratuitos têm limite de requisições por minuto e por dia, e cada provedor muda esses números quando quer. **Quando o limite estoura, o motor local assume no meio da conversa** e você não vê erro nenhum. É por isso que dá para depender disso sem medo.
+
+`ANTHROPIC_API_KEY` também é aceita, mas a Anthropic **não tem nível gratuito** — só use se quiser mesmo pagar.
+
+Para forçar um motor: `IA_PROVEDOR=local` (ou `groq`, `gemini`, `openrouter`, `anthropic`). Para trocar o modelo: `IA_MODELO=...`.
+
+O cartão "Motor da aba Ajuda", no Perfil, mostra qual está ativo e se é grátis.
 
 ---
 
@@ -120,7 +154,10 @@ scripts/gerar-icones.mjs  desenha os PNGs do PWA (sem dependência externa)
 public/sw.js              service worker: recebe o push e abre o app no lugar certo
 src/lib/habitos.ts        catálogo de hábitos e a linha do tempo de cada um
 src/lib/motor.ts          decide o que está vencido e dispara — com dedupe
-src/lib/ia.ts             instruções do chat + retrato ao vivo do usuário
+src/lib/ia/contexto.ts    retrato ao vivo do usuário (fonte única de verdade)
+src/lib/ia/local.ts       motor local gratuito + detector de crise
+src/lib/ia/provedores.ts  Groq, Gemini, OpenRouter e Anthropic em streaming
+src/lib/ia/instrucoes.ts  personalidade e regras do chat
 src/lib/auth.ts           scrypt, JWT e sessão
 src/app/(app)/            as quatro abas
 src/app/api/              rotas
@@ -129,7 +166,8 @@ src/app/api/              rotas
 ### Onde mexer para ajustar o conteúdo
 
 - **Textos das notificações e marcos de cada hábito** → `src/lib/habitos.ts`. Cada entrada tem `chave`, `ms`, `titulo` e `corpo`. Adicionar um marco novo é adicionar um objeto ao array.
-- **Personalidade e regras do chat** → a constante `INSTRUCOES` em `src/lib/ia.ts`.
+- **Respostas do motor gratuito** → `src/lib/ia/local.ts`. As ações de 5 minutos estão em `ACOES_MADRUGADA`/`MANHA`/`TARDE`/`NOITE`.
+- **Personalidade do chat com LLM** → a constante `INSTRUCOES` em `src/lib/ia/instrucoes.ts`.
 - **Quando cada aviso dispara** → `src/lib/motor.ts`.
 - **Cores** → os tokens em `src/app/globals.css`.
 
@@ -145,7 +183,9 @@ src/app/api/              rotas
 
 **Hidratação.** Os cronômetros renderizam vazios no servidor e só começam a contar depois de montados — o relógio do servidor nunca bate com o do celular.
 
-**Chat com fallback.** Usa o fallback do lado do servidor da Anthropic; se a API não aceitar a flag, refaz a chamada sem ela, desde que nada tenha sido transmitido ainda. Limite de 60 mensagens por hora por conta.
+**Chat que não cai.** O provedor externo é a camada de cima, nunca a base. Se ele der erro, estourar o limite ou devolver vazio, o motor local completa a resposta na mesma requisição — sem mensagem de erro para o usuário. Limite de 120 mensagens por hora por conta.
+
+**Crise tem resposta fixa.** Frases de risco de vida ou de abstinência grave são detectadas por regex antes de qualquer provedor ser chamado, e a resposta com CVV 188 / SAMU 192 sai sempre — não depende de o modelo lembrar do número. A detecção usa regex e não busca de substring de propósito: "não quero *mais* viver" não bate com a string "não quero viver", e um falso negativo aqui é inaceitável.
 
 ---
 

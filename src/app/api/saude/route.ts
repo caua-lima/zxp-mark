@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { provedorAtivo } from "@/lib/ia/provedores";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,13 +39,19 @@ export async function GET(req: Request) {
     VAPID_PUBLIC_KEY: definido(process.env.VAPID_PUBLIC_KEY),
     VAPID_PRIVATE_KEY: definido(process.env.VAPID_PRIVATE_KEY),
     VAPID_SUBJECT: definido(process.env.VAPID_SUBJECT),
+    GROQ_API_KEY: definido(process.env.GROQ_API_KEY),
+    GEMINI_API_KEY: definido(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY),
+    OPENROUTER_API_KEY: definido(process.env.OPENROUTER_API_KEY),
     ANTHROPIC_API_KEY: definido(process.env.ANTHROPIC_API_KEY),
     CRON_SECRET: definido(process.env.CRON_SECRET),
   };
 
+  const OPCIONAIS = new Set(["GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "ANTHROPIC_API_KEY"]);
   const faltando = Object.entries(ambiente)
-    .filter(([, ok]) => !ok)
+    .filter(([k, ok]) => !ok && !OPCIONAIS.has(k))
     .map(([k]) => k);
+
+  const ia = provedorAtivo();
 
   return NextResponse.json({
     ok: banco.ok && faltando.length === 0,
@@ -53,7 +60,7 @@ export async function GET(req: Request) {
     faltando,
     recursos: {
       notificacoes: ambiente.VAPID_PUBLIC_KEY && ambiente.VAPID_PRIVATE_KEY,
-      chat: ambiente.ANTHROPIC_API_KEY,
+      chat: { motor: ia.id, rotulo: ia.rotulo, modelo: ia.modelo, gratuito: ia.gratuito },
       cron: ambiente.CRON_SECRET,
     },
     agora: new Date().toISOString(),

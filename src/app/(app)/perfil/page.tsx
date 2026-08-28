@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { usuarioAtual } from "@/lib/auth";
 import { Perfil } from "@/components/Perfil";
+import { provedorAtivo } from "@/lib/ia/provedores";
 
 export const dynamic = "force-dynamic";
 
@@ -8,8 +9,11 @@ export default async function PaginaPerfil() {
   const u = await usuarioAtual();
   if (!u) redirect("/entrar");
 
+  const ia = provedorAtivo();
+
   return (
     <Perfil
+      motor={{ id: ia.id, rotulo: ia.rotulo, modelo: ia.modelo, gratuito: ia.gratuito }}
       inicial={{
         nome: u.nome,
         email: u.email,
