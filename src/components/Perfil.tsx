@@ -41,6 +41,8 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
 
   async function sair() {
     await fetch("/api/auth/sair", { method: "POST" });
+    // As páginas guardadas para uso offline são de uma conta só — apaga.
+    navigator.serviceWorker?.controller?.postMessage({ tipo: "limpar-cache" });
     router.replace("/entrar");
     router.refresh();
   }
@@ -113,6 +115,28 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
             Usar o do aparelho ({fusoDoAparelho})
           </button>
         )}
+      </section>
+
+      <section className="cartao divide-y divide-borda px-5">
+        <a
+          href="/conquistas"
+          className="flex items-center justify-between gap-3 py-4 text-[15px] text-tinta"
+        >
+          <span className="flex items-center gap-2.5">🏆 Minhas conquistas</span>
+          <span className="text-apagado">›</span>
+        </a>
+        <a
+          href="/api/exportar"
+          className="flex items-center justify-between gap-3 py-4 text-[15px] text-tinta"
+        >
+          <span className="min-w-0">
+            <span className="flex items-center gap-2.5">💾 Baixar meus dados</span>
+            <span className="mt-0.5 block text-[12.5px] text-apagado">
+              Marcos, recaídas, contagens e conversas em JSON
+            </span>
+          </span>
+          <span className="text-apagado">›</span>
+        </a>
       </section>
 
       <Botao variante="vazio" onClick={sair} className="w-full">

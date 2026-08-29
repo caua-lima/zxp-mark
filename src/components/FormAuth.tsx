@@ -39,7 +39,9 @@ export function FormAuth({ modo }: { modo: "entrar" | "criar" }) {
         setErro(dados.erro ?? "Algo deu errado. Tente de novo.");
         return;
       }
-      router.replace("/marcos");
+      // Conta nova cai direto na criação do primeiro marco: sem marco, o app
+      // inteiro é uma tela vazia.
+      router.replace(criando ? "/marcos/novo" : "/marcos");
       router.refresh();
     } catch {
       setErro("Sem conexão com o servidor.");

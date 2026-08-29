@@ -26,13 +26,22 @@ export default async function PaginaMarcos() {
           <p className="text-[13px] text-apagado">Olá, {user?.nome.split(" ")[0]}</p>
           <h1 className="text-[26px] font-semibold tracking-tight">Meus marcos</h1>
         </div>
-        <Link
-          href="/marcos/novo"
-          className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-forte"
-          aria-label="Novo marco"
-        >
-          +
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/conquistas"
+            className="flex size-11 items-center justify-center rounded-full border border-borda bg-white/[0.04] text-lg active:bg-white/[0.08]"
+            aria-label="Conquistas"
+          >
+            🏆
+          </Link>
+          <Link
+            href="/marcos/novo"
+            className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-forte"
+            aria-label="Novo marco"
+          >
+            +
+          </Link>
+        </div>
       </header>
 
       <BannerNotificacoes />

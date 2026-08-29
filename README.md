@@ -18,6 +18,10 @@ Identidade visual ZXP Solutions: preto + amarelo + branco.
 
 **Ajuda** — chat que recebe, a cada mensagem, o seu retrato exato: tempo da sequência atual, próximo marco e quanto falta, dinheiro economizado, histórico de recaídas e gatilhos, o "porquê" que você escreveu, e as contagens em aberto. Pergunte *"por que não devo fumar agora?"* e a resposta usa os seus números, não conselho genérico. **Funciona de graça, sem nenhuma API** — veja [Chat: quanto custa](#chat-quanto-custa-nada).
 
+**Conquistas** — tudo que você já bateu, em ordem, com a data de cada uma. Mais recordes, o que está chegando e um botão de compartilhar.
+
+**Funciona offline** — o app abre sem internet e a tela offline traz o protocolo de fissura, que não precisa de dado nenhum.
+
 **Recaída** não é fracasso: registra o gatilho, guarda quanto durou a sequência, mantém o recorde pessoal e reinicia o relógio.
 
 ---
@@ -151,7 +155,7 @@ O app também tem atalhos de toque longo no ícone: *Estou com vontade*, *Meus m
 prisma/schema.prisma      modelo de dados
 scripts/gerar-vapid.mjs   gera chaves e segredos no .env.local
 scripts/gerar-icones.mjs  desenha os PNGs do PWA (sem dependência externa)
-public/sw.js              service worker: recebe o push e abre o app no lugar certo
+public/sw.js              push + cache do casco para funcionar offline
 src/lib/habitos.ts        catálogo de hábitos e a linha do tempo de cada um
 src/lib/motor.ts          decide o que está vencido e dispara — com dedupe
 src/lib/ia/contexto.ts    retrato ao vivo do usuário (fonte única de verdade)
@@ -159,7 +163,8 @@ src/lib/ia/local.ts       motor local gratuito + detector de crise
 src/lib/ia/provedores.ts  Groq, Gemini, OpenRouter e Anthropic em streaming
 src/lib/ia/instrucoes.ts  personalidade e regras do chat
 src/lib/auth.ts           scrypt, JWT e sessão
-src/app/(app)/            as quatro abas
+src/app/(app)/            as quatro abas + conquistas
+src/app/offline/          tela util quando nao ha conexao
 src/app/api/              rotas
 ```
 
@@ -180,6 +185,8 @@ src/app/api/              rotas
 **Nada de rajada.** Se o cron ficar horas parado e você tiver passado por vários marcos, só o mais recente vira notificação; os anteriores são registrados em silêncio. Marcos atingidos há mais de 6 horas também não notificam — chegar "6 horas sem fumar" no dia seguinte não ajuda ninguém.
 
 **Fuso do usuário.** Resumo da manhã e avisos de contagem usam o fuso salvo no perfil, não o do servidor.
+
+**Offline sem vazar.** O casco (tela offline, ícones, assets do build) fica em cache permanente; páginas com dado seu vão para um cache separado que o logout apaga por postMessage. Chamada de API nunca é cacheada — dado velho de marco é pior do que erro honesto.
 
 **Hidratação.** Os cronômetros renderizam vazios no servidor e só começam a contar depois de montados — o relógio do servidor nunca bate com o do celular.
 
