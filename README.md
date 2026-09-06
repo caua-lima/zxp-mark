@@ -22,6 +22,8 @@ Identidade visual ZXP Solutions: preto + amarelo + branco.
 
 **Funciona offline** — o app abre sem internet e a tela offline traz o protocolo de fissura, que não precisa de dado nenhum.
 
+**Acesso** — aba própria para trocar a própria senha e, para quem é admin, criar, editar, promover e apagar acessos. Com `CADASTRO_ABERTO=false` o cadastro público fecha e só o admin abre porta.
+
 **Recaída** não é fracasso: registra o gatilho, guarda quanto durou a sequência, mantém o recorde pessoal e reinicia o relógio.
 
 ---
@@ -174,7 +176,10 @@ src/lib/ia/contexto.ts    retrato ao vivo do usuário (fonte única de verdade)
 src/lib/ia/local.ts       motor local gratuito + detector de crise
 src/lib/ia/provedores.ts  Groq, Gemini, OpenRouter e Anthropic em streaming
 src/lib/ia/instrucoes.ts  personalidade e regras do chat
-src/lib/auth.ts           scrypt, JWT e sessão
+src/lib/senha.ts          scrypt puro, compartilhado com os scripts de CLI
+src/lib/auth.ts           JWT e sessão
+src/lib/admin.ts          guarda de rota para as ações de admin
+scripts/criar-acesso.mjs  cria o primeiro admin direto no banco
 src/app/(app)/            as quatro abas + conquistas
 src/app/offline/          tela util quando nao ha conexao
 src/app/api/              rotas
@@ -205,6 +210,18 @@ src/app/api/              rotas
 **Chat que não cai.** O provedor externo é a camada de cima, nunca a base. Se ele der erro, estourar o limite ou devolver vazio, o motor local completa a resposta na mesma requisição — sem mensagem de erro para o usuário. Limite de 120 mensagens por hora por conta.
 
 **Crise tem resposta fixa.** Frases de risco de vida ou de abstinência grave são detectadas por regex antes de qualquer provedor ser chamado, e a resposta com CVV 188 / SAMU 192 sai sempre — não depende de o modelo lembrar do número. A detecção usa regex e não busca de substring de propósito: "não quero *mais* viver" não bate com a string "não quero viver", e um falso negativo aqui é inaceitável.
+
+---
+
+## Criar o primeiro acesso
+
+Quando o banco está vazio não existe admin para usar a aba Acesso. Crie o primeiro pela linha de comando:
+
+```bash
+npm run acesso -- --email voce@dominio.com --nome "Seu Nome" --admin
+```
+
+Sem `--senha`, ele gera uma temporária forte e grava em `ACESSO-TEMPORARIO.txt` (fora do git). Entre no app, troque a senha na aba Acesso e apague o arquivo. Daí em diante todo acesso novo sai pela própria aba.
 
 ---
 

@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aviso, Botao, Campo } from "@/components/ui";
 
-export function FormAuth({ modo }: { modo: "entrar" | "criar" }) {
+export function FormAuth({
+  modo,
+  cadastroAberto = true,
+}: {
+  modo: "entrar" | "criar";
+  cadastroAberto?: boolean;
+}) {
   const router = useRouter();
   const criando = modo === "criar";
 
@@ -90,15 +96,17 @@ export function FormAuth({ modo }: { modo: "entrar" | "criar" }) {
         {criando ? "Criar minha conta" : "Entrar"}
       </Botao>
 
-      <p className="pt-2 text-center text-[14px] text-apagado">
-        {criando ? "Já tem conta? " : "Ainda não tem conta? "}
-        <Link
-          href={criando ? "/entrar" : "/criar-conta"}
-          className="font-medium text-brand hover:text-brand-forte"
-        >
-          {criando ? "Entrar" : "Criar agora"}
-        </Link>
-      </p>
+      {(criando || cadastroAberto) && (
+        <p className="pt-2 text-center text-[14px] text-apagado">
+          {criando ? "Já tem conta? " : "Ainda não tem conta? "}
+          <Link
+            href={criando ? "/entrar" : "/criar-conta"}
+            className="font-medium text-brand hover:text-brand-forte"
+          >
+            {criando ? "Entrar" : "Criar agora"}
+          </Link>
+        </p>
+      )}
     </form>
   );
 }

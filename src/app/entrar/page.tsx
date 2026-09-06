@@ -1,12 +1,15 @@
 import { redirect } from "next/navigation";
 import { usuarioId } from "@/lib/auth";
 import { FormAuth } from "@/components/FormAuth";
+import { cadastroAberto } from "@/lib/config";
+import { prisma } from "@/lib/db";
 import { Marca } from "@/components/Marca";
 
 export const dynamic = "force-dynamic";
 
 export default async function Entrar() {
   if (await usuarioId()) redirect("/marcos");
+  const aberto = cadastroAberto() || (await prisma.user.count()) === 0;
 
   return (
     <main className="area-topo area-baixo mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-12">
@@ -15,7 +18,7 @@ export default async function Entrar() {
       <p className="mt-1.5 mb-7 text-[15px] text-apagado">
         Seu cronômetro não parou enquanto você esteve fora.
       </p>
-      <FormAuth modo="entrar" />
+      <FormAuth modo="entrar" cadastroAberto={aberto} />
     </main>
   );
 }

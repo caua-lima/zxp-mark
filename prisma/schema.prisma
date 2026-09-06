@@ -19,6 +19,12 @@ model User {
   senhaHash         String
   timezone          String   @default("America/Sao_Paulo")
 
+  /// Admin gerencia os acessos de todo mundo na aba Acesso.
+  admin             Boolean  @default(false)
+  /// Marcado quando o acesso e criado por um admin: pede troca no 1o login.
+  trocarSenha       Boolean  @default(false)
+  ultimoAcesso      DateTime?
+
   // Preferencias de notificacao
   notifMarcos       Boolean  @default(true)
   notifResumoDiario Boolean  @default(true)

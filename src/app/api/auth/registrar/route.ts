@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { criarSessao, hashSenha } from "@/lib/auth";
+import { cadastroAberto } from "@/lib/config";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,15 @@ const Corpo = z.object({
 });
 
 export async function POST(req: Request) {
+  // Cadastro fechado: so o primeiro acesso passa, para o banco nunca ficar
+  // sem ninguem que consiga entrar.
+  if (!cadastroAberto() && (await prisma.user.count()) > 0) {
+    return NextResponse.json(
+      { erro: "O cadastro está fechado. Peça um acesso a quem administra o app." },
+      { status: 403 }
+    );
+  }
+
   const dados = Corpo.safeParse(await req.json().catch(() => null));
   if (!dados.success) {
     return NextResponse.json(

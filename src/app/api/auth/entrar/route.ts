@@ -30,5 +30,9 @@ export async function POST(req: Request) {
   }
 
   await criarSessao(user.id);
+  await prisma.user
+    .update({ where: { id: user.id }, data: { ultimoAcesso: new Date() } })
+    .catch(() => {});
+
   return NextResponse.json({ ok: true, user: { id: user.id, nome: user.nome, email: user.email } });
 }

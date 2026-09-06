@@ -7,6 +7,7 @@ const ABAS = [
   { href: "/marcos", rotulo: "Marcos", icone: Chama },
   { href: "/contagem", rotulo: "Contagem", icone: Calendario },
   { href: "/ajuda", rotulo: "Ajuda", icone: Balao },
+  { href: "/acesso", rotulo: "Acesso", icone: Chave },
   { href: "/perfil", rotulo: "Perfil", icone: Pessoa },
 ];
 
@@ -62,6 +63,15 @@ function Balao({ ativa }: IconeProps) {
   return (
     <svg viewBox="0 0 24 24" className={comum} fill={ativa ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.7">
       <path d="M20.5 11.5c0 4.1-3.8 7.4-8.5 7.4-1 0-2-.15-2.9-.42L4 20.5l1.4-3.7A7 7 0 0 1 3.5 11.5C3.5 7.4 7.3 4.1 12 4.1s8.5 3.3 8.5 7.4Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Chave({ ativa }: IconeProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={comum} fill="none" stroke="currentColor" strokeWidth="1.7">
+      <circle cx="8.5" cy="8.5" r="4.5" fill={ativa ? "currentColor" : "none"} fillOpacity="0.25" />
+      <path d="m11.8 11.8 8 8M17.5 17.5l2-2M15 15l2-2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
