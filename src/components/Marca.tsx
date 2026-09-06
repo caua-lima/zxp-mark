@@ -1,31 +1,73 @@
-export function Marca({ tamanho = 44 }: { tamanho?: number }) {
+/**
+ * Marca do app. O Z é o traçado oficial da ZXP Solutions, copiado do
+ * public/marca/icone-transparente-dourado.svg — mesmos pontos, mesma
+ * espessura, mesmas junções em esquadria.
+ */
+
+export function MarcaZ({
+  tamanho = 44,
+  cor = "#F4B942",
+  className,
+}: {
+  tamanho?: number;
+  cor?: string;
+  className?: string;
+}) {
   return (
-    <div className="flex items-center gap-3">
-      <svg width={tamanho} height={tamanho} viewBox="0 0 100 100" aria-hidden>
-        <defs>
-          <linearGradient id="marca-arco" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#c99700" />
-            <stop offset="55%" stopColor="#f7c41c" />
-            <stop offset="100%" stopColor="#ffe37a" />
-          </linearGradient>
-        </defs>
-        <circle cx="50" cy="50" r="36" fill="none" stroke="#292d35" strokeWidth="11" />
-        <circle
-          cx="50"
-          cy="50"
-          r="36"
+    <svg
+      width={tamanho}
+      height={tamanho}
+      viewBox="0 0 200 200"
+      className={className}
+      role="img"
+      aria-label="ZXP Solutions"
+    >
+      <polyline
+        points="30,47 170,47 30,153 170,153"
+        fill="none"
+        stroke={cor}
+        strokeWidth="34"
+        strokeLinejoin="miter"
+        strokeLinecap="butt"
+      />
+    </svg>
+  );
+}
+
+/** Z dentro do quadrado onyx arredondado, como no ícone do app. */
+export function MarcaIcone({ tamanho = 44 }: { tamanho?: number }) {
+  return (
+    <svg width={tamanho} height={tamanho} viewBox="0 0 200 200" role="img" aria-label="ZXP Solutions">
+      <rect width="200" height="200" rx="44" fill="#10100E" />
+      <g transform="translate(24,24) scale(0.76)">
+        <polyline
+          points="30,47 170,47 30,153 170,153"
           fill="none"
-          stroke="url(#marca-arco)"
-          strokeWidth="11"
-          strokeLinecap="round"
-          strokeDasharray={`${2 * Math.PI * 36 * 0.78} ${2 * Math.PI * 36}`}
-          transform="rotate(-90 50 50)"
+          stroke="#F4B942"
+          strokeWidth="34"
+          strokeLinejoin="miter"
+          strokeLinecap="butt"
         />
-        <circle cx="50" cy="50" r="9.5" fill="#f2f4f8" />
-      </svg>
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * Lockup do produto: o Z da ZXP, o nome do app e a assinatura da empresa —
+ * a mesma hierarquia do logo horizontal oficial.
+ */
+export function Marca({ tamanho = 54 }: { tamanho?: number }) {
+  return (
+    // Mesma proporção do logo-horizontal oficial: Z inteiro, sem o quadrado
+    // (o quadrado só existe no ícone do app), e o wordmark à direita.
+    <div className="flex items-center gap-3">
+      <MarcaZ tamanho={tamanho} />
       <div>
-        <p className="text-[22px] font-semibold leading-none tracking-tight">Marco</p>
-        <p className="mt-1 text-[12.5px] text-apagado">Cada hora conta.</p>
+        <p className="font-display text-[26px] leading-none font-extrabold tracking-tight text-brand">
+          MARCO
+        </p>
+        <p className="assinatura mt-1.5 text-[9.5px] text-tinta/75">ZXP Solutions</p>
       </div>
     </div>
   );

@@ -156,7 +156,7 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
       )}
 
       {/* barra de escrita, colada acima da tab bar */}
-      <div className="area-baixo sticky bottom-0 -mx-5 mt-4 border-t border-white/8 bg-[#0c0d10]/90 px-5 pt-3 pb-3 backdrop-blur-xl">
+      <div className="area-baixo sticky bottom-0 -mx-5 mt-4 border-t border-white/8 bg-[#10100e]/90 px-5 pt-3 pb-3 backdrop-blur-xl">
         <form
           onSubmit={(e) => {
             e.preventDefault();

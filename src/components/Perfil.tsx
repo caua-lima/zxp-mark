@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Botao, Chave } from "@/components/ui";
 import { CartaoNotificacoes } from "@/components/Push";
+import { MarcaZ } from "@/components/Marca";
 
 export type Preferencias = {
   nome: string;
@@ -143,11 +144,15 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
         Sair da conta
       </Botao>
 
-      <p className="pt-4 pb-2 text-center text-[12px] leading-relaxed text-fantasma">
-        O Marco não substitui médico, psicólogo ou psiquiatra.
-        <br />
-        Se precisar de ajuda agora: CVV — 188, gratuito, 24 horas.
-      </p>
+      <div className="flex flex-col items-center gap-2 pt-6 pb-2">
+        <MarcaZ tamanho={22} cor="#7a766c" />
+        <p className="assinatura text-[9px] text-fantasma">ZXP Solutions</p>
+        <p className="mt-2 text-center text-[12px] leading-relaxed text-fantasma">
+          O Marco não substitui médico, psicólogo ou psiquiatra.
+          <br />
+          Se precisar de ajuda agora: CVV — 188, gratuito, 24 horas.
+        </p>
+      </div>
     </main>
   );
 }
@@ -196,7 +201,7 @@ function SeletorHora({
         className="numeros rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-white outline-none"
       >
         {Array.from({ length: 24 }, (_, h) => (
-          <option key={h} value={h} className="bg-[#1e2127]">
+          <option key={h} value={h} className="bg-[#21211f]">
             {String(h).padStart(2, "0")}:00
           </option>
         ))}

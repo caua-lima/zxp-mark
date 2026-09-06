@@ -2,7 +2,7 @@
 
 App de marcos e contagens regressivas para iPhone. PWA instalável, com notificação push nativa do iOS, contas individuais e um chat que sabe exatamente há quanto tempo você está firme.
 
-Identidade visual ZXP Solutions: preto + amarelo + branco.
+Identidade visual ZXP Solutions. O kit oficial está em `public/marca` e é a fonte de tudo: **onyx `#10100E`**, **dourado `#F4B942`**, **marfim `#F6F3E8`** e tipografia **Sora**. Os ícones do PWA são gerados do PNG oficial, não redesenhados.
 
 ---
 
@@ -33,7 +33,7 @@ Identidade visual ZXP Solutions: preto + amarelo + branco.
 | | |
 |---|---|
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript |
-| Estilo | Tailwind v4 com os tokens da ZXP |
+| Estilo | Tailwind v4 com os tokens da ZXP (Sora nos títulos, Inter no corpo) |
 | Banco | PostgreSQL via Prisma 6 |
 | Auth | Sessão própria — scrypt + JWT (`jose`) em cookie httpOnly |
 | Push | Web Push (VAPID) com service worker próprio |
@@ -167,7 +167,8 @@ O app também tem atalhos de toque longo no ícone: *Estou com vontade*, *Meus m
 ```
 prisma/schema.prisma      modelo de dados
 scripts/gerar-vapid.mjs   gera chaves e segredos no .env.local
-scripts/gerar-icones.mjs  desenha os PNGs do PWA (sem dependência externa)
+public/marca/             kit oficial da ZXP (SVG, PNG, favicon)
+scripts/gerar-icones.mjs  reamostra os ícones do PWA a partir de public/marca
 scripts/prisma-com-env.mjs  faz o Prisma CLI enxergar o .env.local
 public/sw.js              push + cache do casco para funcionar offline
 src/lib/habitos.ts        catálogo de hábitos e a linha do tempo de cada um
@@ -191,7 +192,8 @@ src/app/api/              rotas
 - **Respostas do motor gratuito** → `src/lib/ia/local.ts`. As ações de 5 minutos estão em `ACOES_MADRUGADA`/`MANHA`/`TARDE`/`NOITE`.
 - **Personalidade do chat com LLM** → a constante `INSTRUCOES` em `src/lib/ia/instrucoes.ts`.
 - **Quando cada aviso dispara** → `src/lib/motor.ts`.
-- **Cores** → os tokens em `src/app/globals.css`.
+- **Cores e tipografia** → os tokens em `src/app/globals.css`, tirados dos SVGs de `public/marca`.
+- **Ícones do PWA** → `npm run icons` regenera tudo a partir de `public/marca/app-icon-onyx-1024.png`.
 
 ---
 

@@ -37,7 +37,9 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
           <span className="text-xl">{marco.emoji}</span>
           <div className="min-w-0">
             <h3 className="truncate text-[16px] font-semibold">{marco.titulo}</h3>
-            <p className="truncate text-[12.5px] text-apagado">{p.rotulo}</p>
+            {p.rotulo !== marco.titulo && (
+              <p className="truncate text-[12.5px] text-apagado">{p.rotulo}</p>
+            )}
           </div>
         </div>
         <span className="shrink-0 rounded-full bg-white/6 px-2.5 py-1 text-[11px] font-medium text-suave">

@@ -194,7 +194,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
                   className={`absolute -left-[26px] top-1 size-3 rounded-full border-2 ${
                     batido
                       ? "border-brand bg-brand"
-                      : "border-white/15 bg-[#16181d]"
+                      : "border-white/15 bg-[#191917]"
                   } ${atual ? "ring-4 ring-brand/20" : ""}`}
                 />
                 <div className="flex items-baseline justify-between gap-3">
@@ -272,7 +272,7 @@ function Anel({ progresso }: { progresso: number }) {
         cy="50"
         r={r}
         fill="none"
-        stroke="#f7c41c"
+        stroke="#f4b942"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeDasharray={`${c * progresso} ${c}`}

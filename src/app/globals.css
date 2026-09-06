@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
-/* Tokens da identidade ZXP Solutions — preto + amarelo + branco.
-   Mesmos valores usados no dashboard de performance. */
+/* Identidade ZXP Solutions.
+   Valores tirados dos SVGs oficiais em public/marca:
+   onyx #10100E · dourado #F4B942 · marfim #F6F3E8 · tipografia Sora. */
 @theme {
   --font-sans:
     var(--fonte-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
+  --font-display: var(--fonte-sora), var(--fonte-inter), system-ui, sans-serif;
 
-  --color-fundo: #0c0d10;
-  --color-superficie: #16181d;
-  --color-elevado: #1e2127;
-  --color-alt: #1b1e24;
-  --color-borda: #292d35;
-  --color-borda-forte: #363b45;
+  /* Onyx e as superfícies que sobem a partir dele — todas mornas, sem azul. */
+  --color-fundo: #10100e;
+  --color-superficie: #191917;
+  --color-elevado: #21211f;
+  --color-alt: #1c1c1a;
+  --color-borda: #2e2e2a;
+  --color-borda-forte: #3d3d37;
 
-  --color-tinta: #f2f4f8;
-  --color-suave: #9aa5b8;
-  --color-apagado: #6b7280;
-  --color-fantasma: #4d535f;
+  /* Marfim e a escala de texto que desce dele. */
+  --color-tinta: #f6f3e8;
+  --color-suave: #a8a49a;
+  --color-apagado: #7a766c;
+  --color-fantasma: #56534b;
 
-  --color-brand: #f7c41c;
-  --color-brand-forte: #ffe37a;
-  --color-brand-ink: #16140a;
+  --color-brand: #f4b942;
+  --color-brand-forte: #ffd98a;
+  --color-brand-ink: #10100e;
 
   --color-sucesso: #35c46a;
   --color-perigo: #ff6b6b;
@@ -34,9 +38,9 @@
 
 :root {
   color-scheme: dark;
-  --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --sombra-md: 0 12px 30px rgba(0, 0, 0, 0.5);
-  --anel-foco: 0 0 0 3px rgba(247, 196, 28, 0.35);
+  --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --sombra-md: 0 12px 30px rgba(0, 0, 0, 0.55);
+  --anel-foco: 0 0 0 3px rgba(244, 185, 66, 0.35);
 }
 
 html,
@@ -51,10 +55,24 @@ body {
 body {
   /* brilho dourado difuso no topo — profundidade sem pesar */
   background-image:
-    radial-gradient(60rem 32rem at 50% -12rem, rgba(247, 196, 28, 0.13), transparent 70%),
-    radial-gradient(40rem 24rem at 90% 4rem, rgba(247, 196, 28, 0.05), transparent 70%);
+    radial-gradient(60rem 32rem at 50% -12rem, rgba(244, 185, 66, 0.12), transparent 70%),
+    radial-gradient(40rem 24rem at 90% 4rem, rgba(244, 185, 66, 0.045), transparent 70%);
   background-attachment: fixed;
   min-height: 100dvh;
+}
+
+/* Sora é a fonte da marca: fica nos títulos, na marca e nos números grandes. */
+h1,
+h2,
+h3,
+.numeros {
+  font-family: var(--font-display);
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
 }
 
 button,
@@ -83,7 +101,7 @@ select {
 }
 
 @utility cartao {
-  background: color-mix(in srgb, var(--color-superficie) 90%, transparent);
+  background: color-mix(in srgb, var(--color-superficie) 92%, transparent);
   border: 1px solid var(--color-borda);
   border-radius: var(--radius-lg);
   box-shadow: var(--sombra-sm);
@@ -94,6 +112,14 @@ select {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
   letter-spacing: -0.02em;
+}
+
+/* Assinatura da marca: "ZXP SOLUTIONS" em marfim, espaçado. */
+@utility assinatura {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 ::-webkit-scrollbar {

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+<rect width="200" height="300" fill="#10100E"/>
+<g transform="translate(0,10)"><polyline points="30,47 170,47 30,153 170,153" fill="none" stroke-width="34" stroke-linejoin="miter" stroke-linecap="butt" stroke="#F4B942"/></g>
+<text x="100" y="235" font-family="Sora, Arial, sans-serif" font-size="34" font-weight="800" fill="#F4B942" text-anchor="middle">ZXP</text>
+<text x="100" y="262" font-family="Sora, Arial, sans-serif" font-size="14" font-weight="500" letter-spacing="3" fill="#F6F3E8" text-anchor="middle">SOLUTIONS</text>
+</svg>
