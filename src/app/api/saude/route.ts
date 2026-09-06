@@ -23,6 +23,11 @@ export async function GET(req: Request) {
   const definido = (v?: string) => Boolean(v && v.length > 8);
 
   let banco: { ok: boolean; detalhe: string; usuarios?: number; inscricoes?: number };
+
+  const url = process.env.DATABASE_URL ?? "";
+  let host = "(nao definida)";
+  try { host = new URL(url).hostname; } catch {}
+  const transporte = host.endsWith(".neon.tech") ? "WebSocket (adapter Neon)" : "TCP 5432";
   try {
     const [usuarios, inscricoes] = await Promise.all([
       prisma.user.count(),
@@ -30,7 +35,8 @@ export async function GET(req: Request) {
     ]);
     banco = { ok: true, detalhe: "conectado", usuarios, inscricoes };
   } catch (e) {
-    banco = { ok: false, detalhe: (e as Error).message.slice(0, 200) };
+    // Mensagem inteira: truncar aqui ja escondeu a causa de um erro real.
+    banco = { ok: false, detalhe: (e as Error).message.replace(/s+/g, " ").slice(0, 700) };
   }
 
   const ambiente = {
@@ -56,6 +62,11 @@ export async function GET(req: Request) {
   return NextResponse.json({
     ok: banco.ok && faltando.length === 0,
     banco,
+    conexao: {
+      host,
+      transporte,
+      regiaoDaFuncao: process.env.VERCEL_REGION ?? "local",
+    },
     ambiente,
     faltando,
     recursos: {

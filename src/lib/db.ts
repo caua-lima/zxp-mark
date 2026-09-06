@@ -1,11 +1,34 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
+
+// O driver do Neon fala WebSocket; em Node ele precisa de uma implementação.
+neonConfig.webSocketConstructor = ws;
 
 const global0 = globalThis as unknown as { prisma?: PrismaClient };
 
+/** O Neon serve o mesmo banco por TCP e por WebSocket; só ele tem os dois. */
+function ehNeon(url: string): boolean {
+  try {
+    return new URL(url).hostname.endsWith(".neon.tech");
+  } catch {
+    return false;
+  }
+}
+
 function criar(): PrismaClient {
-  return new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+  const url = process.env.DATABASE_URL ?? "";
+  const log: ("error" | "warn")[] =
+    process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"];
+
+  // Em serverless a saída TCP na 5432 nem sempre existe; o adapter do Neon
+  // trafega por WebSocket na 443, que passa em qualquer lugar.
+  if (ehNeon(url)) {
+    return new PrismaClient({ adapter: new PrismaNeon({ connectionString: url }), log });
+  }
+
+  return new PrismaClient({ log });
 }
 
 /**
