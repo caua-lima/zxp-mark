@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { provedorAtivo } from "@/lib/ia/provedores";
@@ -26,7 +27,23 @@ export async function GET(req: Request) {
 
   const url = process.env.DATABASE_URL ?? "";
   let host = "(nao definida)";
-  try { host = new URL(url).hostname; } catch {}
+  let usuarioBanco = "(nao definida)";
+  let senhaImpressao = "(nao definida)";
+  let parametros: string[] = [];
+
+  try {
+    const u = new URL(url);
+    host = u.hostname;
+    usuarioBanco = decodeURIComponent(u.username);
+    parametros = [...u.searchParams.keys()];
+    // Impressão digital da senha: permite comparar o que está aqui com o que
+    // está na máquina de quem configurou, sem expor a senha em lugar nenhum.
+    senhaImpressao = createHash("sha256")
+      .update(decodeURIComponent(u.password))
+      .digest("hex")
+      .slice(0, 12);
+  } catch {}
+
   const transporte = host.endsWith(".neon.tech") ? "WebSocket (adapter Neon)" : "TCP 5432";
   try {
     const [usuarios, inscricoes] = await Promise.all([
@@ -36,7 +53,7 @@ export async function GET(req: Request) {
     banco = { ok: true, detalhe: "conectado", usuarios, inscricoes };
   } catch (e) {
     // Mensagem inteira: truncar aqui ja escondeu a causa de um erro real.
-    banco = { ok: false, detalhe: (e as Error).message.replace(/s+/g, " ").slice(0, 700) };
+    banco = { ok: false, detalhe: (e as Error).message.replace(/\s+/g, " ").trim().slice(0, 700) };
   }
 
   const ambiente = {
@@ -64,6 +81,9 @@ export async function GET(req: Request) {
     banco,
     conexao: {
       host,
+      usuario: usuarioBanco,
+      senhaImpressao,
+      parametros,
       transporte,
       regiaoDaFuncao: process.env.VERCEL_REGION ?? "local",
     },
