@@ -61,8 +61,15 @@ if (alvo.hostname === "localhost" || alvo.hostname === "127.0.0.1") {
   );
 }
 
-// Sem DIRECT_URL, a migração usa a própria DATABASE_URL.
-if (!process.env.DIRECT_URL) process.env.DIRECT_URL = process.env.DATABASE_URL;
+
+// Sem DIRECT_URL definida, tenta deduzir. No Neon o endpoint direto é o
+// mesmo host sem o sufixo "-pooler"; nos demais casos, a própria
+// DATABASE_URL serve.
+if (!process.env.DIRECT_URL) {
+  process.env.DIRECT_URL = alvo.hostname.includes("-pooler.")
+    ? process.env.DATABASE_URL.replace("-pooler.", ".")
+    : process.env.DATABASE_URL;
+}
 
 // pgbouncer em modo transação (Supabase 6543) não suporta o DDL do db push:
 // ele derruba prepared statements no meio da migração.
