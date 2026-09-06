@@ -81,7 +81,7 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
           ) : null}
           {st.unidadesEvitadas ? (
             <span className="text-suave">
-              <span className="numeros font-semibold text-white">{st.unidadesEvitadas}</span>{" "}
+              <span className="numeros font-semibold text-tinta">{st.unidadesEvitadas}</span>{" "}
               {st.unidadeNome} a menos
             </span>
           ) : null}

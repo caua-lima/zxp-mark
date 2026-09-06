@@ -171,7 +171,7 @@ function Compartilhar({
     recordes.dinheiroTotal >= 1 ? `${reais(recordes.dinheiroTotal)} economizados` : "",
     `${recordes.total} marcos conquistados`,
     "",
-    "ZXP Mark — cada hora conta.",
+    "ZXP Mark",
   ]
     .filter(Boolean)
     .join("\n");

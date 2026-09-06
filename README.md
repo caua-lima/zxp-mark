@@ -43,6 +43,34 @@ Sem dependência de serviço externo de auth ou de push.
 
 ---
 
+## Identidade visual — não improvise
+
+Tudo sai de `public/marca`, o kit oficial da ZXP Solutions. As cores foram lidas dos próprios SVGs, não estimadas.
+
+| Token | Valor | Onde |
+|---|---|---|
+| `--color-fundo` | `#10100E` onyx | fundo de tudo |
+| `--color-brand` | `#F4B942` dourado | acento, botões, o Z |
+| `--color-tinta` | `#F6F3E8` marfim | texto — **nunca branco puro** |
+| `--color-superficie` | `#191917` | cartões |
+| `--color-borda` | `#2E2E2A` | divisórias |
+
+Escala de texto que desce do marfim: `tinta` → `suave` `#A8A49A` → `apagado` `#7A766C` → `fantasma` `#56534B`. Nenhum cinza azulado.
+
+**Tipografia:** Sora (a do logo) nos títulos, na marca e nos números do cronômetro; Inter no texto corrido, onde Sora pesa nos tamanhos pequenos.
+
+**O Z** é o traçado oficial — pontos `30,47 170,47 30,153 170,153`, espessura 34, junção em esquadria. Está em `src/components/Marca.tsx` em três formas: `MarcaZ` (símbolo), `MarcaIcone` (Z no quadrado onyx) e `Marca` (lockup ZXP / Mark).
+
+**Regras:** os tokens vivem só em `src/app/globals.css`; não escreva hexadecimal solto nos componentes. `npm run icons` regenera os ícones do PWA a partir do PNG oficial — eles não são desenhados à mão.
+
+Verificação rápida de que nada saiu da linha:
+
+```bash
+grep -rnoE "#[0-9a-fA-F]{6}|text-white" src/ | grep -viE "10100e|f4b942|ffd98a|f6f3e8|191917|21211f|2e2e2a|3d3d37|a8a49a|7a766c|56534b|1c1c1a|35c46a|ff6b6b|4ea1ff"
+```
+
+---
+
 ## Subir na Vercel — passo a passo
 
 ### 1. Banco de dados

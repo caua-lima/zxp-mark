@@ -182,7 +182,7 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
             rows={1}
             maxLength={4000}
             placeholder="Escreve o que está sentindo..."
-            className="max-h-[140px] flex-1 resize-none rounded-3xl border border-white/10 bg-white/[0.05] px-4 py-3 text-white outline-none placeholder:text-fantasma focus:border-brand/40"
+            className="max-h-[140px] flex-1 resize-none rounded-3xl border border-white/10 bg-white/[0.05] px-4 py-3 text-tinta outline-none placeholder:text-fantasma focus:border-brand/40"
           />
           <button
             type="submit"

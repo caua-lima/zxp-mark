@@ -32,7 +32,7 @@ export default async function CriarConta() {
           <li key={titulo} className="flex gap-3">
             <span className="text-lg leading-6">{icone}</span>
             <span className="min-w-0">
-              <span className="block text-[14.5px] font-medium text-white">{titulo}</span>
+              <span className="block text-[14.5px] font-medium text-tinta">{titulo}</span>
               <span className="block text-[13px] leading-snug text-apagado">{texto}</span>
             </span>
           </li>

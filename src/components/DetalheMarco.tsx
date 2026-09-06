@@ -200,7 +200,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
                 <div className="flex items-baseline justify-between gap-3">
                   <h3
                     className={`text-[14.5px] font-medium ${
-                      batido ? "text-white" : "text-apagado"
+                      batido ? "text-tinta" : "text-apagado"
                     }`}
                   >
                     {m.titulo}
@@ -237,7 +237,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
             {marco.recaidas.map((r) => (
               <div key={r.id} className="cartao p-4">
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-[14px] text-white">{dataLonga(r.quando)}</span>
+                  <span className="text-[14px] text-tinta">{dataLonga(r.quando)}</span>
                   <span className="text-[12px] text-apagado">
                     durou {duracaoExtenso(r.duracaoMs)}
                   </span>
@@ -266,7 +266,7 @@ function Anel({ progresso }: { progresso: number }) {
       className="pointer-events-none absolute inset-0 m-auto size-[240px] opacity-30"
       aria-hidden
     >
-      <circle cx="50" cy="50" r={r} fill="none" stroke="#ffffff10" strokeWidth="1.5" />
+      <circle cx="50" cy="50" r={r} fill="none" stroke="#3d3d37" strokeWidth="1.5" />
       <circle
         cx="50"
         cy="50"
@@ -298,7 +298,7 @@ function Estatistica({
       <p className="text-[11.5px] tracking-wide text-apagado uppercase">{rotulo}</p>
       <p
         className={`numeros mt-1.5 text-[19px] leading-tight font-semibold ${
-          destaque ? "text-brand" : "text-white"
+          destaque ? "text-brand" : "text-tinta"
         }`}
       >
         {valor}

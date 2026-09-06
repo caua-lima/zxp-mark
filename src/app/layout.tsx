@@ -18,7 +18,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ZXP Mark — cada hora conta",
+  // Template: a subpagina informa so o proprio nome e vira "Acesso — ZXP Mark".
+  title: {
+    default: "ZXP Mark",
+    template: "%s — ZXP Mark",
+  },
   description:
     "Conte cada hora que você segurou firme, marque as datas que importam e tenha alguém do seu lado quando a vontade bater. Um app ZXP Solutions.",
   applicationName: "ZXP Mark",

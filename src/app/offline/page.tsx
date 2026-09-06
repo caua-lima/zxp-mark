@@ -1,6 +1,6 @@
 import { Marca } from "@/components/Marca";
 
-export const metadata = { title: "Sem conexão — ZXP Mark" };
+export const metadata = { title: "Sem conexão" };
 
 export default function Offline() {
   return (

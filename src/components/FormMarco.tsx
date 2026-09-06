@@ -89,7 +89,7 @@ export function FormMarco() {
                 onClick={() => trocarPreset(op.id)}
                 className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-3 text-left transition-colors ${
                   ativo
-                    ? "border-brand/50 bg-brand/10 text-white"
+                    ? "border-brand/50 bg-brand/10 text-tinta"
                     : "border-white/8 bg-white/[0.03] text-suave active:bg-white/[0.06]"
                 }`}
               >
@@ -125,7 +125,7 @@ export function FormMarco() {
               onClick={() => setQuando(valor)}
               className={`flex-1 rounded-2xl border px-4 py-3 text-[14px] font-medium transition-colors ${
                 quando === valor
-                  ? "border-brand/50 bg-brand/10 text-white"
+                  ? "border-brand/50 bg-brand/10 text-tinta"
                   : "border-white/8 bg-white/[0.03] text-suave"
               }`}
             >

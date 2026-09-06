@@ -144,7 +144,7 @@ function Bloco({ valor, rotulo, forte }: { valor: number; rotulo: string; forte?
     <div className="flex flex-col items-center">
       <span
         className={`numeros font-semibold leading-none ${
-          forte ? "text-4xl text-brand" : "text-2xl text-white"
+          forte ? "text-4xl text-brand" : "text-2xl text-tinta"
         }`}
       >
         {forte ? valor : String(valor).padStart(2, "0")}

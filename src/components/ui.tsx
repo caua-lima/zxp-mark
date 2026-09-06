@@ -19,10 +19,10 @@ export function Botao({
     cheio:
       "bg-brand text-brand-ink hover:bg-brand-forte active:bg-brand-forte font-semibold shadow-lg shadow-brand/20",
     vazio:
-      "bg-white/5 text-white border border-white/12 hover:bg-white/10 active:bg-white/15",
+      "bg-white/5 text-tinta border border-white/12 hover:bg-white/10 active:bg-white/15",
     perigo:
       "bg-perigo/12 text-perigo border border-perigo/25 hover:bg-perigo/20",
-    fantasma: "text-suave hover:text-white hover:bg-white/5",
+    fantasma: "text-suave hover:text-tinta hover:bg-white/5",
   }[variante];
 
   return (
@@ -51,7 +51,7 @@ export const Campo = forwardRef<
       <input
         ref={ref}
         {...resto}
-        className={`w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-white outline-none transition placeholder:text-fantasma focus:border-brand/50 focus:bg-white/[0.06] ${className}`}
+        className={`w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-tinta outline-none transition placeholder:text-fantasma focus:border-brand/50 focus:bg-white/[0.06] ${className}`}
       />
       {dica && <span className="mt-1.5 block text-xs text-apagado">{dica}</span>}
     </label>
@@ -71,7 +71,7 @@ export function Area({
       )}
       <textarea
         {...resto}
-        className={`w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-white outline-none transition placeholder:text-fantasma focus:border-brand/50 focus:bg-white/[0.06] ${className}`}
+        className={`w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-tinta outline-none transition placeholder:text-fantasma focus:border-brand/50 focus:bg-white/[0.06] ${className}`}
       />
       {dica && <span className="mt-1.5 block text-xs text-apagado">{dica}</span>}
     </label>
@@ -105,7 +105,7 @@ export function Chave({
       className="flex w-full items-center justify-between gap-4 py-3.5 text-left"
     >
       <span className="min-w-0">
-        <span className="block text-[15px] text-white">{rotulo}</span>
+        <span className="block text-[15px] text-tinta">{rotulo}</span>
         {descricao && <span className="mt-0.5 block text-[13px] text-apagado">{descricao}</span>}
       </span>
       <span

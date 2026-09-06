@@ -107,7 +107,7 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
         <p className="mt-1 text-[13px] text-apagado">
           Usado para saber que horas são aí quando eu te aviso.
         </p>
-        <p className="numeros mt-3 text-[14px] text-white">{prefs.timezone}</p>
+        <p className="numeros mt-3 text-[14px] text-tinta">{prefs.timezone}</p>
         {fusoDiferente && (
           <button
             onClick={() => atualizar({ timezone: fusoDoAparelho })}
@@ -198,7 +198,7 @@ function SeletorHora({
       <select
         value={valor}
         onChange={(e) => aoMudar(Number(e.target.value))}
-        className="numeros rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-white outline-none"
+        className="numeros rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-tinta outline-none"
       >
         {Array.from({ length: 24 }, (_, h) => (
           <option key={h} value={h} className="bg-[#21211f]">
