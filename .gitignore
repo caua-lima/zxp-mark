@@ -19,3 +19,5 @@ next-env.d.ts
 ACESSO-TEMPORARIO.txt
 VERCEL-ENV.txt
 CORRIGIR-DATABASE-URL.txt
+.env.vercel
+.vercel
