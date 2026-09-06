@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
+    "db:push": "node scripts/prisma-com-env.mjs db push",
+    "db:studio": "node scripts/prisma-com-env.mjs studio",
     "vapid": "node scripts/gerar-vapid.mjs",
     "icons": "node scripts/gerar-icones.mjs"
   },

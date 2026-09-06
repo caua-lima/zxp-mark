@@ -60,9 +60,13 @@ Não precisa de chave de IA nenhuma: o chat funciona de graça no motor local.
 
 ### 3. Criar as tabelas
 
+Cole a `DATABASE_URL` no `.env.local` e rode:
+
 ```bash
 npm run db:push
 ```
+
+(O script faz a ponte do `.env.local` para o Prisma CLI, que por padrão só lê `.env`.)
 
 ### 4. Rodar local
 
@@ -155,6 +159,7 @@ O app também tem atalhos de toque longo no ícone: *Estou com vontade*, *Meus m
 prisma/schema.prisma      modelo de dados
 scripts/gerar-vapid.mjs   gera chaves e segredos no .env.local
 scripts/gerar-icones.mjs  desenha os PNGs do PWA (sem dependência externa)
+scripts/prisma-com-env.mjs  faz o Prisma CLI enxergar o .env.local
 public/sw.js              push + cache do casco para funcionar offline
 src/lib/habitos.ts        catálogo de hábitos e a linha do tempo de cada um
 src/lib/motor.ts          decide o que está vencido e dispara — com dedupe
