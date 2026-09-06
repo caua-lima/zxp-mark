@@ -87,6 +87,13 @@ export async function GET(req: Request) {
       transporte,
       regiaoDaFuncao: process.env.VERCEL_REGION ?? "local",
     },
+    // Responde "o redeploy aconteceu?" sem depender de olhar o painel.
+    deploy: {
+      ambiente: process.env.VERCEL_ENV ?? "local",
+      commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local",
+      mensagem: process.env.VERCEL_GIT_COMMIT_MESSAGE?.split("\n")[0]?.slice(0, 80) ?? null,
+      id: process.env.VERCEL_DEPLOYMENT_ID ?? null,
+    },
     ambiente,
     faltando,
     recursos: {
