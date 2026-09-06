@@ -12,8 +12,8 @@ export default async function LayoutApp({ children }: { children: React.ReactNod
     <>
       <RegistrarSW />
       <VerificarAoAbrir />
-      {/* pb-28 abre espaço para a tab bar fixa */}
-      <div className="area-topo mx-auto max-w-lg px-5 pt-5 pb-28">{children}</div>
+      {/* base-app abre espaço para a tab bar fixa e para o indicador de início */}
+      <div className="topo-app base-app mx-auto max-w-lg px-5">{children}</div>
       <TabBar />
     </>
   );

@@ -4,7 +4,7 @@ export const metadata = { title: "Sem conexão" };
 
 export default function Offline() {
   return (
-    <main className="area-topo area-baixo mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-12 text-center">
+    <main className="topo-tela base-tela mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 text-center">
       <div className="flex justify-center">
         <Marca />
       </div>

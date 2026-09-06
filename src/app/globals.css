@@ -92,12 +92,39 @@ select {
   box-shadow: var(--anel-foco);
 }
 
-@utility area-topo {
-  padding-top: env(safe-area-inset-top);
+/* Área segura do aparelho.
+   O app roda com viewport-fit=cover e barra de status translúcida, então o
+   conteúdo vai por baixo do relógio e do indicador de início. Estas
+   utilities JÁ SOMAM o respiro desejado: usar `area-topo pt-5` junto não
+   funciona, porque as duas escrevem padding-top e uma anula a outra. */
+
+/* topo do app, dentro das abas */
+@utility topo-app {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1.25rem);
 }
 
+/* base do app: precisa limpar a tab bar fixa MAIS o indicador de início */
+@utility base-app {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem);
+}
+
+/* topo das telas de tela cheia (entrar, criar conta, offline) */
+@utility topo-tela {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 3rem);
+}
+
+@utility base-tela {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 3rem);
+}
+
+/* barra de escrita do chat, colada acima da tab bar */
+@utility base-barra {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+}
+
+/* a tab bar não tem outro padding-bottom, então não há conflito aqui */
 @utility area-baixo {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
 }
 
 @utility cartao {
