@@ -4,7 +4,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Runtime: use o pooler (Supabase 6543 / Neon -pooler).
+  url       = env("DATABASE_URL")
+  // Migracoes: precisa de conexao direta — pgbouncer em modo transacao nao
+  // aguenta o DDL do db push. O script scripts/prisma-com-env.mjs cai de
+  // volta na DATABASE_URL quando esta nao esta definida.
+  directUrl = env("DIRECT_URL")
 }
 
 model User {

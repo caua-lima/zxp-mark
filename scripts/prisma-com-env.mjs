@@ -46,16 +46,37 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+let alvo;
 try {
-  const { hostname } = new URL(process.env.DATABASE_URL);
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    console.warn(
-      `\nAviso: DATABASE_URL aponta para ${hostname} — ainda é o valor de exemplo.\n` +
-        "Se não houver um Postgres rodando aí, o comando abaixo vai falhar.\n"
-    );
-  }
+  alvo = new URL(process.env.DATABASE_URL);
 } catch {
   console.error("\nDATABASE_URL não é uma URL válida.\n");
+  process.exit(1);
+}
+
+if (alvo.hostname === "localhost" || alvo.hostname === "127.0.0.1") {
+  console.warn(
+    `\nAviso: DATABASE_URL aponta para ${alvo.hostname} — ainda é o valor de exemplo.\n` +
+      "Se não houver um Postgres rodando aí, o comando abaixo vai falhar.\n"
+  );
+}
+
+// Sem DIRECT_URL, a migração usa a própria DATABASE_URL.
+if (!process.env.DIRECT_URL) process.env.DIRECT_URL = process.env.DATABASE_URL;
+
+// pgbouncer em modo transação (Supabase 6543) não suporta o DDL do db push:
+// ele derruba prepared statements no meio da migração.
+const migrando = process.argv.some((a) => a === "push" || a === "migrate" || a === "dev");
+const direta = new URL(process.env.DIRECT_URL);
+const emTransacao = direta.port === "6543" || direta.searchParams.get("pgbouncer") === "true";
+
+if (migrando && emTransacao) {
+  console.error(
+    "\nDIRECT_URL está apontando para o pooler de TRANSAÇÃO (porta 6543).\n" +
+      "A migração precisa de conexão direta, senão falha no meio.\n\n" +
+      "No Supabase, copie a string do 'Session pooler' (porta 5432) e ponha em\n" +
+      "DIRECT_URL no .env.local. A de transação (6543) continua na DATABASE_URL.\n"
+  );
   process.exit(1);
 }
 

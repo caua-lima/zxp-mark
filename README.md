@@ -45,7 +45,14 @@ Sem dependência de serviço externo de auth ou de push.
 
 ### 1. Banco de dados
 
-Crie um Postgres (Neon, Supabase ou Vercel Postgres) e copie a **connection string com pool** (`-pooler`, `pgbouncer=true` ou equivalente). Serverless abre muita conexão; sem pool o banco derruba.
+Crie um Postgres e copie a **connection string com pool**. Serverless abre muita conexão; sem pool o banco derruba.
+
+| | `DATABASE_URL` (app) | `DIRECT_URL` (só migração) |
+|---|---|---|
+| **Neon** | a que tem `-pooler` no host | deixe vazio |
+| **Supabase** | Transaction pooler, porta **6543**, + `?pgbouncer=true&connection_limit=1` | Session pooler, porta **5432** |
+
+O `npm run db:push` avisa se você trocar as duas de lugar — o pooler de transação derruba o DDL no meio da migração.
 
 ### 2. Segredos
 
