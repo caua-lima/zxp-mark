@@ -1,40 +1,70 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Cronometro } from "@/components/Cronometro";
+import { Respiracao } from "@/components/Respiracao";
+import { duracaoExtenso } from "@/lib/formato";
 
 export type Msg = { id: string; papel: "user" | "assistant"; conteudo: string };
 
-const SUGESTOES = [
-  "Por que não devo fumar agora?",
-  "Estou com muita vontade",
-  "Quanto tempo eu já aguentei?",
-  "Me lembra do meu porquê",
-  "O que está acontecendo no meu corpo agora?",
-  "Recaí ontem, e agora?",
-];
+/** O que o chat sabe sobre a pessoa sem precisar perguntar ao servidor. */
+export type Situacao = {
+  temMarcos: boolean;
+  titulo: string | null;
+  emoji: string;
+  sufixo: string;
+  cicloInicio: string | null;
+  proximoTitulo: string | null;
+  proximoFaltaMs: number | null;
+  temRecaida: boolean;
+  contagemTitulo: string | null;
+  horas: number;
+};
 
 const SOS = "Estou com muita vontade agora. Me ajuda a passar dos próximos 5 minutos.";
 
-export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolean }) {
+/** As sugestões mudam com o estado — nada de lista fixa que não serve pra nada. */
+function sugestoesPara(s: Situacao): string[] {
+  if (!s.temMarcos) {
+    return ["O que esse app faz?", "Como funciona a contagem?", "Quero parar de fumar"];
+  }
+
+  const base = ["Estou com muita vontade", "Por que não devo ceder agora?"];
+
+  // Primeiras 72h: é onde a abstinência física aperta.
+  if (s.horas < 72) {
+    base.push("Quanto tempo dura a vontade?", "O que está acontecendo no meu corpo agora?");
+  } else {
+    base.push("O que está acontecendo no meu corpo agora?", "Quanto já economizei?");
+  }
+
+  if (s.temRecaida) base.push("Qual é o meu gatilho?");
+  else base.push("Quanto tempo eu já aguentei?");
+
+  if (s.contagemTitulo) base.push(`Quantos dias faltam para ${s.contagemTitulo.toLowerCase()}?`);
+
+  base.push("Me lembra do meu porquê", "Tô ansioso", "Não consigo dormir");
+  return base;
+}
+
+export function Chat({ inicial, situacao }: { inicial: Msg[]; situacao: Situacao }) {
   const busca = useSearchParams();
   const [msgs, setMsgs] = useState<Msg[]>(inicial);
   const [texto, setTexto] = useState("");
   const [saindo, setSaindo] = useState("");
   const [ocupado, setOcupado] = useState(false);
   const [erro, setErro] = useState("");
+  const [respirando, setRespirando] = useState(false);
 
   const fim = useRef<HTMLDivElement>(null);
-  const caixa = useRef<HTMLTextAreaElement>(null);
   const jaDisparou = useRef(false);
 
-  const rolar = useCallback(() => {
-    fim.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, []);
+  const sugestoes = useMemo(() => sugestoesPara(situacao), [situacao]);
 
   useEffect(() => {
-    rolar();
-  }, [msgs.length, saindo, rolar]);
+    fim.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [msgs.length, saindo, respirando]);
 
   const enviar = useCallback(
     async (conteudo: string) => {
@@ -99,7 +129,7 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
 
   return (
     <div className="flex min-h-[calc(100dvh-8rem)] flex-col">
-      <header className="mb-4 flex items-end justify-between gap-3">
+      <header className="mb-3 flex items-end justify-between gap-3">
         <div>
           <p className="text-[13px] text-apagado">Estou aqui a qualquer hora</p>
           <h1 className="text-[26px] font-semibold tracking-tight">Ajuda</h1>
@@ -111,8 +141,26 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
         )}
       </header>
 
+      {/* O número fica à vista o tempo todo — é o argumento mais forte que existe. */}
+      {situacao.cicloInicio && (
+        <div className="cartao mb-3 flex items-center gap-3 px-4 py-3">
+          <span className="text-lg">{situacao.emoji}</span>
+          <div className="min-w-0 flex-1">
+            <div className="text-[15px] font-semibold">
+              <Cronometro desde={situacao.cicloInicio} tamanho="medio" />
+            </div>
+            <p className="truncate text-[11.5px] text-apagado">
+              {situacao.sufixo}
+              {situacao.proximoTitulo && situacao.proximoFaltaMs !== null
+                ? ` · ${situacao.proximoTitulo} em ${duracaoExtenso(situacao.proximoFaltaMs)}`
+                : ""}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 space-y-3">
-        {vazio && <Abertura temMarcos={temMarcos} />}
+        {vazio && <Abertura temMarcos={situacao.temMarcos} />}
 
         {msgs.map((m) => (
           <Balao key={m.id} papel={m.papel} texto={m.conteudo} />
@@ -132,6 +180,8 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
           </div>
         )}
 
+        {respirando && <Respiracao aoFechar={() => setRespirando(false)} />}
+
         {erro && (
           <p className="rounded-2xl border border-perigo/25 bg-perigo/10 px-4 py-3 text-[13.5px] text-perigo">
             {erro}
@@ -141,19 +191,26 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
         <div ref={fim} />
       </div>
 
-      {vazio && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {SUGESTOES.map((s) => (
+      <div className="mt-4 flex flex-wrap gap-2">
+        {!respirando && (
+          <button
+            onClick={() => setRespirando(true)}
+            className="rounded-full border border-brand/30 bg-brand/10 px-3.5 py-2 text-[13px] font-medium text-brand active:bg-brand/20"
+          >
+            Respirar 4-7-8
+          </button>
+        )}
+        {vazio &&
+          sugestoes.map((s) => (
             <button
               key={s}
               onClick={() => enviar(s)}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-[13px] text-suave active:bg-white/[0.08]"
+              className="rounded-full border border-borda bg-white/[0.04] px-3.5 py-2 text-[13px] text-suave active:bg-white/[0.08]"
             >
               {s}
             </button>
           ))}
-        </div>
-      )}
+      </div>
 
       {/* barra de escrita, colada acima da tab bar */}
       <div className="area-baixo sticky bottom-0 -mx-5 mt-4 border-t border-white/8 bg-[#10100e]/90 px-5 pt-3 pb-3 backdrop-blur-xl">
@@ -165,7 +222,6 @@ export function Chat({ inicial, temMarcos }: { inicial: Msg[]; temMarcos: boolea
           className="flex items-end gap-2"
         >
           <textarea
-            ref={caixa}
             value={texto}
             onChange={(e) => {
               setTexto(e.target.value);

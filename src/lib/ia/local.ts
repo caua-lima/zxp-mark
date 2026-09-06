@@ -381,6 +381,151 @@ function respFallback(r: Retrato, m: RetratoMarco | null, s: number): string {
   return l.join("\n");
 }
 
+function respSoUm(m: RetratoMarco, s: number): string {
+  return [
+    escolher(
+      [
+        'Não existe "só um". Existe o primeiro — e o segundo vem sozinho, mais fácil, mais rápido.',
+        'O "só um" não é uma dose menor. É o botão que zera o contador e devolve o hábito inteiro.',
+        "Se um fosse suficiente, você não estaria contando os dias. Você já testou essa hipótese antes.",
+      ],
+      s
+    ),
+    "",
+    `Na prática: você troca ${duracaoExtenso(m.decorridoMs)} por poucos minutos. E amanhã recomeça do zero, com a vontade igualzinha.`,
+    "",
+    "O que costuma funcionar é adiar, não negociar. Diz pra você mesmo: agora não, daqui a 20 minutos eu decido. Quase sempre não chega a decidir.",
+  ].join("\n");
+}
+
+function respDuracao(): string {
+  return [
+    "Uma onda de fissura dura de 3 a 5 minutos. Não meia hora, não a tarde inteira — minutos.",
+    "",
+    "Ela sobe rápido, estoura e cai. O erro clássico é achar que vai piorar pra sempre e ceder no pico, que é justo o momento em que ela já ia começar a descer.",
+    "",
+    "Marca no relógio da próxima vez. Ver o tempo passar tira o poder dela.",
+  ].join("\n");
+}
+
+function respGatilho(m: RetratoMarco): string {
+  const gatilhos = m.recaidas.map((r) => r.gatilho).filter(Boolean) as string[];
+  if (gatilhos.length === 0) {
+    return [
+      "Você ainda não registrou nenhum gatilho, então não tenho o seu padrão — só os comuns.",
+      "",
+      `Para ${m.rotulo.toLowerCase()}, os que mais aparecem são: ${m.contextoClinico.split("Gatilhos clássicos:")[1]?.trim() || "estresse, tédio, álcool e estar sozinho."}`,
+      "",
+      "Da próxima vez que a vontade bater forte, anota o que estava acontecendo. Três anotações e o padrão aparece sozinho.",
+    ].join("\n");
+  }
+
+  const contagem = new Map<string, number>();
+  for (const g of gatilhos) contagem.set(g, (contagem.get(g) ?? 0) + 1);
+  const ordenado = [...contagem.entries()].sort((a, b) => b[1] - a[1]);
+  const [top, n] = ordenado[0];
+
+  return [
+    `Pelo seu histórico, o seu gatilho principal é "${top}"${n > 1 ? ` — apareceu ${n} vezes` : ""}.`,
+    ...(ordenado.length > 1
+      ? [`Depois vêm: ${ordenado.slice(1).map(([g, c]) => `${g} (${c}x)`).join(", ")}.`]
+      : []),
+    "",
+    "Gatilho não se enfrenta na hora, se planeja antes. Decide agora, com a cabeça fria, o que você faz da próxima vez que isso aparecer — e deixa decidido.",
+    "",
+    "Qual é a próxima situação em que ele provavelmente vai aparecer?",
+    // Sem filter(Boolean) aqui: as strings vazias são as linhas em branco
+    // que separam os parágrafos.
+  ].join("\n");
+}
+
+function respFesta(m: RetratoMarco, s: number): string {
+  return [
+    "Evento social é onde mais gente cai — e é o mais fácil de planejar, porque você sabe que vem.",
+    "",
+    "Três coisas que funcionam:",
+    "· Decide antes de sair, não lá dentro. Lá dentro você já negociou.",
+    "· Bebida na mão o tempo todo, mesmo que seja água ou refrigerante. Mão ocupada, boca ocupada.",
+    "· Combina uma saída: se apertar, você vai embora. Sem culpa, sem explicação.",
+    "",
+    `Você chega lá com ${duracaoExtenso(m.decorridoMs)}. Sair de lá com esse número inteiro é uma vitória bem maior do que parece.`,
+    "",
+    escolher(
+      ["Quem vai estar com você?", "Que horas você vai?", "Alguém lá sabe que você parou?"],
+      s
+    ),
+  ].join("\n");
+}
+
+function respAnsiedade(s: number): string {
+  return [
+    "Ansiedade nos primeiros dias é esperada: o que te acalmava saiu de cena e o corpo ainda não recompôs o resto.",
+    "",
+    "Ela diminui sozinha em algumas semanas. Enquanto isso, o que ajuda de verdade é o corpo, não a cabeça:",
+    "",
+    `· Respiração 4-7-8: inspira em 4, segura 7, solta em 8. Quatro ciclos, agora.`,
+    "· Caminhada de 10 minutos, mesmo sem destino.",
+    "· Menos cafeína — ela imita ansiedade e você não vai saber diferenciar.",
+    "",
+    escolher(
+      ["Consegue fazer os quatro ciclos agora e me dizer como ficou?", "Dá pra sair pra caminhar agora?"],
+      s
+    ),
+  ].join("\n");
+}
+
+function respSono(): string {
+  return [
+    "Sono bagunçado é dos efeitos mais comuns e dos mais chatos, porque você fica sem energia justo quando precisa dela.",
+    "",
+    "Costuma normalizar entre 1 e 3 semanas. Até lá:",
+    "· Nada de cafeína depois das 14h.",
+    "· Sol na cara pela manhã, nem que sejam 10 minutos.",
+    "· Se acordar de madrugada com vontade, levanta e sai do quarto. Não decide nada deitado no escuro.",
+    "",
+    "Aguentar essas semanas de sono ruim é o preço de entrada. Ele acaba.",
+  ].join("\n");
+}
+
+function respPeso(m: RetratoMarco): string {
+  return [
+    "Preocupação legítima, e vale colocar na proporção certa: o ganho médio ao parar de fumar fica em poucos quilos, e some com o tempo. O dano de voltar a fumar não some.",
+    "",
+    "Parte disso é a boca procurando o que fazer, não fome. Ajuda ter à mão: água gelada, chiclete sem açúcar, cenoura, maçã, gelo pra mastigar.",
+    "",
+    `E tem um bônus: ${m.decorridoMs > 7 * DIA ? "sua capacidade pulmonar já melhorou o suficiente pra caminhada e corrida ficarem mais fáceis" : "em uma semana sua respiração já melhora e exercício fica mais viável"}.`,
+    "",
+    "Uma coisa de cada vez. Primeiro o hábito, depois o peso.",
+  ].join("\n");
+}
+
+function respProfissional(): string {
+  return [
+    "Boa pergunta, e a resposta é sim — procurar ajuda profissional aumenta muito a chance de dar certo, e não é sinal de fraqueza nenhuma.",
+    "",
+    "· No SUS, a Unidade Básica de Saúde mais perto tem programa de cessação de tabagismo, gratuito, com acompanhamento e medicação quando indicado.",
+    "· Psicólogo ou psiquiatra ajuda principalmente quando o hábito está grudado em ansiedade ou depressão.",
+    "· Grupos como AA e NA existem em quase toda cidade e não custam nada.",
+    "",
+    "Eu sou um app: eu conto o seu tempo e fico do seu lado às 3 da manhã. Não substituo nenhum dos três.",
+  ].join("\n");
+}
+
+function respRespiracao(): string {
+  return [
+    "Vamos fazer agora. Respiração 4-7-8, quatro ciclos:",
+    "",
+    "1. Solta todo o ar pela boca.",
+    "2. Inspira pelo nariz contando até 4.",
+    "3. Segura contando até 7.",
+    "4. Solta pela boca contando até 8, devagar.",
+    "",
+    "Repete quatro vezes. Leva pouco mais de um minuto e derruba a frequência cardíaca — que é justo o que sobe na fissura.",
+    "",
+    "Tem um contador guiado no botão aqui embaixo, se preferir seguir na tela.",
+  ].join("\n");
+}
+
 /* ------------------------------- segurança ------------------------------- */
 
 /**
@@ -464,6 +609,10 @@ export function responderLocal(r: Retrato, mensagem: string, ops: OpcoesLocal = 
 
   if (!m && !ehSobreContagem(r, t) && !tem(t, "faltam", "dias para", "dias pra")) {
     return SEM_MARCO;
+  }
+
+  if (tem(t, "quanto tempo dura", "dura quanto", "quanto dura a vontade", "quanto dura a fissura", "passa em quanto")) {
+    return respDuracao();
   }
 
   if (
@@ -550,6 +699,38 @@ export function responderLocal(r: Retrato, mensagem: string, ops: OpcoesLocal = 
 
   if (/^(oi|ola|opa|eae|e ai|bom dia|boa tarde|boa noite|salve|hey)\b/.test(t) || t.length <= 4) {
     return respSaudacao(r, s);
+  }
+
+  if (tem(t, "so um", "so uma", "posso fumar um", "um so", "um cigarro so", "so hoje", "so dessa vez", "diminuir em vez")) {
+    return m ? respSoUm(m, s) : SEM_MARCO;
+  }
+
+  if (tem(t, "gatilho", "o que me faz", "por que eu recaio", "sempre caio", "padrao")) {
+    return m ? respGatilho(m) : SEM_MARCO;
+  }
+
+  if (tem(t, "festa", "churrasco", "balada", "aniversario", "bar", "evento", "casamento", "vou sair", "confraterniza", "reuniao de familia")) {
+    return m ? respFesta(m, s) : SEM_MARCO;
+  }
+
+  if (tem(t, "ansios", "ansiedade", "nervos", "agitado", "irritad", "estress", "no limite")) {
+    return respAnsiedade(s);
+  }
+
+  if (tem(t, "dormir", "sono", "insonia", "acordando de madrugada", "nao durmo", "acordo cansado")) {
+    return respSono();
+  }
+
+  if (tem(t, "engordar", "engordando", "peso", "comendo muito", "fome", "gordo", "balanca")) {
+    return m ? respPeso(m) : SEM_MARCO;
+  }
+
+  if (tem(t, "psicolog", "psiquiatra", "terapia", "medico", "remedio", "adesivo", "tratamento", "grupo de apoio", "profissional")) {
+    return respProfissional();
+  }
+
+  if (tem(t, "respira", "respirar", "4-7-8", "exercicio de respira")) {
+    return respRespiracao();
   }
 
   return respFallback(r, m, s);

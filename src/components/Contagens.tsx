@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Area, Aviso, Botao, Campo } from "@/components/ui";
+import { Area, Aviso, Botao, Campo, Chave } from "@/components/ui";
 import { Regressiva } from "@/components/Cronometro";
 import { dataLonga } from "@/lib/formato";
+import { iconePara } from "@/lib/deteccao";
+import { DIA } from "@/lib/habitos";
 
 export type Contagem = {
   id: string;
@@ -13,12 +15,10 @@ export type Contagem = {
   descricao: string | null;
   alvo: string;
   criadoEm: string;
+  avisoDiario: boolean;
   avisos: number[];
   notificar: boolean;
 };
-
-const EMOJIS = ["🎯", "✈️", "🏖️", "🎂", "💍", "🏠", "🎓", "🚗", "🎄", "💼", "🏆", "❤️"];
-const OPCOES_AVISO = [90, 60, 30, 14, 7, 3, 1, 0];
 
 export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: number }) {
   const router = useRouter();
@@ -60,7 +60,7 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
           <h2 className="text-[17px] font-semibold">Nada marcado ainda</h2>
           <p className="mx-auto mt-2 max-w-xs text-[14px] leading-relaxed text-apagado">
             Viagem, aniversário, prova, mudança. Marca a data e eu conto os dias por você — com
-            aviso quando estiver chegando.
+            um aviso todo dia no celular.
           </p>
         </div>
       )}
@@ -99,13 +99,25 @@ function CartaoContagem({
   agora: number;
   aoMudar: () => void;
 }) {
-  const [confirmando, setConfirmando] = useState(false);
+  const [painel, setPainel] = useState(false);
   const [ocupado, setOcupado] = useState(false);
+  const [diario, setDiario] = useState(contagem.avisoDiario);
 
   const alvo = new Date(contagem.alvo).getTime();
   const criado = new Date(contagem.criadoEm).getTime();
   const total = Math.max(1, alvo - criado);
   const progresso = Math.max(0, Math.min(1, (agora - criado) / total));
+  const faltamDias = Math.max(0, Math.ceil((alvo - agora) / DIA));
+
+  async function alterar(patch: Record<string, unknown>) {
+    setOcupado(true);
+    await fetch(`/api/contagens/${contagem.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    setOcupado(false);
+  }
 
   async function excluir() {
     setOcupado(true);
@@ -124,7 +136,7 @@ function CartaoContagem({
           </div>
         </div>
         <button
-          onClick={() => setConfirmando((v) => !v)}
+          onClick={() => setPainel((v) => !v)}
           className="shrink-0 px-1 text-[18px] leading-none text-fantasma active:text-suave"
           aria-label="Opções"
         >
@@ -149,29 +161,42 @@ function CartaoContagem({
         <p className="mt-3 text-[13.5px] leading-relaxed text-suave">{contagem.descricao}</p>
       )}
 
-      {contagem.notificar && contagem.avisos.length > 0 && alvo > agora && (
+      {contagem.notificar && alvo > agora && (
         <p className="mt-3 text-[12px] text-fantasma">
-          🔔 Aviso em {contagem.avisos.map((d) => (d === 0 ? "no dia" : `D-${d}`)).join(", ")}
+          {diario
+            ? `🔔 Aviso todo dia: "faltam ${faltamDias} dias"`
+            : `🔔 Aviso em ${contagem.avisos.map((d) => (d === 0 ? "no dia" : `D-${d}`)).join(", ")}`}
         </p>
       )}
 
-      {confirmando && (
-        <div className="surge mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-3.5">
-          <span className="text-[13px] text-apagado">Apagar esta contagem?</span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setConfirmando(false)}
-              className="rounded-xl px-3 py-2 text-[13px] text-suave"
-            >
-              Não
-            </button>
-            <button
-              onClick={excluir}
-              disabled={ocupado}
-              className="rounded-xl bg-perigo/15 px-3 py-2 text-[13px] font-medium text-perigo disabled:opacity-50"
-            >
-              Apagar
-            </button>
+      {painel && (
+        <div className="surge mt-4 space-y-1 border-t border-borda pt-2">
+          <Chave
+            ligado={diario}
+            aoMudar={(v) => {
+              setDiario(v);
+              void alterar({ avisoDiario: v });
+            }}
+            rotulo="Aviso diário"
+            descricao="Todo dia, com quantos dias faltam."
+          />
+          <div className="flex items-center justify-between gap-3 border-t border-borda pt-3.5">
+            <span className="text-[13px] text-apagado">Apagar esta contagem?</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPainel(false)}
+                className="rounded-xl px-3 py-2 text-[13px] text-suave"
+              >
+                Fechar
+              </button>
+              <button
+                onClick={excluir}
+                disabled={ocupado}
+                className="rounded-xl bg-perigo/15 px-3 py-2 text-[13px] font-medium text-perigo disabled:opacity-50"
+              >
+                Apagar
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -181,15 +206,24 @@ function CartaoContagem({
 
 function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
   const [titulo, setTitulo] = useState("");
-  const [emoji, setEmoji] = useState("🎯");
   const [descricao, setDescricao] = useState("");
   const [data, setData] = useState("");
   const [hora, setHora] = useState("09:00");
-  const [avisos, setAvisos] = useState<number[]>([30, 14, 7, 3, 1, 0]);
+  const [diario, setDiario] = useState(true);
   const [erro, setErro] = useState("");
   const [ocupado, setOcupado] = useState(false);
 
   const hoje = new Date().toISOString().slice(0, 10);
+  // O ícone aparece ao vivo enquanto se escreve — o sistema escolhe, mas a
+  // pessoa vê a escolha acontecendo em vez de receber um emoji do nada.
+  const icone = useMemo(() => iconePara(titulo, descricao), [titulo, descricao]);
+
+  const faltam = useMemo(() => {
+    if (!data) return null;
+    const alvo = new Date(`${data}T${hora || "09:00"}`).getTime();
+    if (Number.isNaN(alvo)) return null;
+    return Math.max(0, Math.ceil((alvo - Date.now()) / DIA));
+  }, [data, hora]);
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -212,10 +246,9 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           titulo: titulo.trim(),
-          emoji,
           descricao: descricao.trim() || undefined,
           alvo: alvo.toISOString(),
-          avisos,
+          avisoDiario: diario,
         }),
       });
       if (!r.ok) {
@@ -234,32 +267,22 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
     <form onSubmit={enviar} className="cartao surge mb-5 space-y-4 p-5">
       <h2 className="text-[16px] font-semibold">Nova contagem</h2>
 
-      <Campo
-        rotulo="O que é?"
-        value={titulo}
-        onChange={(e) => setTitulo(e.target.value)}
-        placeholder="Viagem para a praia"
-        maxLength={80}
-        required
-      />
-
-      <div>
-        <span className="mb-2 block text-[13px] font-medium text-suave">Ícone</span>
-        <div className="flex flex-wrap gap-1.5">
-          {EMOJIS.map((e) => (
-            <button
-              key={e}
-              type="button"
-              onClick={() => setEmoji(e)}
-              className={`flex size-10 items-center justify-center rounded-xl border text-lg transition-colors ${
-                emoji === e
-                  ? "border-brand/50 bg-brand/15"
-                  : "border-white/8 bg-white/[0.03]"
-              }`}
-            >
-              {e}
-            </button>
-          ))}
+      <div className="flex items-end gap-3">
+        <div
+          className="flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-borda bg-white/[0.03] text-2xl"
+          title="Escolhido pelo título"
+        >
+          {icone}
+        </div>
+        <div className="min-w-0 flex-1">
+          <Campo
+            rotulo="O que é?"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            placeholder="Viagem para a praia"
+            maxLength={80}
+            required
+          />
         </div>
       </div>
 
@@ -280,6 +303,13 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
         />
       </div>
 
+      {faltam !== null && faltam > 0 && (
+        <p className="surge text-[13px] text-brand">
+          Faltam <span className="numeros font-semibold">{faltam}</span>{" "}
+          {faltam === 1 ? "dia" : "dias"}.
+        </p>
+      )}
+
       <Area
         rotulo="Detalhe (opcional)"
         value={descricao}
@@ -289,36 +319,18 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
         placeholder="Voo 14h, não esquecer o passaporte"
       />
 
-      <div>
-        <span className="mb-2 block text-[13px] font-medium text-suave">Me avise em</span>
-        <div className="flex flex-wrap gap-2">
-          {OPCOES_AVISO.map((d) => {
-            const ativo = avisos.includes(d);
-            return (
-              <button
-                key={d}
-                type="button"
-                onClick={() =>
-                  setAvisos((atual) =>
-                    ativo ? atual.filter((x) => x !== d) : [...atual, d].sort((a, b) => b - a)
-                  )
-                }
-                className={`rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
-                  ativo
-                    ? "border-brand/50 bg-brand/15 text-brand-forte"
-                    : "border-white/10 bg-white/[0.03] text-apagado"
-                }`}
-              >
-                {d === 0 ? "No dia" : `${d} dias antes`}
-              </button>
-            );
-          })}
-        </div>
+      <div className="border-t border-borda pt-1">
+        <Chave
+          ligado={diario}
+          aoMudar={setDiario}
+          rotulo="Me avise todo dia"
+          descricao='Uma notificação por dia: "faltam 66 dias", "faltam 65 dias"...'
+        />
       </div>
 
       <Aviso>{erro}</Aviso>
 
-      <Botao type="submit" carregando={ocupado} className="w-full !bg-brand !text-brand-ink !shadow-brand/20">
+      <Botao type="submit" carregando={ocupado} className="w-full">
         Marcar no calendário
       </Botao>
     </form>

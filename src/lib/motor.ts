@@ -170,7 +170,10 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
     }
 
     const faltam = diasDeCalendario(tz, agora, c.alvo);
-    if (!c.avisos.includes(faltam)) continue;
+
+    // Com aviso diário ligado, sai um por dia com a contagem — e a lista de
+    // marcos é ignorada, senão os dois cairiam juntos no mesmo dia.
+    if (!c.avisoDiario && !c.avisos.includes(faltam)) continue;
     if (!dentroDaJanela(hora, u.horaResumo)) continue;
 
     const corpo =
@@ -183,7 +186,9 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
     const ok = await despachar(userId, {
       tipo: "contagem",
       refId: c.id,
-      chave: `d-${faltam}`,
+      // Diário usa a data como chave; por marco, o número de dias. Assim os
+      // dois modos convivem sem colidir no índice de deduplicação.
+      chave: c.avisoDiario ? `diario-${hoje}` : `d-${faltam}`,
       ciclo: c.alvo,
       payload: {
         titulo: `${c.emoji} ${c.titulo}`,
@@ -194,7 +199,7 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
     });
     if (ok) {
       enviadas++;
-      detalhes.push(`contagem ${c.titulo} → d-${faltam}`);
+      detalhes.push(`contagem ${c.titulo} → ${c.avisoDiario ? "diário" : `d-${faltam}`} (faltam ${faltam})`);
     }
   }
 

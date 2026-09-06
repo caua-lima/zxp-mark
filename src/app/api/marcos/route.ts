@@ -9,7 +9,6 @@ export const runtime = "nodejs";
 const Novo = z.object({
   titulo: z.string().trim().min(2, "Dê um nome ao marco").max(80),
   preset: z.string().default("personalizado"),
-  emoji: z.string().max(8).optional(),
   porque: z.string().max(2000).optional(),
   /** ISO. Se ausente, começa agora. */
   cicloInicio: z.string().datetime().optional(),
@@ -65,7 +64,9 @@ export async function POST(req: Request) {
       userId: uid,
       titulo: dados.data.titulo,
       preset: presetId,
-      emoji: dados.data.emoji || p.emoji,
+      // O ícone segue o tipo do hábito, decidido pelo servidor — o cliente
+      // não manda emoji, então não tem como chegar corrompido ou fora do padrão.
+      emoji: p.emoji,
       porque: dados.data.porque?.trim() || null,
       inicio,
       cicloInicio: inicio,

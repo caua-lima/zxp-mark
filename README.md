@@ -8,13 +8,13 @@ Identidade visual ZXP Solutions. O kit oficial está em `public/marca` e é a fo
 
 ## O que ele faz
 
-**Marcos** — você escolhe o que quer largar (fumar, vape, álcool, açúcar, pornografia, redes, apostas, cafeína ou um hábito seu) e o cronômetro começa. Cada hábito tem uma linha do tempo própria, baseada no que de fato acontece no corpo: 20 minutos, 1h, 6h, 8h, 12h, 24h, 72h, 1 semana, 1 mês… até 15 anos. A cada marco atingido chega uma notificação com o que está acontecendo com você *naquele momento*.
+**Marcos** — você **escreve** o que quer largar, com as suas palavras, e o sistema reconhece o hábito para carregar a linha do tempo certa ("quero largar o cigarro" → 27 marcos de cessação de nicotina). Não reconheceu, usa a linha geral. O cronômetro começa na hora. Cada hábito tem uma linha do tempo própria, baseada no que de fato acontece no corpo: 20 minutos, 1h, 6h, 8h, 12h, 24h, 72h, 1 semana, 1 mês… até 15 anos. A cada marco atingido chega uma notificação com o que está acontecendo com você *naquele momento*.
 
 > 🚭 **6 HORAS SEM FUMAR**
 > Seu corpo já está se livrando da nicotina de verdade. Quando você acordar amanhã, ele vai pedir — é o pico matinal. Segure firme: passa em minutos e você volta a mandar.
 > *R$ 3,00 economizados · 5 cigarros a menos*
 
-**Contagens** — marque uma data (viagem dia 13 de novembro) e ela vira contagem regressiva ao vivo, com aviso em D-30, D-14, D-7, D-3, D-1 e no dia. Os marcos de aviso são configuráveis por contagem.
+**Contagens** — marque uma data e ela vira contagem regressiva ao vivo. O ícone é escolhido pelo sistema a partir do título ("Viagem para a praia" vira ✈️, "Prova do ENEM" vira 📝) e por padrão chega **um aviso por dia**: faltam 66 dias, faltam 65 dias, e assim por diante. Dá para trocar por avisos só em D-30, D-14, D-7, D-3, D-1 e no dia.
 
 **Ajuda** — chat que recebe, a cada mensagem, o seu retrato exato: tempo da sequência atual, próximo marco e quanto falta, dinheiro economizado, histórico de recaídas e gatilhos, o "porquê" que você escreveu, e as contagens em aberto. Pergunte *"por que não devo fumar agora?"* e a resposta usa os seus números, não conselho genérico. **Funciona de graça, sem nenhuma API** — veja [Chat: quanto custa](#chat-quanto-custa-nada).
 
@@ -224,6 +224,7 @@ src/app/api/              rotas
 
 - **Textos das notificações e marcos de cada hábito** → `src/lib/habitos.ts`. Cada entrada tem `chave`, `ms`, `titulo` e `corpo`. Adicionar um marco novo é adicionar um objeto ao array.
 - **Respostas do motor gratuito** → `src/lib/ia/local.ts`. As ações de 5 minutos estão em `ACOES_MADRUGADA`/`MANHA`/`TARDE`/`NOITE`.
+- **Reconhecimento de hábito e ícone** → `src/lib/deteccao.ts`. Adicionar um termo é acrescentar uma palavra numa lista.
 - **Personalidade do chat com LLM** → a constante `INSTRUCOES` em `src/lib/ia/instrucoes.ts`.
 - **Quando cada aviso dispara** → `src/lib/motor.ts`.
 - **Cores e tipografia** → os tokens em `src/app/globals.css`, tirados dos SVGs de `public/marca`.

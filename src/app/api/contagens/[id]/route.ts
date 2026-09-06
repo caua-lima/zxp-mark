@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { usuarioId } from "@/lib/auth";
+import { iconePara } from "@/lib/deteccao";
 
 export const runtime = "nodejs";
 
 const Patch = z.object({
   titulo: z.string().trim().min(2).max(80).optional(),
-  emoji: z.string().max(8).optional(),
   descricao: z.string().max(500).nullable().optional(),
   alvo: z.string().datetime({ offset: true }).optional(),
+  avisoDiario: z.boolean().optional(),
   avisos: z.array(z.number().int().min(0).max(365)).max(12).optional(),
   notificar: z.boolean().optional(),
 });
@@ -27,6 +28,15 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   const { alvo, avisos, ...resto } = dados.data;
   const patch: Record<string, unknown> = { ...resto };
+
+  // Título ou descrição mudou: o ícone é derivado deles, então recalcula.
+  if (dados.data.titulo !== undefined || dados.data.descricao !== undefined) {
+    patch.emoji = iconePara(
+      dados.data.titulo ?? atual.titulo,
+      dados.data.descricao !== undefined ? dados.data.descricao : atual.descricao
+    );
+  }
+
   if (alvo) {
     patch.alvo = new Date(alvo);
     // Data nova = ciclo novo: libera os avisos para serem enviados de novo.
