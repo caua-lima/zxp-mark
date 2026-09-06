@@ -53,7 +53,7 @@ export async function GET() {
   if (!u) return NextResponse.json({ erro: "Usuário não encontrado" }, { status: 404 });
 
   const dados = {
-    app: "Marco",
+    app: "ZXP Mark",
     exportadoEm: new Date().toISOString(),
     perfil: { nome: u.nome, email: u.email, timezone: u.timezone, criadoEm: u.criadoEm },
     marcos: u.marcos.map((m) => ({

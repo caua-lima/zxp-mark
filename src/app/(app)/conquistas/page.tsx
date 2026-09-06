@@ -10,7 +10,7 @@ import {
 } from "@/components/Conquistas";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Conquistas — Marco" };
+export const metadata = { title: "Conquistas — ZXP Mark" };
 
 export default async function PaginaConquistas() {
   const uid = (await usuarioId())!;

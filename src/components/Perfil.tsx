@@ -148,7 +148,7 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
         <MarcaZ tamanho={22} cor="#7a766c" />
         <p className="assinatura text-[9px] text-fantasma">ZXP Solutions</p>
         <p className="mt-2 text-center text-[12px] leading-relaxed text-fantasma">
-          O Marco não substitui médico, psicólogo ou psiquiatra.
+          O ZXP Mark não substitui médico, psicólogo ou psiquiatra.
           <br />
           Se precisar de ajuda agora: CVV — 188, gratuito, 24 horas.
         </p>

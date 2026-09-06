@@ -1,6 +1,6 @@
-# Marco
+# ZXP Mark
 
-App de marcos e contagens regressivas para iPhone. PWA instalável, com notificação push nativa do iOS, contas individuais e um chat que sabe exatamente há quanto tempo você está firme.
+App de marcos e contagens regressivas para iPhone. **ZXP Mark** — o nome do produto; "marco" no app é sempre a conquista, nunca o app. PWA instalável, com notificação push nativa do iOS, contas individuais e um chat que sabe exatamente há quanto tempo você está firme.
 
 Identidade visual ZXP Solutions. O kit oficial está em `public/marca` e é a fonte de tudo: **onyx `#10100E`**, **dourado `#F4B942`**, **marfim `#F6F3E8`** e tipografia **Sora**. Os ícones do PWA são gerados do PNG oficial, não redesenhados.
 
@@ -235,4 +235,4 @@ Sem `--senha`, ele gera uma temporária forte e grava em `ACESSO-TEMPORARIO.txt`
 
 ## Aviso
 
-O Marco não substitui médico, psicólogo ou psiquiatra. Abstinência grave de álcool pode ser perigosa e exige avaliação médica. Se precisar de ajuda agora: **CVV — 188**, gratuito, 24 horas.
+O ZXP Mark não substitui médico, psicólogo ou psiquiatra. Abstinência grave de álcool pode ser perigosa e exige avaliação médica. Se precisar de ajuda agora: **CVV — 188**, gratuito, 24 horas.

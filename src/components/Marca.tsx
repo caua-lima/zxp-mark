@@ -59,15 +59,16 @@ export function MarcaIcone({ tamanho = 44 }: { tamanho?: number }) {
  */
 export function Marca({ tamanho = 54 }: { tamanho?: number }) {
   return (
-    // Mesma proporção do logo-horizontal oficial: Z inteiro, sem o quadrado
-    // (o quadrado só existe no ícone do app), e o wordmark à direita.
+    // Mesma estrutura do logo-horizontal oficial: Z inteiro (o quadrado só
+    // existe no ícone do app), "ZXP" em dourado 800 e a segunda linha em
+    // marfim espaçado — onde no logo da empresa se lê SOLUTIONS.
     <div className="flex items-center gap-3">
       <MarcaZ tamanho={tamanho} />
       <div>
         <p className="font-display text-[26px] leading-none font-extrabold tracking-tight text-brand">
-          MARCO
+          ZXP
         </p>
-        <p className="assinatura mt-1.5 text-[9.5px] text-tinta/75">ZXP Solutions</p>
+        <p className="assinatura mt-1.5 text-[11px] text-tinta/85">Mark</p>
       </div>
     </div>
   );

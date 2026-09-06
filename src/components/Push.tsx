@@ -167,7 +167,7 @@ const PASSOS_IOS = [
   "Abra este site no Safari (não funciona no Chrome do iPhone).",
   "Toque no botão Compartilhar — o quadrado com a seta para cima.",
   "Role e toque em “Adicionar à Tela de Início”.",
-  "Abra o Marco pelo ícone novo e volte aqui para ativar.",
+  "Abra o ZXP Mark pelo ícone novo e volte aqui para ativar.",
 ];
 
 /** Cartão completo, usado na aba Perfil. */
@@ -207,7 +207,7 @@ export function CartaoNotificacoes() {
       {estado === "bloqueado" && (
         <p className="mt-4 rounded-2xl border border-perigo/20 bg-perigo/[0.08] p-4 text-[13.5px] text-perigo">
           As notificações estão bloqueadas para este site. No iPhone: Ajustes → Notificações →
-          Marco → permitir. Depois volte aqui.
+          ZXP Mark → permitir. Depois volte aqui.
         </p>
       )}
 

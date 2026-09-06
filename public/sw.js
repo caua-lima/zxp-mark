@@ -1,4 +1,4 @@
-/* Service worker do Marco: push + funcionamento offline. */
+/* Service worker do ZXP Mark: push + funcionamento offline. */
 
 const VERSAO = "marco-v2";
 const ESTATICO = `${VERSAO}-estatico`;
@@ -97,10 +97,10 @@ self.addEventListener("push", (evento) => {
   try {
     dados = evento.data ? evento.data.json() : {};
   } catch {
-    dados = { titulo: "Marco", corpo: evento.data ? evento.data.text() : "" };
+    dados = { titulo: "ZXP Mark", corpo: evento.data ? evento.data.text() : "" };
   }
 
-  const titulo = dados.titulo || "Marco";
+  const titulo = dados.titulo || "ZXP Mark";
   const opcoes = {
     body: dados.corpo || "",
     icon: "/icons/icone-192.png",

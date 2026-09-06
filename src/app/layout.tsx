@@ -18,14 +18,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Marco — cada hora conta",
+  title: "ZXP Mark — cada hora conta",
   description:
     "Conte cada hora que você segurou firme, marque as datas que importam e tenha alguém do seu lado quando a vontade bater. Um app ZXP Solutions.",
-  applicationName: "Marco",
+  applicationName: "ZXP Mark",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "Marco",
+    title: "ZXP Mark",
     statusBarStyle: "black-translucent",
   },
   icons: {

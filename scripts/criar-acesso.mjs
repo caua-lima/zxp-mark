@@ -84,7 +84,7 @@ try {
     writeFileSync(
       arquivo,
       [
-        "ACESSO TEMPORARIO — Marco",
+        "ACESSO TEMPORARIO — ZXP Mark",
         "",
         `E-mail: ${u.email}`,
         `Senha : ${senha}`,

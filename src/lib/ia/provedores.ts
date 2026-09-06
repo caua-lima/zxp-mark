@@ -253,7 +253,7 @@ export function transmitir(
         turnos,
         {
           "http-referer": process.env.APP_URL || "https://zxp-mark.vercel.app",
-          "x-title": "Marco",
+          "x-title": "ZXP Mark",
         }
       );
     case "gemini":

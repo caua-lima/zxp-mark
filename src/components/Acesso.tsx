@@ -22,7 +22,7 @@ export function Acesso({ eu }: { eu: Eu }) {
   return (
     <main className="space-y-3.5">
       <header className="mb-5">
-        <p className="text-[13px] text-apagado">Quem entra no Marco</p>
+        <p className="text-[13px] text-apagado">Quem entra no ZXP Mark</p>
         <h1 className="text-[26px] font-semibold tracking-tight">Acesso</h1>
       </header>
 

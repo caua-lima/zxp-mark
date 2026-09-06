@@ -4,7 +4,7 @@ import { usuarioId } from "@/lib/auth";
 import { Acesso } from "@/components/Acesso";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Acesso — Marco" };
+export const metadata = { title: "Acesso — ZXP Mark" };
 
 export default async function PaginaAcesso() {
   const uid = await usuarioId();
