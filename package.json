@@ -12,7 +12,8 @@
     "db:studio": "node scripts/prisma-com-env.mjs studio",
     "vapid": "node scripts/gerar-vapid.mjs",
     "icons": "node scripts/gerar-icones.mjs",
-    "acesso": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/criar-acesso.mjs"
+    "acesso": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/criar-acesso.mjs",
+    "vercel-env": "node scripts/vercel-env.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

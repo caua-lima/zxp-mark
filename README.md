@@ -85,7 +85,13 @@ npm run dev
 
 ### 5. Deploy
 
-Importe o repositório na Vercel e cole **todas** as variáveis do `.env.local` em Settings → Environment Variables. O build já roda `prisma generate`.
+Gere o bloco pronto e cole de uma vez:
+
+```bash
+npm run vercel-env
+```
+
+Isso escreve `VERCEL-ENV.txt` (fora do git) já sem o que só existe na máquina local. Na Vercel: Settings → Environment Variables → cole o arquivo inteiro → **Deployments → Redeploy**. O build já roda `prisma generate`.
 
 ### 6. Ligar o cron ⚠️ *o passo que faz as notificações existirem*
 
