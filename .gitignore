@@ -18,3 +18,4 @@ next-env.d.ts
 # acesso temporario gerado por scripts/criar-acesso.mjs
 ACESSO-TEMPORARIO.txt
 VERCEL-ENV.txt
+CORRIGIR-DATABASE-URL.txt
