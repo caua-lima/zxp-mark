@@ -1,6 +1,7 @@
 /**
- * Gera os ícones do PWA a partir dos arquivos oficiais da marca ZXP Solutions
- * em public/marca — nada é redesenhado aqui.
+ * Gera os ícones do PWA a partir do Z oficial da ZXP Solutions em
+ * public/marca — a geometria nunca é redesenhada, só recolorida para a cor
+ * de assinatura deste app.
  *
  * Decodifica o PNG de 1024, reamostra por média de área (nítido em qualquer
  * tamanho) e reencoda. Só zlib do Node, sem dependência de imagem.
@@ -15,8 +16,11 @@ const marca = join(raiz, "public", "marca");
 const saida = join(raiz, "public", "icons");
 mkdirSync(saida, { recursive: true });
 
-/** Onyx da marca — fundo dos ícones opacos. */
+/** DNA da família ZXP Solutions: onyx de fundo em todos os apps. */
 const ONYX = [0x10, 0x10, 0x0e];
+
+/** Cor de assinatura do ZXP Mark (o dourado pertence ao ZXP Market). */
+const MAGENTA = [0xec, 0x48, 0x99];
 
 /* ------------------------------- PNG: CRC -------------------------------- */
 
@@ -218,23 +222,45 @@ function centralizar(img, tela, cor) {
   return { largura: tela, altura: tela, px };
 }
 
+/** Troca a cor mantendo o canal alfa — a forma e o antialiasing sobrevivem. */
+function recolorir(img, cor) {
+  const { largura, altura, px } = img;
+  const saidaPx = Buffer.alloc(largura * altura * 4);
+  for (let i = 0; i < largura * altura; i++) {
+    const d = i * 4;
+    saidaPx[d] = cor[0];
+    saidaPx[d + 1] = cor[1];
+    saidaPx[d + 2] = cor[2];
+    saidaPx[d + 3] = px[d + 3];
+  }
+  return { largura, altura, px: saidaPx };
+}
+
 /* --------------------------------- gerar --------------------------------- */
 
-const appIcon = lerPng(join(marca, "app-icon-onyx-1024.png"));
-const zSozinho = lerPng(join(marca, "icone-dourado-1024.png"));
+// A fonte é o Z oficial em PNG transparente. Ele vem na cor do ZXP Market,
+// mas só o canal alfa é aproveitado: a geometria e o antialiasing são os da
+// especificação, e a cor de assinatura deste app entra por cima.
+const zMagenta = recolorir(lerPng(join(marca, "icone-dourado-1024.png")), MAGENTA);
 
-const arquivos = [];
-
-for (const t of [192, 512]) {
-  arquivos.push([`icone-${t}.png`, sobreFundo(reduzir(appIcon, t), ONYX)]);
+/** Z centralizado sobre onyx, ocupando `proporcao` do quadro. */
+function icone(tamanho, proporcao) {
+  return centralizar(reduzir(zMagenta, Math.round(tamanho * proporcao)), tamanho, ONYX);
 }
-arquivos.push(["apple-touch-icon.png", sobreFundo(reduzir(appIcon, 180), ONYX)]);
 
-// Maskable: o Android recorta as bordas, então o Z fica em ~60% do quadro.
-arquivos.push(["mascara-512.png", centralizar(reduzir(zSozinho, 308), 512, ONYX)]);
-
-// Badge da notificação: o iOS/Android renderiza como silhueta.
-arquivos.push(["badge.png", sobreFundo(reduzir(zSozinho, 96), ONYX)]);
+const arquivos = [
+  // Ícone do app: mesma proporção do app-icon oficial (0,76 do quadro).
+  ["icone-192.png", icone(192, 0.76)],
+  ["icone-512.png", icone(512, 0.76)],
+  ["apple-touch-icon.png", icone(180, 0.76)],
+  // Maskable: o Android recorta as bordas, então o Z recua para a zona segura.
+  ["mascara-512.png", icone(512, 0.6)],
+  // Badge da notificação: renderizado pequeno, então o Z ocupa mais.
+  ["badge.png", icone(96, 0.8)],
+  // Favicon do navegador.
+  ["favicon-32.png", icone(32, 0.82)],
+  ["favicon-16.png", icone(16, 0.86)],
+];
 
 for (const [nome, img] of arquivos) {
   const dados = escreverPng(img.largura, img.altura, img.px);
@@ -242,4 +268,4 @@ for (const [nome, img] of arquivos) {
   console.log(`  ${nome.padEnd(22)} ${img.largura}x${img.altura}  ${(dados.length / 1024).toFixed(1)} KB`);
 }
 
-console.log("\nÍcones gerados de public/marca (ZXP Solutions).");
+console.log("\nÍcones do ZXP Mark gerados: Z da ZXP Solutions em magenta sobre onyx.");

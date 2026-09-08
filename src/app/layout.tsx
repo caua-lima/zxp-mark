@@ -32,13 +32,14 @@ export const metadata: Metadata = {
     title: "ZXP Mark",
     statusBarStyle: "black-translucent",
   },
+  // Favicons magenta gerados por `npm run icons`. Os de public/marca estão
+  // na cor do ZXP Market e servem só como referência da família.
   icons: {
     icon: [
-      { url: "/marca/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/marca/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
       { url: "/icons/icone-192.png", sizes: "192x192", type: "image/png" },
     ],
-    shortcut: "/marca/favicon.ico",
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
   formatDetection: { telephone: false },
