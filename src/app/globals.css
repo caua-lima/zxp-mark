@@ -1,30 +1,39 @@
 @import "tailwindcss";
 
-/* Identidade ZXP Solutions.
-   Valores tirados dos SVGs oficiais em public/marca:
-   onyx #10100E · dourado #F4B942 · marfim #F6F3E8 · tipografia Sora. */
+/* Identidade ZXP Mark — parte da família ZXP Solutions.
+ *
+ * DNA comum aos 4 apps (Market, Tasks, Finance, Mark): onyx de fundo, marfim
+ * de texto, Sora nos títulos e o "Z" de traço. O que separa um app do outro é
+ * a COR DE ASSINATURA — aqui, magenta. O dourado #F4B942 pertence ao ZXP
+ * Market e não deve reaparecer neste projeto.
+ *
+ * Fonte única de verdade: nenhum componente escreve hexadecimal de marca.
+ */
 @theme {
   --font-sans:
     var(--fonte-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
   --font-display: var(--fonte-sora), var(--fonte-inter), system-ui, sans-serif;
 
-  /* Onyx e as superfícies que sobem a partir dele — todas mornas, sem azul. */
+  /* Onyx e as superfícies que sobem a partir dele — nunca preto puro. */
   --color-fundo: #10100e;
-  --color-superficie: #191917;
-  --color-elevado: #21211f;
+  --color-superficie: #1a1916;
+  --color-elevado: #242320;
   --color-alt: #1c1c1a;
   --color-borda: #2e2e2a;
   --color-borda-forte: #3d3d37;
 
-  /* Marfim e a escala de texto que desce dele. */
+  /* Marfim e a escala de texto que desce dele — nunca branco puro. */
   --color-tinta: #f6f3e8;
   --color-suave: #a8a49a;
   --color-apagado: #7a766c;
   --color-fantasma: #56534b;
 
-  --color-brand: #f4b942;
-  --color-brand-forte: #ffd98a;
+  /* Cor de assinatura do ZXP Mark. */
+  --color-brand: #ec4899;
+  /* hover e pressed: o magenta escurece, não clareia */
+  --color-brand-escuro: #c2377a;
+  /* onyx sobre magenta dá 5.4:1 e passa em AA; marfim daria 3.2:1 e falharia */
   --color-brand-ink: #10100e;
 
   --color-sucesso: #35c46a;
@@ -40,7 +49,7 @@
   color-scheme: dark;
   --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
   --sombra-md: 0 12px 30px rgba(0, 0, 0, 0.55);
-  --anel-foco: 0 0 0 3px rgba(244, 185, 66, 0.35);
+  --anel-foco: 0 0 0 3px rgba(236, 72, 153, 0.35);
 }
 
 html,
@@ -53,10 +62,10 @@ body {
 }
 
 body {
-  /* brilho dourado difuso no topo — profundidade sem pesar */
+  /* brilho magenta difuso no topo — profundidade sem pesar */
   background-image:
-    radial-gradient(60rem 32rem at 50% -12rem, rgba(244, 185, 66, 0.12), transparent 70%),
-    radial-gradient(40rem 24rem at 90% 4rem, rgba(244, 185, 66, 0.045), transparent 70%);
+    radial-gradient(60rem 32rem at 50% -12rem, rgba(236, 72, 153, 0.12), transparent 70%),
+    radial-gradient(40rem 24rem at 90% 4rem, rgba(236, 72, 153, 0.045), transparent 70%);
   background-attachment: fixed;
   min-height: 100dvh;
 }

@@ -36,7 +36,7 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
         </div>
         <button
           onClick={() => setCriando((v) => !v)}
-          className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-forte"
+          className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-escuro"
           aria-label={criando ? "Fechar" : "Nova contagem"}
         >
           {criando ? "×" : "+"}
@@ -151,7 +151,7 @@ function CartaoContagem({
       {alvo > agora && (
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/8">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-brand to-brand-forte"
+            className="h-full rounded-full bg-gradient-to-r from-brand to-brand-escuro"
             style={{ width: `${Math.max(1.5, progresso * 100)}%` }}
           />
         </div>

@@ -17,7 +17,7 @@ export function Botao({
 }: BotaoProps) {
   const estilos = {
     cheio:
-      "bg-brand text-brand-ink hover:bg-brand-forte active:bg-brand-forte font-semibold shadow-lg shadow-brand/20",
+      "bg-brand text-brand-ink hover:bg-brand-escuro active:bg-brand-escuro font-semibold shadow-lg shadow-brand/20",
     vazio:
       "bg-white/5 text-tinta border border-white/12 hover:bg-white/10 active:bg-white/15",
     perigo:

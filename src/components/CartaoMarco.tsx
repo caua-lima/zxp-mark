@@ -62,7 +62,7 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-forte transition-[width] duration-1000"
+              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-escuro transition-[width] duration-1000"
               style={{ width: `${Math.max(2, progresso * 100)}%` }}
             />
           </div>

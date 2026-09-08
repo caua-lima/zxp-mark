@@ -145,7 +145,7 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
       </Botao>
 
       <div className="flex flex-col items-center gap-2 pt-6 pb-2">
-        <MarcaZ tamanho={22} cor="#7a766c" />
+        <MarcaZ tamanho={22} cor="var(--color-apagado)" />
         <p className="assinatura text-[9px] text-fantasma">ZXP Solutions</p>
         <p className="mt-2 text-center text-[12px] leading-relaxed text-fantasma">
           O ZXP Mark não substitui médico, psicólogo ou psiquiatra.
@@ -201,7 +201,7 @@ function SeletorHora({
         className="numeros rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-tinta outline-none"
       >
         {Array.from({ length: 24 }, (_, h) => (
-          <option key={h} value={h} className="bg-[#21211f]">
+          <option key={h} value={h} className="bg-elevado">
             {String(h).padStart(2, "0")}:00
           </option>
         ))}

@@ -1,12 +1,32 @@
 /**
- * Marca do app. O Z é o traçado oficial da ZXP Solutions, copiado do
- * public/marca/icone-transparente-dourado.svg — mesmos pontos, mesma
- * espessura, mesmas junções em esquadria.
+ * Marca do ZXP Mark.
+ *
+ * O "Z" é o símbolo compartilhado pelos 4 apps da ZXP Solutions: traço
+ * (stroke), nunca preenchimento, com a geometria exata da especificação —
+ * pontos `30,47 170,47 30,153 170,153`, espessura 34, junção em esquadria,
+ * ponta reta. O que muda de um app para outro é só a cor de assinatura, que
+ * aqui vem de `--color-brand` (magenta). Nenhum hexadecimal escrito à mão.
  */
 
+const PONTOS = "30,47 170,47 30,153 170,153";
+
+function Traco({ cor }: { cor: string }) {
+  return (
+    <polyline
+      points={PONTOS}
+      fill="none"
+      stroke={cor}
+      strokeWidth="34"
+      strokeLinejoin="miter"
+      strokeLinecap="butt"
+    />
+  );
+}
+
+/** Só o símbolo, sem contêiner. */
 export function MarcaZ({
   tamanho = 44,
-  cor = "#F4B942",
+  cor = "var(--color-brand)",
   className,
 }: {
   tamanho?: number;
@@ -20,48 +40,30 @@ export function MarcaZ({
       viewBox="0 0 200 200"
       className={className}
       role="img"
-      aria-label="ZXP Solutions"
+      aria-label="ZXP Mark"
     >
-      <polyline
-        points="30,47 170,47 30,153 170,153"
-        fill="none"
-        stroke={cor}
-        strokeWidth="34"
-        strokeLinejoin="miter"
-        strokeLinecap="butt"
-      />
+      <Traco cor={cor} />
     </svg>
   );
 }
 
-/** Z dentro do quadrado onyx arredondado, como no ícone do app. */
+/** Símbolo dentro do contêiner onyx arredondado — a forma do ícone do app. */
 export function MarcaIcone({ tamanho = 44 }: { tamanho?: number }) {
   return (
-    <svg width={tamanho} height={tamanho} viewBox="0 0 200 200" role="img" aria-label="ZXP Solutions">
-      <rect width="200" height="200" rx="44" fill="#10100E" />
-      <g transform="translate(24,24) scale(0.76)">
-        <polyline
-          points="30,47 170,47 30,153 170,153"
-          fill="none"
-          stroke="#F4B942"
-          strokeWidth="34"
-          strokeLinejoin="miter"
-          strokeLinecap="butt"
-        />
-      </g>
+    <svg width={tamanho} height={tamanho} viewBox="0 0 200 200" role="img" aria-label="ZXP Mark">
+      <rect width="200" height="200" rx="44" fill="var(--color-fundo)" />
+      <Traco cor="var(--color-brand)" />
     </svg>
   );
 }
 
 /**
- * Lockup do produto: o Z da ZXP, o nome do app e a assinatura da empresa —
- * a mesma hierarquia do logo horizontal oficial.
+ * Lockup do produto, na estrutura do logo horizontal da família: símbolo,
+ * "ZXP" na cor de assinatura e a segunda linha em marfim espaçado — o mesmo
+ * lugar onde no logo da empresa se lê SOLUTIONS.
  */
 export function Marca({ tamanho = 54 }: { tamanho?: number }) {
   return (
-    // Mesma estrutura do logo-horizontal oficial: Z inteiro (o quadrado só
-    // existe no ícone do app), "ZXP" em dourado 800 e a segunda linha em
-    // marfim espaçado — onde no logo da empresa se lê SOLUTIONS.
     <div className="flex items-center gap-3">
       <MarcaZ tamanho={tamanho} />
       <div>

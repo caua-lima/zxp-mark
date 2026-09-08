@@ -213,7 +213,7 @@ export function Chat({ inicial, situacao }: { inicial: Msg[]; situacao: Situacao
       </div>
 
       {/* barra de escrita, colada acima da tab bar */}
-      <div className="base-barra sticky bottom-0 -mx-5 mt-4 border-t border-white/8 bg-[#10100e]/90 px-5 pt-3 backdrop-blur-xl">
+      <div className="base-barra sticky bottom-0 -mx-5 mt-4 border-t border-white/8 bg-fundo/90 px-5 pt-3 backdrop-blur-xl">
         <form
           onSubmit={(e) => {
             e.preventDefault();

@@ -188,7 +188,7 @@ export function CartaoNotificacoes() {
 
       {estado === "instalar-primeiro" && (
         <div className="mt-4 rounded-2xl border border-brand/20 bg-brand/[0.07] p-4">
-          <p className="text-[14px] font-medium text-brand-forte">
+          <p className="text-[14px] font-medium text-brand">
             No iPhone, notificações só funcionam com o app instalado.
           </p>
           <ol className="mt-3 space-y-2">
@@ -255,10 +255,10 @@ export function BannerNotificacoes() {
       >
         <span className="text-xl">📲</span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-medium text-brand-forte">
+          <span className="block text-[14px] font-medium text-brand">
             Instale na tela de início
           </span>
-          <span className="block text-[12.5px] text-brand-forte/60">
+          <span className="block text-[12.5px] text-brand/60">
             É o que libera as notificações no iPhone. Ver como →
           </span>
         </span>
@@ -269,7 +269,7 @@ export function BannerNotificacoes() {
   return (
     <div className="surge mb-4 flex items-center gap-3 rounded-2xl border border-brand/20 bg-brand/[0.07] px-4 py-3">
       <span className="text-xl">🔔</span>
-      <span className="min-w-0 flex-1 text-[13.5px] text-brand-forte">
+      <span className="min-w-0 flex-1 text-[13.5px] text-brand">
         Ative as notificações para receber cada marco.
       </span>
       <button

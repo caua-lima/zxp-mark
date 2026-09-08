@@ -27,7 +27,7 @@ export function Acesso({ eu }: { eu: Eu }) {
       </header>
 
       {eu.trocarSenha && (
-        <p className="surge rounded-2xl border border-brand/25 bg-brand/[0.08] px-4 py-3.5 text-[13.5px] leading-relaxed text-brand-forte">
+        <p className="surge rounded-2xl border border-brand/25 bg-brand/[0.08] px-4 py-3.5 text-[13.5px] leading-relaxed text-brand">
           Sua senha foi definida por um administrador. Troque agora por uma só sua.
         </p>
       )}
@@ -171,7 +171,7 @@ function Usuarios({ euId }: { euId: string }) {
               setCriando((v) => !v);
               setEditando(null);
             }}
-            className="rounded-xl bg-brand px-3.5 py-2 text-[13px] font-semibold text-brand-ink active:bg-brand-forte"
+            className="rounded-xl bg-brand px-3.5 py-2 text-[13px] font-semibold text-brand-ink active:bg-brand-escuro"
           >
             {criando ? "Cancelar" : "+ Novo"}
           </button>

@@ -46,6 +46,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // Meta tag do navegador não aceita var(): tem que ser literal.
+  // Espelha --color-fundo (onyx).
   themeColor: "#10100e",
   width: "device-width",
   initialScale: 1,

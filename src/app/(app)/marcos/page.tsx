@@ -36,7 +36,7 @@ export default async function PaginaMarcos() {
           </Link>
           <Link
             href="/marcos/novo"
-            className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-forte"
+            className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-escuro"
             aria-label="Novo marco"
           >
             +
@@ -96,7 +96,7 @@ function Vazio() {
       </p>
       <Link
         href="/marcos/novo"
-        className="mt-5 inline-flex rounded-2xl bg-brand px-5 py-3.5 text-[15px] font-semibold text-brand-ink active:bg-brand-forte"
+        className="mt-5 inline-flex rounded-2xl bg-brand px-5 py-3.5 text-[15px] font-semibold text-brand-ink active:bg-brand-escuro"
       >
         Criar meu primeiro marco
       </Link>

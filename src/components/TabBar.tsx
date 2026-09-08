@@ -15,7 +15,7 @@ export function TabBar() {
   const caminho = usePathname();
 
   return (
-    <nav className="area-baixo fixed inset-x-0 bottom-0 z-40 border-t border-white/8 bg-[#10100e]/85 backdrop-blur-xl">
+    <nav className="area-baixo fixed inset-x-0 bottom-0 z-40 border-t border-white/8 bg-fundo/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-lg">
         {ABAS.map((aba) => {
           const ativa = caminho === aba.href || caminho.startsWith(`${aba.href}/`);

@@ -101,7 +101,7 @@ export function FormAuth({
           {criando ? "Já tem conta? " : "Ainda não tem conta? "}
           <Link
             href={criando ? "/entrar" : "/criar-conta"}
-            className="font-medium text-brand hover:text-brand-forte"
+            className="font-medium text-brand hover:opacity-80"
           >
             {criando ? "Entrar" : "Criar agora"}
           </Link>

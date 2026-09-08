@@ -77,7 +77,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/8">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-brand to-brand-forte transition-[width] duration-1000"
+                className="h-full rounded-full bg-gradient-to-r from-brand to-brand-escuro transition-[width] duration-1000"
                 style={{ width: `${Math.max(2, progresso * 100)}%` }}
               />
             </div>
@@ -131,7 +131,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
           <p className="text-[12px] font-medium tracking-wide text-brand/70 uppercase">
             Seu porquê
           </p>
-          <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-line text-brand-forte">
+          <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-line text-brand">
             {marco.porque}
           </p>
         </section>
@@ -266,13 +266,13 @@ function Anel({ progresso }: { progresso: number }) {
       className="pointer-events-none absolute inset-0 m-auto size-[240px] opacity-30"
       aria-hidden
     >
-      <circle cx="50" cy="50" r={r} fill="none" stroke="#3d3d37" strokeWidth="1.5" />
+      <circle cx="50" cy="50" r={r} fill="none" stroke="var(--color-borda-forte)" strokeWidth="1.5" />
       <circle
         cx="50"
         cy="50"
         r={r}
         fill="none"
-        stroke="#f4b942"
+        stroke="var(--color-brand)"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeDasharray={`${c * progresso} ${c}`}
@@ -362,7 +362,7 @@ function PainelRecaida({
             onClick={() => setGatilho(gatilho === g ? "" : g)}
             className={`rounded-full border px-3 py-1.5 text-[13px] transition-colors ${
               gatilho === g
-                ? "border-brand/50 bg-brand/15 text-brand-forte"
+                ? "border-brand/50 bg-brand/15 text-brand"
                 : "border-white/10 bg-white/[0.03] text-suave"
             }`}
           >
