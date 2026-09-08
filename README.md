@@ -2,7 +2,7 @@
 
 App de marcos e contagens regressivas para iPhone. **ZXP Mark** — o nome do produto; "marco" no app é sempre a conquista, nunca o app. PWA instalável, com notificação push nativa do iOS, contas individuais e um chat que sabe exatamente há quanto tempo você está firme.
 
-Identidade visual ZXP Solutions. O kit oficial está em `public/marca` e é a fonte de tudo: **onyx `#10100E`**, **dourado `#F4B942`**, **marfim `#F6F3E8`** e tipografia **Sora**. Os ícones do PWA são gerados do PNG oficial, não redesenhados.
+Parte da família **ZXP Solutions**. DNA comum: onyx `#10100E`, marfim `#F6F3E8` e tipografia Sora. Cor de assinatura deste app: **magenta `#EC4899`** — veja [Identidade visual](#identidade-visual--não-improvise).
 
 ---
 
@@ -45,28 +45,41 @@ Sem dependência de serviço externo de auth ou de push.
 
 ## Identidade visual — não improvise
 
-Tudo sai de `public/marca`, o kit oficial da ZXP Solutions. As cores foram lidas dos próprios SVGs, não estimadas.
+O ZXP Mark é um dos 4 apps da **ZXP Solutions** (Market, Tasks, Finance, Mark). Todos compartilham o mesmo DNA visual; o que separa um do outro é **uma cor de assinatura**, como Gmail/Calendar/Drive fazem no Workspace.
 
-| Token | Valor | Onde |
+### DNA da família (não muda)
+
+| | |
+|---|---|
+| Fundo | onyx `#10100E` — **nunca preto puro** |
+| Texto | marfim `#F6F3E8` — **nunca branco puro** |
+| Tipografia | Sora (700-800) nos títulos; Inter (400-600) no corpo |
+| Símbolo | o "Z" de **traço**, nunca preenchimento |
+
+O Z tem geometria fixa: pontos `30,47 170,47 30,153 170,153`, espessura 34, junção em esquadria, ponta reta. Está em [Marca.tsx](src/components/Marca.tsx) como `MarcaZ`, `MarcaIcone` e `Marca`.
+
+### Cor de assinatura deste app: magenta
+
+| Token | Valor | Uso |
 |---|---|---|
-| `--color-fundo` | `#10100E` onyx | fundo de tudo |
-| `--color-brand` | `#F4B942` dourado | acento, botões, o Z |
-| `--color-tinta` | `#F6F3E8` marfim | texto — **nunca branco puro** |
-| `--color-superficie` | `#191917` | cartões |
-| `--color-borda` | `#2E2E2A` | divisórias |
+| `--color-brand` | `#EC4899` | ações primárias, estado ativo, foco, o Z |
+| `--color-brand-escuro` | `#C2377A` | hover e pressed — o magenta **escurece**, não clareia |
+| `--color-brand-ink` | `#10100E` | texto sobre magenta |
 
-Escala de texto que desce do marfim: `tinta` → `suave` `#A8A49A` → `apagado` `#7A766C` → `fantasma` `#56534B`. Nenhum cinza azulado.
+Sobre o `brand-ink`: onyx sobre magenta dá **5,4:1** e passa em AA; marfim daria 3,2:1 e falharia. Por isso botão magenta leva texto onyx, não marfim.
 
-**Tipografia:** Sora (a do logo) nos títulos, na marca e nos números do cronômetro; Inter no texto corrido, onde Sora pesa nos tamanhos pequenos.
+> ⚠️ **O dourado `#F4B942` pertence ao ZXP Market.** Não deve reaparecer aqui. Os arquivos em `public/marca` estão na cor dele e servem só como referência da família e fonte da geometria do Z — `npm run icons` recolore para magenta preservando o canal alfa, então a forma nunca é redesenhada.
 
-**O Z** é o traçado oficial — pontos `30,47 170,47 30,153 170,153`, espessura 34, junção em esquadria. Está em `src/components/Marca.tsx` em três formas: `MarcaZ` (símbolo), `MarcaIcone` (Z no quadrado onyx) e `Marca` (lockup ZXP / Mark).
+### Regras
 
-**Regras:** os tokens vivem só em `src/app/globals.css`; não escreva hexadecimal solto nos componentes. `npm run icons` regenera os ícones do PWA a partir do PNG oficial — eles não são desenhados à mão.
+- Hexadecimal de marca vive **só** em [globals.css](src/app/globals.css). Componentes usam token (`text-brand`) ou `var(--color-brand)`. Única exceção: `themeColor` no metadata, que é meta tag e não aceita `var()`.
+- `npm run icons` regenera ícones e favicons a partir do Z oficial.
+- A cor da ferramenta não vaza para o que o app exporta: a exportação é JSON de dados, o compartilhar é texto e as notificações são texto — nenhum deles carrega cor.
 
-Verificação rápida de que nada saiu da linha:
+Verificação de que nada saiu da linha:
 
 ```bash
-grep -rnoE "#[0-9a-fA-F]{6}|text-white" src/ | grep -viE "10100e|f4b942|ffd98a|f6f3e8|191917|21211f|2e2e2a|3d3d37|a8a49a|7a766c|56534b|1c1c1a|35c46a|ff6b6b|4ea1ff"
+grep -rnoiE "#f4b942|#ffd98a|#ec4899|#c2377a|text-white" src/ | grep -v globals.css
 ```
 
 ---
