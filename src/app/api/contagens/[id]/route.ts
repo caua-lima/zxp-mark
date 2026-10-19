@@ -11,6 +11,7 @@ const Patch = z.object({
   descricao: z.string().max(500).nullable().optional(),
   alvo: z.string().datetime({ offset: true }).optional(),
   avisoDiario: z.boolean().optional(),
+  horaAviso: z.number().int().min(0).max(23).optional(),
   avisos: z.array(z.number().int().min(0).max(365)).max(12).optional(),
   notificar: z.boolean().optional(),
 });

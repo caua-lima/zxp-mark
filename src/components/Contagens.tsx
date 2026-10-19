@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Area, Aviso, Botao, Campo, Chave } from "@/components/ui";
-import { Regressiva } from "@/components/Cronometro";
+import { Area, Aviso, Botao, Campo, Chave, SeletorHora } from "@/components/ui";
+import { RegressivaHeroi } from "@/components/Cronometro";
 import { dataLonga } from "@/lib/formato";
 import { iconePara } from "@/lib/deteccao";
 import { DIA } from "@/lib/habitos";
@@ -16,6 +16,7 @@ export type Contagem = {
   alvo: string;
   criadoEm: string;
   avisoDiario: boolean;
+  horaAviso: number;
   avisos: number[];
   notificar: boolean;
 };
@@ -36,7 +37,7 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
         </div>
         <button
           onClick={() => setCriando((v) => !v)}
-          className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/20 active:bg-brand-escuro"
+          className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/25 transition-transform active:scale-95 active:bg-brand-escuro"
           aria-label={criando ? "Fechar" : "Nova contagem"}
         >
           {criando ? "×" : "+"}
@@ -60,12 +61,12 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
           <h2 className="text-[17px] font-semibold">Nada marcado ainda</h2>
           <p className="mx-auto mt-2 max-w-xs text-[14px] leading-relaxed text-apagado">
             Viagem, aniversário, prova, mudança. Marca a data e eu conto os dias por você — com
-            um aviso todo dia no celular.
+            um aviso todo dia no horário que você escolher.
           </p>
         </div>
       )}
 
-      <div className="space-y-3.5">
+      <div className="space-y-4">
         {futuras.map((c) => (
           <CartaoContagem key={c.id} contagem={c} agora={agora} aoMudar={() => router.refresh()} />
         ))}
@@ -74,7 +75,7 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
       {passadas.length > 0 && (
         <>
           <h2 className="mt-7 mb-3 text-[13px] font-medium text-apagado">Já aconteceram</h2>
-          <div className="space-y-3.5 opacity-60">
+          <div className="space-y-4 opacity-55">
             {passadas.map((c) => (
               <CartaoContagem
                 key={c.id}
@@ -102,12 +103,15 @@ function CartaoContagem({
   const [painel, setPainel] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [diario, setDiario] = useState(contagem.avisoDiario);
+  const [hora, setHora] = useState(contagem.horaAviso);
 
   const alvo = new Date(contagem.alvo).getTime();
   const criado = new Date(contagem.criadoEm).getTime();
   const total = Math.max(1, alvo - criado);
   const progresso = Math.max(0, Math.min(1, (agora - criado) / total));
   const faltamDias = Math.max(0, Math.ceil((alvo - agora) / DIA));
+  // Reta final ganha um brilho: dá pra sentir a proximidade sem ler o número.
+  const perto = alvo > agora && faltamDias <= 7;
 
   async function alterar(patch: Record<string, unknown>) {
     setOcupado(true);
@@ -126,80 +130,112 @@ function CartaoContagem({
   }
 
   return (
-    <div className="cartao surge p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="text-xl">{contagem.emoji}</span>
-          <div className="min-w-0">
-            <h3 className="truncate text-[16px] font-semibold">{contagem.titulo}</h3>
-            <p className="text-[12.5px] text-apagado">{dataLonga(contagem.alvo)}</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setPainel((v) => !v)}
-          className="shrink-0 px-1 text-[18px] leading-none text-fantasma active:text-suave"
-          aria-label="Opções"
-        >
-          ⋯
-        </button>
-      </div>
+    <div
+      className={`cartao surge relative overflow-hidden p-5 ${
+        perto ? "border-brand/30 shadow-[0_0_40px_-12px_var(--color-brand)]" : ""
+      }`}
+    >
+      {/* brilho atrás do número, só sugerido */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-16 -left-10 size-56 rounded-full bg-brand/10 blur-3xl"
+      />
 
-      <div className="mt-4">
-        <Regressiva ate={contagem.alvo} />
-      </div>
-
-      {alvo > agora && (
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/8">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-brand to-brand-escuro"
-            style={{ width: `${Math.max(1.5, progresso * 100)}%` }}
-          />
-        </div>
-      )}
-
-      {contagem.descricao && (
-        <p className="mt-3 text-[13.5px] leading-relaxed text-suave">{contagem.descricao}</p>
-      )}
-
-      {contagem.notificar && alvo > agora && (
-        <p className="mt-3 text-[12px] text-fantasma">
-          {diario
-            ? `🔔 Aviso todo dia: "faltam ${faltamDias} dias"`
-            : `🔔 Aviso em ${contagem.avisos.map((d) => (d === 0 ? "no dia" : `D-${d}`)).join(", ")}`}
-        </p>
-      )}
-
-      {painel && (
-        <div className="surge mt-4 space-y-1 border-t border-borda pt-2">
-          <Chave
-            ligado={diario}
-            aoMudar={(v) => {
-              setDiario(v);
-              void alterar({ avisoDiario: v });
-            }}
-            rotulo="Aviso diário"
-            descricao="Todo dia, com quantos dias faltam."
-          />
-          <div className="flex items-center justify-between gap-3 border-t border-borda pt-3.5">
-            <span className="text-[13px] text-apagado">Apagar esta contagem?</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPainel(false)}
-                className="rounded-xl px-3 py-2 text-[13px] text-suave"
-              >
-                Fechar
-              </button>
-              <button
-                onClick={excluir}
-                disabled={ocupado}
-                className="rounded-xl bg-perigo/15 px-3 py-2 text-[13px] font-medium text-perigo disabled:opacity-50"
-              >
-                Apagar
-              </button>
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand/12 text-xl">
+              {contagem.emoji}
+            </span>
+            <div className="min-w-0">
+              {/* Duas linhas em vez de cortar: "Viagem pro Rio de Janeiro" não
+                  cabe numa só no celular, e é o nome da coisa toda. */}
+              <h3 className="text-[17px] leading-tight font-semibold">{contagem.titulo}</h3>
+              <p className="mt-0.5 text-[12.5px] text-apagado">{dataLonga(contagem.alvo)}</p>
             </div>
           </div>
+          <button
+            onClick={() => setPainel((v) => !v)}
+            className="shrink-0 px-1 text-[18px] leading-none text-fantasma active:text-suave"
+            aria-label="Opções"
+          >
+            ⋯
+          </button>
         </div>
-      )}
+
+        <div className="mt-5">
+          <RegressivaHeroi ate={contagem.alvo} />
+        </div>
+
+        {alvo > agora && (
+          <div className="mt-5">
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-brand-escuro to-brand transition-[width] duration-1000"
+                style={{ width: `${Math.max(1.5, progresso * 100)}%` }}
+              />
+            </div>
+            <p className="numeros mt-1.5 text-right text-[11px] text-fantasma">
+              {Math.round(progresso * 100)}% do caminho
+            </p>
+          </div>
+        )}
+
+        {contagem.descricao && (
+          <p className="mt-3 text-[13.5px] leading-relaxed text-suave">{contagem.descricao}</p>
+        )}
+
+        {contagem.notificar && alvo > agora && (
+          <p className="mt-3 flex items-center gap-1.5 text-[12px] text-fantasma">
+            <span>🔔</span>
+            {diario
+              ? `Todo dia às ${String(hora).padStart(2, "0")}:00`
+              : `Aviso em ${contagem.avisos.map((d) => (d === 0 ? "no dia" : `D-${d}`)).join(", ")}`}
+          </p>
+        )}
+
+        {painel && (
+          <div className="surge mt-4 space-y-1 border-t border-borda pt-2">
+            <Chave
+              ligado={diario}
+              aoMudar={(v) => {
+                setDiario(v);
+                void alterar({ avisoDiario: v });
+              }}
+              rotulo="Aviso diário"
+              descricao="Todo dia, com quantos dias faltam."
+            />
+            {diario && (
+              <SeletorHora
+                rotulo="Horário do aviso"
+                valor={hora}
+                aoMudar={(h) => {
+                  setHora(h);
+                  void alterar({ horaAviso: h });
+                }}
+              />
+            )}
+            <div className="flex items-center justify-between gap-3 border-t border-borda pt-3.5">
+              <span className="text-[13px] text-apagado">Apagar esta contagem?</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPainel(false)}
+                  className="rounded-xl px-3 py-2 text-[13px] text-suave"
+                >
+                  Fechar
+                </button>
+                <button
+                  onClick={excluir}
+                  disabled={ocupado}
+                  className="rounded-xl bg-perigo/15 px-3 py-2 text-[13px] font-medium text-perigo disabled:opacity-50"
+                >
+                  Apagar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -210,6 +246,7 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
   const [data, setData] = useState("");
   const [hora, setHora] = useState("09:00");
   const [diario, setDiario] = useState(true);
+  const [horaAviso, setHoraAviso] = useState(12);
   const [erro, setErro] = useState("");
   const [ocupado, setOcupado] = useState(false);
 
@@ -249,6 +286,7 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
           descricao: descricao.trim() || undefined,
           alvo: alvo.toISOString(),
           avisoDiario: diario,
+          horaAviso,
         }),
       });
       if (!r.ok) {
@@ -279,7 +317,7 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
             rotulo="O que é?"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            placeholder="Viagem para a praia"
+            placeholder="Viagem pro Rio de Janeiro"
             maxLength={80}
             required
           />
@@ -316,16 +354,19 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
         onChange={(e) => setDescricao(e.target.value)}
         rows={2}
         maxLength={500}
-        placeholder="Voo 14h, não esquecer o passaporte"
+        placeholder="Voo 14h, não esquecer o documento"
       />
 
-      <div className="border-t border-borda pt-1">
+      <div className="space-y-1 border-t border-borda pt-1">
         <Chave
           ligado={diario}
           aoMudar={setDiario}
           rotulo="Me avise todo dia"
-          descricao='Uma notificação por dia: "faltam 66 dias", "faltam 65 dias"...'
+          descricao='"Faltam 26 dias", "faltam 25 dias"... com um empurrão junto.'
         />
+        {diario && (
+          <SeletorHora rotulo="Em que horário" valor={horaAviso} aoMudar={setHoraAviso} />
+        )}
       </div>
 
       <Aviso>{erro}</Aviso>

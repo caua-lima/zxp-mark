@@ -122,3 +122,31 @@ export function Chave({
     </button>
   );
 }
+
+/** Escolha de hora cheia (0-23). Usado nas contagens e nas preferências. */
+export function SeletorHora({
+  rotulo,
+  valor,
+  aoMudar,
+}: {
+  rotulo: string;
+  valor: number;
+  aoMudar: (h: number) => void;
+}) {
+  return (
+    <label className="surge flex items-center justify-between gap-4 py-3.5">
+      <span className="text-[14px] text-suave">{rotulo}</span>
+      <select
+        value={valor}
+        onChange={(e) => aoMudar(Number(e.target.value))}
+        className="numeros rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-tinta outline-none"
+      >
+        {Array.from({ length: 24 }, (_, h) => (
+          <option key={h} value={h} className="bg-elevado">
+            {String(h).padStart(2, "0")}:00
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}

@@ -11,6 +11,8 @@ const Corpo = z.object({
   notifMarcos: z.boolean().optional(),
   notifResumoDiario: z.boolean().optional(),
   notifNoite: z.boolean().optional(),
+  notifFoco: z.boolean().optional(),
+  horaFoco: z.number().int().min(0).max(23).optional(),
   horaResumo: z.number().int().min(0).max(23).optional(),
   horaNoite: z.number().int().min(0).max(23).optional(),
 });
@@ -33,6 +35,8 @@ export async function PATCH(req: Request) {
       notifMarcos: true,
       notifResumoDiario: true,
       notifNoite: true,
+      notifFoco: true,
+      horaFoco: true,
       horaResumo: true,
       horaNoite: true,
     },

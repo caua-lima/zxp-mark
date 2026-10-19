@@ -118,6 +118,56 @@ function Unidade({
 }
 
 /** Contagem regressiva: dias, horas, minutos e segundos até a data alvo. */
+/**
+ * Contagem em destaque: o número de dias domina o cartão e o resto do tempo
+ * corre embaixo, pequeno. É o que transforma a data numa coisa que você sente
+ * em vez de só ler.
+ */
+export function RegressivaHeroi({ ate }: { ate: string | Date }) {
+  const agora = usarAgora();
+  const alvo = new Date(ate).getTime();
+  const t = agora === null ? null : alvo - agora;
+
+  if (t === null) {
+    return (
+      <div className="pulso">
+        <div className="numeros text-[64px] leading-none font-extrabold text-borda-forte">--</div>
+        <div className="mt-1 h-4" />
+      </div>
+    );
+  }
+
+  if (t <= 0) {
+    return (
+      <div>
+        <p className="font-display text-[40px] leading-none font-extrabold text-brand">É HOJE</p>
+        <p className="mt-2 text-[13px] text-suave">acabou a espera</p>
+      </div>
+    );
+  }
+
+  const { d, h, m, s } = duracao(t);
+
+  return (
+    <div className="flex items-end gap-3">
+      <div>
+        <p className="numeros font-display text-[64px] leading-[0.85] font-extrabold text-brand">
+          {d}
+        </p>
+        <p className="mt-1.5 text-[11px] font-semibold tracking-[0.18em] text-apagado uppercase">
+          {d === 1 ? "dia" : "dias"}
+        </p>
+      </div>
+      <p className="numeros mb-1 text-[15px] text-suave">
+        {pad(h)}
+        <span className="text-fantasma">h</span> {pad(m)}
+        <span className="text-fantasma">m</span> {pad(s)}
+        <span className="text-fantasma">s</span>
+      </p>
+    </div>
+  );
+}
+
 export function Regressiva({ ate }: { ate: string | Date }) {
   const agora = usarAgora();
   const alvo = new Date(ate).getTime();

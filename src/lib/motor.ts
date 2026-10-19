@@ -8,8 +8,9 @@
  */
 import { prisma } from "@/lib/db";
 import { enviarPush, type Payload } from "@/lib/push";
-import { DIA, preset } from "@/lib/habitos";
+import { DIA, preset, situacao } from "@/lib/habitos";
 import { diaLocal, duracaoExtenso, horaLocal, reais, rotuloMs, impacto } from "@/lib/formato";
+import { textoContagem, textoFoco } from "@/lib/mensagens";
 
 const EPOCH = new Date(0);
 
@@ -129,6 +130,10 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
               url: `/marcos/${m.id}`,
               tag: `marco-${m.id}`,
               urgente: true,
+              acoes: [
+                { acao: "abrir", titulo: "Ver marco" },
+                { acao: "conquistas", titulo: "Conquistas" },
+              ],
             },
           },
           mudo
@@ -174,14 +179,40 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
     // Com aviso diário ligado, sai um por dia com a contagem — e a lista de
     // marcos é ignorada, senão os dois cairiam juntos no mesmo dia.
     if (!c.avisoDiario && !c.avisos.includes(faltam)) continue;
-    if (!dentroDaJanela(hora, u.horaResumo)) continue;
+    // Cada contagem tem o seu horário: a viagem pode avisar ao meio-dia
+    // mesmo com o resumo do app saindo às 8.
+    if (!dentroDaJanela(hora, c.horaAviso)) continue;
 
-    const corpo =
-      faltam === 0
-        ? "É hoje! Contagem encerrada."
-        : faltam === 1
-          ? "Falta 1 dia. Confere se está tudo pronto."
-          : `Faltam ${faltam} dias.`;
+    const principal = u.marcos[0];
+    const texto = textoContagem({
+      titulo: c.titulo,
+      emoji: c.emoji,
+      descricao: c.descricao,
+      faltaMs: restante,
+      dias: faltam,
+      progresso: Math.max(
+        0,
+        Math.min(1, (agora.getTime() - c.criadoEm.getTime()) / Math.max(1, c.alvo.getTime() - c.criadoEm.getTime()))
+      ),
+      marco: principal
+        ? {
+            sufixo: preset(principal.preset).sufixo,
+            decorridoMs: agora.getTime() - principal.cicloInicio.getTime(),
+            dinheiro: impacto(
+              {
+                preset: principal.preset,
+                cicloInicio: principal.cicloInicio,
+                unidadesPorDia: principal.unidadesPorDia,
+                gastoDiario: principal.gastoDiario,
+              },
+              agora.getTime()
+            ).dinheiroEconomizado,
+          }
+        : null,
+      // A data do dia varia a frase sem sortear: relendo a mesma notificação
+      // o texto é o mesmo, mas amanhã é outro.
+      semente: Number(hoje.replaceAll("-", "")),
+    });
 
     const ok = await despachar(userId, {
       tipo: "contagem",
@@ -191,10 +222,15 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
       chave: c.avisoDiario ? `diario-${hoje}` : `d-${faltam}`,
       ciclo: c.alvo,
       payload: {
-        titulo: `${c.emoji} ${c.titulo}`,
-        corpo: c.descricao?.trim() ? `${corpo} ${c.descricao.trim()}` : corpo,
+        ...texto,
         url: "/contagem",
         tag: `contagem-${c.id}`,
+        // Na reta final a notificação fica na tela até você tocar.
+        urgente: faltam <= 1,
+        acoes: [
+          { acao: "abrir", titulo: "Ver contagem" },
+          { acao: "marcos", titulo: "Meus marcos" },
+        ],
       },
     });
     if (ok) {
@@ -235,12 +271,63 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
           corpo: linhas.join("\n"),
           url: "/marcos",
           tag: "resumo",
+          acoes: [{ acao: "abrir", titulo: "Ver meus marcos" }],
         },
       });
       if (ok) {
         enviadas++;
         detalhes.push("resumo diário");
       }
+    }
+  }
+
+  /* --------------------------- foco do meio-dia ------------------------- */
+  // O terceiro toque do dia. A tarde é onde a maioria escorrega, e é também
+  // onde lembrar da recompensa funciona melhor do que lembrar da regra.
+  if (u.notifFoco && dentroDaJanela(hora, u.horaFoco) && u.marcos.length) {
+    const m = u.marcos[0];
+    const decorrido = agora.getTime() - m.cicloInicio.getTime();
+    const p = preset(m.preset);
+    const s = situacao(m.preset, decorrido);
+
+    const proxima = u.contagens
+      .filter((c) => c.notificar && c.alvo.getTime() > agora.getTime())
+      .sort((a, b) => a.alvo.getTime() - b.alvo.getTime())[0];
+
+    const texto = textoFoco({
+      primeiroNome: u.nome.split(" ")[0],
+      sufixo: p.sufixo,
+      decorridoMs: decorrido,
+      proximoTitulo: s.proximo?.titulo ?? null,
+      proximoFaltaMs: s.proximo ? s.proximo.ms - decorrido : null,
+      dinheiro: impacto(
+        { preset: m.preset, cicloInicio: m.cicloInicio, unidadesPorDia: m.unidadesPorDia, gastoDiario: m.gastoDiario },
+        agora.getTime()
+      ).dinheiroEconomizado,
+      recompensa: proxima
+        ? { titulo: proxima.titulo, dias: diasDeCalendario(tz, agora, proxima.alvo) }
+        : null,
+      semente: Number(hoje.replaceAll("-", "")),
+    });
+
+    const ok = await despachar(userId, {
+      tipo: "foco",
+      refId: userId,
+      chave: `foco-${hoje}`,
+      ciclo: EPOCH,
+      payload: {
+        ...texto,
+        url: "/marcos",
+        tag: "foco",
+        acoes: [
+          { acao: "abrir", titulo: "Ver meus marcos" },
+          { acao: "sos", titulo: "Estou com vontade" },
+        ],
+      },
+    });
+    if (ok) {
+      enviadas++;
+      detalhes.push("foco do meio-dia");
     }
   }
 
@@ -259,6 +346,7 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
         corpo: `${duracaoExtenso(d)} ${p.sufixo}. Dormir agora é a forma mais fácil de ganhar as próximas 8 horas. Amanhã você acorda com esse número maior.`,
         url: "/marcos",
         tag: "noite",
+        acoes: [{ acao: "abrir", titulo: "Ver meus marcos" }],
       },
     });
     if (ok) {

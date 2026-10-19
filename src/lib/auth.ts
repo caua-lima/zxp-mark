@@ -73,6 +73,8 @@ export async function usuarioAtual() {
       notifMarcos: true,
       notifResumoDiario: true,
       notifNoite: true,
+      notifFoco: true,
+      horaFoco: true,
       horaResumo: true,
       horaNoite: true,
       criadoEm: true,

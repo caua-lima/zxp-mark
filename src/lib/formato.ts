@@ -33,6 +33,16 @@ export function duracaoExtenso(ms: number): string {
   return `${partes.slice(0, -1).join(", ")} e ${partes[partes.length - 1]}`;
 }
 
+/** "24 dias e 12 horas" — o formato das notificações de contagem. */
+export function diasEHoras(ms: number): string {
+  const { d, h } = duracao(ms);
+  const dias = d === 1 ? "1 dia" : `${d} dias`;
+  const horas = h === 1 ? "1 hora" : `${h} horas`;
+  if (d === 0) return horas;
+  if (h === 0) return dias;
+  return `${dias} e ${horas}`;
+}
+
 /** Rótulo curto do tempo de um marco: "6h", "3 dias", "1 ano". */
 export function rotuloMs(ms: number): string {
   if (ms < HORA) return `${Math.round(ms / MIN)} min`;

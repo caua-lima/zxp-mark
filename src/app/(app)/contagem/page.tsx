@@ -22,6 +22,7 @@ export default async function PaginaContagem() {
         alvo: c.alvo.toISOString(),
         criadoEm: c.criadoEm.toISOString(),
         avisoDiario: c.avisoDiario,
+        horaAviso: c.horaAviso,
         avisos: c.avisos,
         notificar: c.notificar,
       }))}

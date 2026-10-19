@@ -21,6 +21,8 @@ export default async function PaginaPerfil() {
         notifMarcos: u.notifMarcos,
         notifResumoDiario: u.notifResumoDiario,
         notifNoite: u.notifNoite,
+        notifFoco: u.notifFoco,
+        horaFoco: u.horaFoco,
         horaResumo: u.horaResumo,
         horaNoite: u.horaNoite,
       }}

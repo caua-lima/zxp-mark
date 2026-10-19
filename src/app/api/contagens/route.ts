@@ -12,6 +12,7 @@ const Nova = z.object({
   /** ISO com fuso, ex.: 2026-11-13T09:00:00-03:00 */
   alvo: z.string().datetime({ offset: true }),
   avisoDiario: z.boolean().optional(),
+  horaAviso: z.number().int().min(0).max(23).optional(),
   avisos: z.array(z.number().int().min(0).max(365)).max(12).optional(),
   notificar: z.boolean().optional(),
 });
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
       descricao,
       alvo: new Date(dados.data.alvo),
       avisoDiario: dados.data.avisoDiario ?? true,
+      horaAviso: dados.data.horaAviso ?? 12,
       avisos,
       notificar: dados.data.notificar ?? true,
     },

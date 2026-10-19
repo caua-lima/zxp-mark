@@ -1,6 +1,6 @@
 /* Service worker do ZXP Mark: push + funcionamento offline. */
 
-const VERSAO = "marco-v2";
+const VERSAO = "zxp-mark-v3";
 const ESTATICO = `${VERSAO}-estatico`;
 const PAGINAS = `${VERSAO}-paginas`;
 
@@ -110,12 +110,9 @@ self.addEventListener("push", (evento) => {
     requireInteraction: !!dados.urgente,
     vibrate: dados.urgente ? [220, 90, 220, 90, 320] : [180, 80, 180],
     data: { url: dados.url || "/marcos" },
-    actions: dados.urgente
-      ? [
-          { action: "abrir", title: "Ver marco" },
-          { action: "sos", title: "Estou com vontade" },
-        ]
-      : [],
+    // O payload decide os botões. Android mostra até 2; iOS ignora o campo
+    // sem reclamar, então não custa mandar sempre.
+    actions: (dados.acoes || []).slice(0, 2).map((a) => ({ action: a.acao, title: a.titulo })),
   };
 
   evento.waitUntil(self.registration.showNotification(titulo, opcoes));
@@ -124,10 +121,14 @@ self.addEventListener("push", (evento) => {
 self.addEventListener("notificationclick", (evento) => {
   evento.notification.close();
 
-  const destino =
-    evento.action === "sos"
-      ? "/ajuda?sos=1"
-      : (evento.notification.data && evento.notification.data.url) || "/marcos";
+  const padrao = (evento.notification.data && evento.notification.data.url) || "/marcos";
+  const porAcao = {
+    sos: "/ajuda?sos=1",
+    marcos: "/marcos",
+    contagem: "/contagem",
+    conquistas: "/conquistas",
+  };
+  const destino = porAcao[evento.action] || padrao;
 
   evento.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((janelas) => {

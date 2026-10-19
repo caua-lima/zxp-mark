@@ -28,6 +28,8 @@ export type Payload = {
   tag?: string;
   /** vibra e mantém a notificação na tela até interação */
   urgente?: boolean;
+  /** botões da notificação; o Android mostra, o iOS ignora em silêncio */
+  acoes?: { acao: string; titulo: string }[];
 };
 
 /**
