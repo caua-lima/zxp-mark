@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Brilho, Icone, Secao } from "@/components/ui";
 import { dataLonga, duracaoExtenso, reais, rotuloMs } from "@/lib/formato";
 
 export type Conquista = {
@@ -50,15 +51,16 @@ export function Conquistas({
         {conquistas.length > 0 && <Compartilhar conquistas={conquistas} recordes={recordes} />}
       </header>
 
-      <section className="cartao mb-3.5 p-6 text-center">
-        <p className="text-[12px] font-medium tracking-wide text-apagado uppercase">
+      <section className="cartao relative mb-3.5 overflow-hidden p-7 text-center">
+        <Brilho className="-top-24 left-1/2 size-64 -translate-x-1/2" />
+        <p className="relative text-[11px] font-semibold tracking-[0.18em] text-apagado uppercase">
           Marcos conquistados
         </p>
-        <p className="numeros mt-2 text-[56px] leading-none font-semibold text-brand">
+        <p className="numeros font-display relative mt-3 text-[76px] leading-[0.82] font-extrabold text-brand">
           {recordes.total}
         </p>
         {recordes.emTentativasAnteriores > 0 && (
-          <p className="mt-2 text-[12.5px] text-apagado">
+          <p className="relative mt-3 text-[12.5px] text-apagado">
             + {recordes.emTentativasAnteriores} em tentativas anteriores — elas também contam
           </p>
         )}
@@ -75,14 +77,16 @@ export function Conquistas({
 
       {proximas.length > 0 && (
         <section className="mb-6">
-          <h2 className="mb-3 text-[13px] font-medium text-suave">Chegando</h2>
+          <Secao titulo="Chegando" />
           <div className="space-y-2">
             {proximas.map((p) => (
               <div
                 key={`${p.marcoId}-${p.titulo}`}
                 className="cartao flex items-center gap-3 px-4 py-3.5"
               >
-                <span className="text-lg opacity-60">{p.emoji}</span>
+                <Icone tamanho="sm" apagado>
+                  {p.emoji}
+                </Icone>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] font-medium text-tinta">{p.titulo}</p>
                   <p className="text-[12px] text-apagado">faltam {duracaoExtenso(p.faltaMs)}</p>
@@ -96,13 +100,11 @@ export function Conquistas({
         </section>
       )}
 
-      <h2 className="mb-3 text-[13px] font-medium text-suave">
-        {conquistas.length > 0 ? "Tudo que você já conquistou" : "Conquistas"}
-      </h2>
+      <Secao titulo={conquistas.length > 0 ? "Tudo que você já conquistou" : "Conquistas"} />
 
       {conquistas.length === 0 ? (
         <div className="cartao px-6 py-10 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-2xl">
+          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/12 text-2xl">
             🏆
           </div>
           <p className="text-[15px] font-semibold">Ainda nenhuma — por enquanto</p>
@@ -115,7 +117,7 @@ export function Conquistas({
         <ol className="relative space-y-0 border-l border-borda pl-5">
           {conquistas.map((c) => (
             <li key={`${c.marcoId}-${c.chave}`} className="relative pb-5">
-              <span className="absolute -left-[26px] top-1 size-3 rounded-full border-2 border-brand bg-brand" />
+              <span className="absolute -left-[26px] top-1 size-3 rounded-full bg-brand ring-4 ring-brand/15" />
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-[14.5px] font-medium text-tinta">{c.titulo}</h3>
                 <span className="numeros shrink-0 text-[11.5px] text-fantasma">
@@ -123,7 +125,7 @@ export function Conquistas({
                 </span>
               </div>
               <p className="mt-1 text-[13px] leading-relaxed text-suave">{c.corpo}</p>
-              <p className="mt-1.5 text-[11.5px] text-brand/70">
+              <p className="mt-2 text-[11.5px] text-brand/75">
                 {c.emoji} {c.marcoTitulo} · {dataLonga(c.em)}
               </p>
             </li>
@@ -145,9 +147,9 @@ function Ficha({
 }) {
   return (
     <div className="cartao p-4">
-      <p className="text-[11.5px] tracking-wide text-apagado uppercase">{rotulo}</p>
+      <p className="text-[10px] font-semibold tracking-[0.1em] text-apagado uppercase">{rotulo}</p>
       <p
-        className={`numeros mt-1.5 text-[19px] leading-tight font-semibold ${
+        className={`numeros font-display mt-2 text-[19px] leading-tight font-bold ${
           destaque ? "text-brand" : "text-tinta"
         }`}
       >
