@@ -2,7 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Area, Aviso, Botao, Campo, Chave, SeletorHora } from "@/components/ui";
+import {
+  Area,
+  Aviso,
+  Botao,
+  Brilho,
+  Campo,
+  Chave,
+  Icone,
+  Progresso,
+  Secao,
+  SeletorHora,
+} from "@/components/ui";
 import { RegressivaHeroi } from "@/components/Cronometro";
 import { dataLonga } from "@/lib/formato";
 import { iconePara } from "@/lib/deteccao";
@@ -55,8 +66,8 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
 
       {futuras.length === 0 && !criando && (
         <div className="cartao px-6 py-10 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-2xl">
-            🎯
+          <div className="mx-auto mb-4 w-fit">
+            <Icone tamanho="lg">🎯</Icone>
           </div>
           <h2 className="text-[17px] font-semibold">Nada marcado ainda</h2>
           <p className="mx-auto mt-2 max-w-xs text-[14px] leading-relaxed text-apagado">
@@ -74,7 +85,7 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
 
       {passadas.length > 0 && (
         <>
-          <h2 className="mt-7 mb-3 text-[13px] font-medium text-apagado">Já aconteceram</h2>
+          <Secao titulo="Já aconteceram" className="mt-7" />
           <div className="space-y-4 opacity-55">
             {passadas.map((c) => (
               <CartaoContagem
@@ -135,18 +146,12 @@ function CartaoContagem({
         perto ? "border-brand/30 shadow-[0_0_40px_-12px_var(--color-brand)]" : ""
       }`}
     >
-      {/* brilho atrás do número, só sugerido */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-16 -left-10 size-56 rounded-full bg-brand/10 blur-3xl"
-      />
+      <Brilho />
 
       <div className="relative">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand/12 text-xl">
-              {contagem.emoji}
-            </span>
+            <Icone>{contagem.emoji}</Icone>
             <div className="min-w-0">
               {/* Duas linhas em vez de cortar: "Viagem pro Rio de Janeiro" não
                   cabe numa só no celular, e é o nome da coisa toda. */}
@@ -169,15 +174,7 @@ function CartaoContagem({
 
         {alvo > agora && (
           <div className="mt-5">
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-escuro to-brand transition-[width] duration-1000"
-                style={{ width: `${Math.max(1.5, progresso * 100)}%` }}
-              />
-            </div>
-            <p className="numeros mt-1.5 text-right text-[11px] text-fantasma">
-              {Math.round(progresso * 100)}% do caminho
-            </p>
+            <Progresso fracao={progresso} percentual />
           </div>
         )}
 
@@ -303,7 +300,7 @@ function FormContagem({ aoSalvar }: { aoSalvar: () => void }) {
 
   return (
     <form onSubmit={enviar} className="cartao surge mb-5 space-y-4 p-5">
-      <h2 className="text-[16px] font-semibold">Nova contagem</h2>
+      <Secao titulo="Nova contagem" className="mb-0" />
 
       <div className="flex items-end gap-3">
         <div
