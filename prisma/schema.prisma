@@ -29,7 +29,10 @@ model User {
   notifMarcos       Boolean  @default(true)
   notifResumoDiario Boolean  @default(true)
   notifNoite        Boolean  @default(true)
+  /// Empurrao do meio do dia: "mantenha o foco", com os numeros reais.
+  notifFoco         Boolean  @default(true)
   horaResumo        Int      @default(8)   // 0-23, hora local
+  horaFoco          Int      @default(12)  // 0-23, hora local
   horaNoite         Int      @default(21)  // 0-23, hora local
 
   criadoEm          DateTime @default(now())
@@ -98,6 +101,8 @@ model Contagem {
   /// Aviso todo dia com quantos dias faltam. Quando ligado, substitui a
   /// lista de `avisos` — nao faz sentido mandar os dois no mesmo dia.
   avisoDiario Boolean @default(true)
+  /// Hora local do aviso diario desta contagem (0-23).
+  horaAviso   Int     @default(12)
   /// Dias de antecedencia, usados quando avisoDiario esta desligado.
   avisos    Int[]    @default([30, 14, 7, 3, 1, 0])
   notificar Boolean  @default(true)
