@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Botao } from "@/components/ui";
+import { Botao, Brilho, Icone } from "@/components/ui";
 
 /* ------------------------------ utilidades ------------------------------ */
 
@@ -175,19 +175,24 @@ export function CartaoNotificacoes() {
   const { estado, dispositivos, erro, ocupado, ativar, desativar, testar } = usarPush();
 
   return (
-    <div className="cartao p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-[17px] font-semibold">Notificações</h2>
-          <p className="mt-1 text-[13px] text-apagado">
-            É assim que cada marco atingido chega até você.
-          </p>
+    <div className="cartao relative overflow-hidden p-5">
+      {estado === "ligado" && <Brilho className="-top-20 -right-12 size-52" />}
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Icone apagado={estado !== "ligado"}>{estado === "ligado" ? "🔔" : "🔕"}</Icone>
+          <div className="min-w-0">
+            <h2 className="text-[17px] leading-tight font-semibold">Notificações</h2>
+            <p className="mt-0.5 text-[13px] text-apagado">
+              É assim que cada marco atingido chega até você.
+            </p>
+          </div>
         </div>
         <Selo estado={estado} />
       </div>
 
       {estado === "instalar-primeiro" && (
-        <div className="mt-4 rounded-2xl border border-brand/20 bg-brand/[0.07] p-4">
+        <div className="relative mt-4 rounded-2xl border border-brand/20 bg-brand/[0.07] p-4">
           <p className="text-[14px] font-medium text-brand">
             No iPhone, notificações só funcionam com o app instalado.
           </p>
@@ -205,22 +210,24 @@ export function CartaoNotificacoes() {
       )}
 
       {estado === "bloqueado" && (
-        <p className="mt-4 rounded-2xl border border-perigo/20 bg-perigo/[0.08] p-4 text-[13.5px] text-perigo">
+        <p className="relative mt-4 rounded-2xl border border-perigo/20 bg-perigo/[0.08] p-4 text-[13.5px] text-perigo">
           As notificações estão bloqueadas para este site. No iPhone: Ajustes → Notificações →
           ZXP Mark → permitir. Depois volte aqui.
         </p>
       )}
 
       {estado === "ligado" && (
-        <p className="mt-4 text-[13.5px] text-suave">
-          Ativas em {dispositivos} {dispositivos === 1 ? "aparelho" : "aparelhos"}. Pode fechar o
-          app — os avisos chegam mesmo com ele fechado.
+        <p className="relative mt-4 text-[13.5px] text-suave">
+          Ativas em{" "}
+          <span className="numeros font-display font-bold text-brand">{dispositivos}</span>{" "}
+          {dispositivos === 1 ? "aparelho" : "aparelhos"}. Pode fechar o app — os avisos chegam
+          mesmo com ele fechado.
         </p>
       )}
 
-      {erro && <p className="mt-3 text-[13px] text-perigo">{erro}</p>}
+      {erro && <p className="relative mt-3 text-[13px] text-perigo">{erro}</p>}
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="relative mt-4 flex flex-wrap gap-2">
         {estado === "desligado" && (
           <Botao onClick={ativar} carregando={ocupado}>
             Ativar notificações
@@ -251,7 +258,7 @@ export function BannerNotificacoes() {
     return (
       <Link
         href="/perfil"
-        className="surge mb-4 flex items-center gap-3 rounded-2xl border border-brand/20 bg-brand/[0.07] px-4 py-3.5"
+        className="surge mb-4 flex items-center gap-3 rounded-2xl border border-brand/25 bg-brand/[0.07] px-4 py-3.5 shadow-lg shadow-brand/10 transition-colors active:bg-brand/15"
       >
         <span className="text-xl">📲</span>
         <span className="min-w-0 flex-1">
@@ -267,7 +274,7 @@ export function BannerNotificacoes() {
   }
 
   return (
-    <div className="surge mb-4 flex items-center gap-3 rounded-2xl border border-brand/20 bg-brand/[0.07] px-4 py-3">
+    <div className="surge mb-4 flex items-center gap-3 rounded-2xl border border-brand/25 bg-brand/[0.07] px-4 py-3 shadow-lg shadow-brand/10">
       <span className="text-xl">🔔</span>
       <span className="min-w-0 flex-1 text-[13.5px] text-brand">
         Ative as notificações para receber cada marco.
@@ -275,7 +282,7 @@ export function BannerNotificacoes() {
       <button
         onClick={ativar}
         disabled={ocupado}
-        className="shrink-0 rounded-xl bg-brand px-3.5 py-2 text-[13px] font-semibold text-brand-ink disabled:opacity-50"
+        className="shrink-0 rounded-full bg-brand px-4 py-2 text-[13px] font-semibold text-brand-ink transition-colors active:bg-brand-escuro disabled:opacity-50"
       >
         {ocupado ? "..." : "Ativar"}
       </button>
