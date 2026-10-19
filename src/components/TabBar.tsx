@@ -24,12 +24,27 @@ export function TabBar() {
             <Link
               key={aba.href}
               href={aba.href}
-              className={`flex flex-1 flex-col items-center gap-1 pt-2.5 pb-2 transition-colors ${
-                ativa ? "text-brand" : "text-apagado"
+              aria-current={ativa ? "page" : undefined}
+              className={`flex flex-1 flex-col items-center gap-1 pt-2 pb-2 transition-colors ${
+                ativa ? "text-brand" : "text-apagado active:text-suave"
               }`}
             >
-              <Icone ativa={ativa} />
-              <span className="text-[10px] font-medium tracking-wide">{aba.rotulo}</span>
+              {/* A pílula atrás do ícone é o que marca a aba: a cor sozinha
+                  some no reflexo do sol, a forma não. */}
+              <span
+                className={`flex h-7 w-14 items-center justify-center rounded-full transition-colors duration-200 ${
+                  ativa ? "bg-brand/12" : ""
+                }`}
+              >
+                <Icone ativa={ativa} />
+              </span>
+              <span
+                className={`text-[10px] tracking-wide transition-all ${
+                  ativa ? "font-semibold" : "font-medium"
+                }`}
+              >
+                {aba.rotulo}
+              </span>
             </Link>
           );
         })}
@@ -39,7 +54,7 @@ export function TabBar() {
 }
 
 type IconeProps = { ativa: boolean };
-const comum = "size-6";
+const comum = "size-[22px] transition-transform";
 
 function Chama({ ativa }: IconeProps) {
   return (
