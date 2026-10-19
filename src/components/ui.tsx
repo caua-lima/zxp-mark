@@ -254,14 +254,17 @@ export function Progresso({
   percentual?: boolean;
   sufixo?: string;
 }) {
-  const pct = Math.round(Math.max(0, Math.min(1, fracao)) * 100);
+  // A barra tem largura mínima para o fiapo aparecer; se o rótulo arredondasse
+  // para baixo, ele diria "0%" ao lado de uma barra que já começou.
+  const bruto = Math.max(0, Math.min(1, fracao));
+  const pct = bruto > 0 ? Math.max(1, Math.round(bruto * 100)) : 0;
   return (
     <div>
       {rotulo && <div className="mb-1.5 text-[12px]">{rotulo}</div>}
       <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
         <div
           className="h-full rounded-full bg-gradient-to-r from-brand-escuro to-brand transition-[width] duration-1000"
-          style={{ width: `${Math.max(1.5, pct)}%` }}
+          style={{ width: `${pct}%` }}
         />
       </div>
       {percentual && (

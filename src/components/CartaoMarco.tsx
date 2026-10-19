@@ -91,6 +91,11 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
   const { proximo, atingidos, progresso } = situacao(marco.preset, decorrido);
   const st = impacto(marco, agora);
 
+  // Um centavo é o menor valor que `reais()` consegue mostrar; abaixo disso
+  // o número existe mas não aparece.
+  const temDinheiro = (st.dinheiroEconomizado ?? 0) >= 0.01;
+  const temUnidades = (st.unidadesEvitadas ?? 0) >= 1;
+
   // Primeiras 24h: fase crítica, o cartão acende para marcar isso.
   const inicio = decorrido < DIA;
 
@@ -140,17 +145,20 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
           </div>
         )}
 
-        {(st.dinheiroEconomizado || st.unidadesEvitadas) && (
+        {/* Centavos e cigarros só entram quando viram número de verdade: nos
+            primeiros minutos isso aparecia como "R$ 0,00 guardados", que é
+            pior do que não aparecer nada. */}
+        {(temDinheiro || temUnidades) && (
           <div className="mt-4 flex gap-5 border-t border-borda pt-3.5 text-[12.5px]">
-            {st.dinheiroEconomizado ? (
+            {temDinheiro ? (
               <span className="text-apagado">
                 <span className="numeros font-semibold text-brand">
-                  {reais(st.dinheiroEconomizado)}
+                  {reais(st.dinheiroEconomizado ?? 0)}
                 </span>{" "}
                 guardados
               </span>
             ) : null}
-            {st.unidadesEvitadas ? (
+            {temUnidades ? (
               <span className="text-apagado">
                 <span className="numeros font-semibold text-tinta">{st.unidadesEvitadas}</span>{" "}
                 {st.unidadeNome} a menos
