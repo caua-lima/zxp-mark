@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Area, Aviso, Botao, Campo } from "@/components/ui";
+import { Area, Aviso, Botao, Campo, Secao } from "@/components/ui";
 import { PRESETS, preset as achar } from "@/lib/habitos";
 import { detectarHabito } from "@/lib/deteccao";
 
@@ -79,7 +79,7 @@ export function FormMarco() {
     <form onSubmit={enviar} className="space-y-6">
       <div>
         <div className="flex items-end gap-3">
-          <div className="flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-borda bg-white/[0.03] text-2xl">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-borda bg-white/[0.03] text-2xl">
             {mostrarDeteccao ? p.emoji : "✍️"}
           </div>
           <div className="min-w-0 flex-1">
@@ -149,7 +149,7 @@ export function FormMarco() {
       </div>
 
       <section>
-        <h2 className="mb-2.5 text-[13px] font-medium text-suave">Quando começou?</h2>
+        <Secao titulo="Quando começou?" />
         <div className="flex gap-2">
           {(
             [
@@ -195,9 +195,11 @@ export function FormMarco() {
       />
 
       <section className="space-y-2.5">
-        <h2 className="text-[13px] font-medium text-suave">
-          Quanto isso te custava? <span className="text-fantasma">(opcional)</span>
-        </h2>
+        <Secao
+          titulo="Quanto isso te custava?"
+          acao={<span className="text-[11px] text-fantasma">opcional</span>}
+          className="mb-0"
+        />
         <div className="grid grid-cols-2 gap-2.5">
           <Campo
             type="number"

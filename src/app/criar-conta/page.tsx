@@ -4,6 +4,7 @@ import { cadastroAberto } from "@/lib/config";
 import { prisma } from "@/lib/db";
 import { FormAuth } from "@/components/FormAuth";
 import { Marca } from "@/components/Marca";
+import { Brilho, Icone } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -18,28 +19,32 @@ export default async function CriarConta() {
   if (!cadastroAberto() && (await prisma.user.count()) > 0) redirect("/entrar");
 
   return (
-    <main className="topo-tela base-tela mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
-      <Marca />
+    <main className="topo-tela base-tela relative mx-auto flex min-h-dvh max-w-md flex-col justify-center overflow-hidden px-6">
+      <Brilho className="-top-24 left-1/2 size-80 -translate-x-1/2" />
 
-      <h1 className="mt-8 text-[28px] font-semibold leading-tight">
-        Comece a contar
-        <br />
-        <span className="text-brand">a partir de agora.</span>
-      </h1>
+      <div className="relative">
+        <Marca />
 
-      <ul className="mt-6 mb-7 space-y-3.5">
-        {PROMESSAS.map(([icone, titulo, texto]) => (
-          <li key={titulo} className="flex gap-3">
-            <span className="text-lg leading-6">{icone}</span>
-            <span className="min-w-0">
-              <span className="block text-[14.5px] font-medium text-tinta">{titulo}</span>
-              <span className="block text-[13px] leading-snug text-apagado">{texto}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
+        <h1 className="mt-8 text-[28px] leading-tight font-semibold">
+          Comece a contar
+          <br />
+          <span className="text-brand">a partir de agora.</span>
+        </h1>
 
-      <FormAuth modo="criar" />
+        <ul className="mt-6 mb-7 space-y-3">
+          {PROMESSAS.map(([icone, titulo, texto]) => (
+            <li key={titulo} className="flex items-start gap-3">
+              <Icone tamanho="sm">{icone}</Icone>
+              <span className="min-w-0 pt-0.5">
+                <span className="block text-[14.5px] font-medium text-tinta">{titulo}</span>
+                <span className="block text-[13px] leading-snug text-apagado">{texto}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <FormAuth modo="criar" />
+      </div>
     </main>
   );
 }
