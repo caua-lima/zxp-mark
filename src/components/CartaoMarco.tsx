@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Cronometro } from "@/components/Cronometro";
-import { preset, situacao } from "@/lib/habitos";
-import { impacto, reais, rotuloMs } from "@/lib/formato";
+import { useEffect, useState } from "react";
+import { Brilho, Icone, Progresso } from "@/components/ui";
+import { preset, situacao, DIA } from "@/lib/habitos";
+import { duracao, impacto, reais, rotuloMs } from "@/lib/formato";
 
 export type MarcoResumo = {
   id: string;
@@ -16,8 +17,71 @@ export type MarcoResumo = {
   gastoDiario: number | null;
 };
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
 /**
- * Cartão da lista. O progresso e as estatísticas são calculados no servidor
+ * Cronômetro em destaque: os dias dominam e o resto corre pequeno ao lado —
+ * o mesmo padrão do cartão de contagem. Renderiza vazio no servidor porque o
+ * relógio dele nunca bate com o do celular.
+ */
+function TempoHeroi({ desde }: { desde: string }) {
+  const [agora, setAgora] = useState<number | null>(null);
+
+  useEffect(() => {
+    setAgora(Date.now());
+    const t = setInterval(() => setAgora(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (agora === null) {
+    return (
+      <div className="pulso">
+        <p className="numeros font-display text-[56px] leading-[0.85] font-extrabold text-borda-forte">
+          --
+        </p>
+        <div className="mt-1.5 h-4" />
+      </div>
+    );
+  }
+
+  const t = Math.max(0, agora - new Date(desde).getTime());
+  const { d, h, m, s } = duracao(t);
+
+  // Antes de completar um dia o herói são as horas: "0 dias" não motiva.
+  const [valor, rotulo] = d > 0 ? [d, d === 1 ? "dia" : "dias"] : [h, h === 1 ? "hora" : "horas"];
+  const resto =
+    d > 0 ? (
+      <>
+        {pad(h)}
+        <span className="text-fantasma">h</span> {pad(m)}
+        <span className="text-fantasma">m</span> {pad(s)}
+        <span className="text-fantasma">s</span>
+      </>
+    ) : (
+      <>
+        {pad(m)}
+        <span className="text-fantasma">m</span> {pad(s)}
+        <span className="text-fantasma">s</span>
+      </>
+    );
+
+  return (
+    <div className="flex items-end gap-3">
+      <div>
+        <p className="numeros font-display text-[56px] leading-[0.85] font-extrabold text-brand">
+          {valor}
+        </p>
+        <p className="mt-1.5 text-[11px] font-semibold tracking-[0.18em] text-apagado uppercase">
+          {rotulo}
+        </p>
+      </div>
+      <p className="numeros mb-1 text-[15px] text-suave">{resto}</p>
+    </div>
+  );
+}
+
+/**
+ * Cartão da lista. O progresso e as estatísticas vêm calculados do servidor
  * (com o `agora` recebido) para não divergir na hidratação; só o cronômetro
  * atualiza a cada segundo.
  */
@@ -27,66 +91,74 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
   const { proximo, atingidos, progresso } = situacao(marco.preset, decorrido);
   const st = impacto(marco, agora);
 
+  // Primeiras 24h: fase crítica, o cartão acende para marcar isso.
+  const inicio = decorrido < DIA;
+
   return (
     <Link
       href={`/marcos/${marco.id}`}
-      className="cartao surge block p-5 transition-colors active:bg-white/[0.07]"
+      className={`cartao surge relative block overflow-hidden p-5 transition-colors active:bg-white/[0.04] ${
+        inicio ? "border-brand/30 shadow-[0_0_40px_-14px_var(--color-brand)]" : ""
+      }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="text-xl">{marco.emoji}</span>
-          <div className="min-w-0">
-            <h3 className="truncate text-[16px] font-semibold">{marco.titulo}</h3>
-            {p.rotulo !== marco.titulo && (
-              <p className="truncate text-[12.5px] text-apagado">{p.rotulo}</p>
-            )}
+      <Brilho />
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Icone>{marco.emoji}</Icone>
+            <div className="min-w-0">
+              <h3 className="text-[17px] leading-tight font-semibold">{marco.titulo}</h3>
+              {p.rotulo !== marco.titulo && (
+                <p className="mt-0.5 truncate text-[12.5px] text-apagado">{p.rotulo}</p>
+              )}
+            </div>
           </div>
+          <span className="numeros shrink-0 rounded-full bg-white/6 px-2.5 py-1 text-[11px] font-medium text-suave">
+            {atingidos.length}/{p.marcos.length}
+          </span>
         </div>
-        <span className="shrink-0 rounded-full bg-white/6 px-2.5 py-1 text-[11px] font-medium text-suave">
-          {atingidos.length}/{p.marcos.length}
-        </span>
-      </div>
 
-      <div className="mt-4">
-        <Cronometro desde={marco.cicloInicio} tamanho="grande" />
-        <p className="mt-1 text-[13px] text-apagado">{p.sufixo}</p>
-      </div>
+        <div className="mt-5">
+          <TempoHeroi desde={marco.cicloInicio} />
+          <p className="mt-2 text-[13px] text-apagado">{p.sufixo}</p>
+        </div>
 
-      {proximo && (
-        <div className="mt-4">
-          <div className="mb-1.5 flex items-baseline justify-between text-[12px]">
-            <span className="text-apagado">
-              Próximo: <span className="text-suave">{proximo.titulo}</span>
-            </span>
-            <span className="numeros text-apagado">{rotuloMs(proximo.ms)}</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-escuro transition-[width] duration-1000"
-              style={{ width: `${Math.max(2, progresso * 100)}%` }}
+        {proximo && (
+          <div className="mt-5">
+            <Progresso
+              fracao={progresso}
+              rotulo={
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="truncate text-apagado">
+                    Próximo: <span className="text-suave">{proximo.titulo}</span>
+                  </span>
+                  <span className="numeros shrink-0 text-fantasma">{rotuloMs(proximo.ms)}</span>
+                </div>
+              }
             />
           </div>
-        </div>
-      )}
+        )}
 
-      {(st.dinheiroEconomizado || st.unidadesEvitadas) && (
-        <div className="mt-4 flex gap-4 border-t border-white/6 pt-3 text-[12.5px]">
-          {st.dinheiroEconomizado ? (
-            <span className="text-suave">
-              <span className="numeros font-semibold text-brand">
-                {reais(st.dinheiroEconomizado)}
-              </span>{" "}
-              guardados
-            </span>
-          ) : null}
-          {st.unidadesEvitadas ? (
-            <span className="text-suave">
-              <span className="numeros font-semibold text-tinta">{st.unidadesEvitadas}</span>{" "}
-              {st.unidadeNome} a menos
-            </span>
-          ) : null}
-        </div>
-      )}
+        {(st.dinheiroEconomizado || st.unidadesEvitadas) && (
+          <div className="mt-4 flex gap-5 border-t border-borda pt-3.5 text-[12.5px]">
+            {st.dinheiroEconomizado ? (
+              <span className="text-apagado">
+                <span className="numeros font-semibold text-brand">
+                  {reais(st.dinheiroEconomizado)}
+                </span>{" "}
+                guardados
+              </span>
+            ) : null}
+            {st.unidadesEvitadas ? (
+              <span className="text-apagado">
+                <span className="numeros font-semibold text-tinta">{st.unidadesEvitadas}</span>{" "}
+                {st.unidadeNome} a menos
+              </span>
+            ) : null}
+          </div>
+        )}
+      </div>
     </Link>
   );
 }

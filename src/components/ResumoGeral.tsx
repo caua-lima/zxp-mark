@@ -10,8 +10,8 @@ type Entrada = {
 };
 
 /**
- * Faixa de totais no topo da aba Marcos. Só aparece quando há mais de um
- * marco — com um só, os números já estão no cartão logo abaixo.
+ * Faixa de totais no topo da aba Marcos. Só aparece com mais de um marco —
+ * com um só, os números já estão no cartão logo abaixo.
  */
 export function ResumoGeral({ marcos, agora }: { marcos: Entrada[]; agora: number }) {
   if (marcos.length < 2) return null;
@@ -37,24 +37,33 @@ export function ResumoGeral({ marcos, agora }: { marcos: Entrada[]; agora: numbe
     void preset(m.preset);
   }
 
-  const itens: [string, string][] = [
-    ["Marcos batidos", String(conquistados)],
-    ["Maior sequência", duracaoExtenso(melhor)],
+  const itens: [string, string, boolean][] = [
+    ["Marcos batidos", String(conquistados), false],
+    ["Maior sequência", duracaoExtenso(melhor), false],
   ];
-  if (dinheiro >= 1) itens.unshift(["Economizado", reais(dinheiro)]);
+  if (dinheiro >= 1) itens.unshift(["Economizado", reais(dinheiro), true]);
 
   return (
-    <section className="cartao mb-4 flex divide-x divide-borda px-1 py-3.5">
-      {itens.map(([rotulo, valor], i) => (
-        <div key={rotulo} className="flex-1 px-3 text-center">
+    <section className="cartao relative mb-4 flex overflow-hidden px-1 py-4">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-20 left-1/2 size-48 -translate-x-1/2 rounded-full bg-brand/8 blur-3xl"
+      />
+      {itens.map(([rotulo, valor, destaque], i) => (
+        <div
+          key={rotulo}
+          className={`relative flex-1 px-3 text-center ${i > 0 ? "border-l border-borda" : ""}`}
+        >
           <p
-            className={`numeros text-[17px] leading-tight font-semibold ${
-              i === 0 && dinheiro >= 1 ? "text-brand" : "text-tinta"
+            className={`numeros font-display text-[18px] leading-tight font-bold ${
+              destaque ? "text-brand" : "text-tinta"
             }`}
           >
             {valor}
           </p>
-          <p className="mt-1 text-[10.5px] tracking-wide text-apagado uppercase">{rotulo}</p>
+          <p className="mt-1 text-[10px] font-semibold tracking-[0.1em] text-apagado uppercase">
+            {rotulo}
+          </p>
         </div>
       ))}
     </section>

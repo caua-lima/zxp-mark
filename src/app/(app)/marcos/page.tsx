@@ -51,7 +51,7 @@ export default async function PaginaMarcos() {
       {marcos.length === 0 ? (
         <Vazio />
       ) : (
-        <div className="space-y-3.5">
+        <div className="space-y-4">
           {marcos.map((m) => (
             <CartaoMarco
               key={m.id}
@@ -74,8 +74,9 @@ export default async function PaginaMarcos() {
       {marcos.length > 0 && (
         <Link
           href="/ajuda?sos=1"
-          className="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-perigo/25 bg-perigo/10 py-4 text-[15px] font-semibold text-perigo active:bg-perigo/20"
+          className="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-perigo/25 bg-perigo/[0.08] py-4 text-[15px] font-semibold text-perigo transition-colors active:bg-perigo/20"
         >
+          <span className="text-lg">🆘</span>
           Estou com vontade agora
         </Link>
       )}
@@ -86,7 +87,7 @@ export default async function PaginaMarcos() {
 function Vazio() {
   return (
     <div className="cartao px-6 py-10 text-center">
-      <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-2xl">
+      <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/12 text-2xl">
         🔥
       </div>
       <h2 className="text-[17px] font-semibold">O relógio começa quando você quiser</h2>
