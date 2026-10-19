@@ -174,7 +174,7 @@ function CartaoContagem({
 
         {alvo > agora && (
           <div className="mt-5">
-            <Progresso fracao={progresso} percentual />
+            <Progresso fracao={progresso} percentual sufixo="do caminho" />
           </div>
         )}
 

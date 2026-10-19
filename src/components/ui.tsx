@@ -239,15 +239,20 @@ export function Brilho({ className = "-top-16 -left-10 size-56" }: { className?:
   );
 }
 
-/** Barra de progresso com percentual opcional à direita. */
+/**
+ * Barra de progresso com percentual opcional à direita. O `sufixo` existe
+ * porque "68%" sozinho não diz percentual de quê — "68% do caminho", sim.
+ */
 export function Progresso({
   fracao,
   rotulo,
   percentual,
+  sufixo,
 }: {
   fracao: number;
   rotulo?: React.ReactNode;
   percentual?: boolean;
+  sufixo?: string;
 }) {
   const pct = Math.round(Math.max(0, Math.min(1, fracao)) * 100);
   return (
@@ -260,7 +265,9 @@ export function Progresso({
         />
       </div>
       {percentual && (
-        <p className="numeros mt-1.5 text-right text-[11px] text-fantasma">{pct}%</p>
+        <p className="numeros mt-1.5 text-right text-[11px] text-fantasma">
+          {pct}%{sufixo ? " " + sufixo : ""}
+        </p>
       )}
     </div>
   );
