@@ -150,3 +150,118 @@ export function SeletorHora({
     </label>
   );
 }
+
+/* ------------------------- primitivos de layout -------------------------- */
+
+/**
+ * Emoji numa caixa com tinta da marca. É o que dá peso ao item numa lista e
+ * faz Marcos, Contagens e Conquistas parecerem o mesmo app.
+ */
+export function Icone({
+  children,
+  tamanho = "md",
+  apagado,
+}: {
+  children: React.ReactNode;
+  tamanho?: "sm" | "md" | "lg";
+  apagado?: boolean;
+}) {
+  const medida = { sm: "size-9 text-base", md: "size-11 text-xl", lg: "size-14 text-2xl" }[tamanho];
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-2xl ${medida} ${
+        apagado ? "bg-white/[0.05]" : "bg-brand/12"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Cabeçalho de seção: rótulo pequeno à esquerda, ação opcional à direita. */
+export function Secao({
+  titulo,
+  acao,
+  className = "",
+}: {
+  titulo: string;
+  acao?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`mb-3 flex items-baseline justify-between gap-3 ${className}`}>
+      <h2 className="text-[12px] font-semibold tracking-[0.12em] text-apagado uppercase">
+        {titulo}
+      </h2>
+      {acao}
+    </div>
+  );
+}
+
+/**
+ * Número grande com rótulo embaixo — o padrão de destaque do app, nascido no
+ * cartão de contagem. `aceso` liga a cor da marca.
+ */
+export function NumeroHeroi({
+  valor,
+  rotulo,
+  aceso = true,
+  tamanho = "lg",
+}: {
+  valor: string;
+  rotulo: string;
+  aceso?: boolean;
+  tamanho?: "md" | "lg";
+}) {
+  return (
+    <div>
+      <p
+        className={`numeros font-display leading-[0.85] font-extrabold ${
+          tamanho === "lg" ? "text-[64px]" : "text-[40px]"
+        } ${aceso ? "text-brand" : "text-tinta"}`}
+      >
+        {valor}
+      </p>
+      <p className="mt-1.5 text-[11px] font-semibold tracking-[0.18em] text-apagado uppercase">
+        {rotulo}
+      </p>
+    </div>
+  );
+}
+
+/** Brilho difuso no canto do cartão — profundidade sem desenhar nada. */
+export function Brilho({ className = "-top-16 -left-10 size-56" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute rounded-full bg-brand/10 blur-3xl ${className}`}
+    />
+  );
+}
+
+/** Barra de progresso com percentual opcional à direita. */
+export function Progresso({
+  fracao,
+  rotulo,
+  percentual,
+}: {
+  fracao: number;
+  rotulo?: React.ReactNode;
+  percentual?: boolean;
+}) {
+  const pct = Math.round(Math.max(0, Math.min(1, fracao)) * 100);
+  return (
+    <div>
+      {rotulo && <div className="mb-1.5 text-[12px]">{rotulo}</div>}
+      <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-brand-escuro to-brand transition-[width] duration-1000"
+          style={{ width: `${Math.max(1.5, pct)}%` }}
+        />
+      </div>
+      {percentual && (
+        <p className="numeros mt-1.5 text-right text-[11px] text-fantasma">{pct}%</p>
+      )}
+    </div>
+  );
+}
