@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Aviso, Botao, Campo, Chave } from "@/components/ui";
+import { Aviso, Botao, Brilho, Campo, Chave, Icone, Secao } from "@/components/ui";
 import { dataLonga } from "@/lib/formato";
 
 export type Eu = { id: string; nome: string; email: string; admin: boolean; trocarSenha: boolean };
@@ -27,9 +27,12 @@ export function Acesso({ eu }: { eu: Eu }) {
       </header>
 
       {eu.trocarSenha && (
-        <p className="surge rounded-2xl border border-brand/25 bg-brand/[0.08] px-4 py-3.5 text-[13.5px] leading-relaxed text-brand">
-          Sua senha foi definida por um administrador. Troque agora por uma só sua.
-        </p>
+        <div className="surge flex items-start gap-3 rounded-2xl border border-brand/25 bg-brand/[0.08] px-4 py-3.5">
+          <span className="text-lg leading-none">🔑</span>
+          <p className="text-[13.5px] leading-relaxed text-brand">
+            Sua senha foi definida por um administrador. Troque agora por uma só sua.
+          </p>
+        </div>
       )}
 
       <MinhaSenha />
@@ -37,10 +40,15 @@ export function Acesso({ eu }: { eu: Eu }) {
       {eu.admin ? (
         <Usuarios euId={eu.id} />
       ) : (
-        <p className="cartao p-5 text-[13.5px] leading-relaxed text-apagado">
-          Só administradores podem criar ou editar outros acessos. Se precisar de um acesso novo,
-          fale com quem administra o app.
-        </p>
+        <div className="cartao flex items-start gap-3 p-5">
+          <Icone tamanho="sm" apagado>
+            🔒
+          </Icone>
+          <p className="text-[13.5px] leading-relaxed text-apagado">
+            Só administradores podem criar ou editar outros acessos. Se precisar de um acesso
+            novo, fale com quem administra o app.
+          </p>
+        </div>
       )}
     </main>
   );
@@ -93,8 +101,9 @@ function MinhaSenha() {
   }
 
   return (
-    <form onSubmit={enviar} className="cartao space-y-3 p-5">
-      <h2 className="text-[15px] font-semibold">Minha senha</h2>
+    <form onSubmit={enviar} className="cartao relative space-y-3 overflow-hidden p-5">
+      <Brilho className="-top-20 -right-12 size-48" />
+      <Secao titulo="Minha senha" className="relative mb-0" />
       <Campo
         rotulo="Senha atual"
         type="password"
@@ -162,20 +171,20 @@ function Usuarios({ euId }: { euId: string }) {
   return (
     <>
       <section className="cartao p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-[15px] font-semibold">
-            Acessos {lista && <span className="text-apagado">({lista.length})</span>}
-          </h2>
-          <button
-            onClick={() => {
-              setCriando((v) => !v);
-              setEditando(null);
-            }}
-            className="rounded-xl bg-brand px-3.5 py-2 text-[13px] font-semibold text-brand-ink active:bg-brand-escuro"
-          >
-            {criando ? "Cancelar" : "+ Novo"}
-          </button>
-        </div>
+        <Secao
+          titulo={lista ? `Acessos · ${lista.length}` : "Acessos"}
+          acao={
+            <button
+              onClick={() => {
+                setCriando((v) => !v);
+                setEditando(null);
+              }}
+              className="rounded-full bg-brand px-3.5 py-1.5 text-[12.5px] font-semibold text-brand-ink transition-colors active:bg-brand-escuro"
+            >
+              {criando ? "Cancelar" : "+ Novo"}
+            </button>
+          }
+        />
 
         <Aviso>{erro}</Aviso>
 
@@ -227,8 +236,15 @@ function LinhaUsuario({
 }) {
   return (
     <div className="py-3.5">
-      <button onClick={aoAbrir} className="flex w-full items-start justify-between gap-3 text-left">
-        <span className="min-w-0">
+      <button onClick={aoAbrir} className="flex w-full items-start gap-3 text-left">
+        <span
+          className={`font-display mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-2xl text-[15px] font-bold ${
+            usuario.admin ? "bg-brand/12 text-brand" : "bg-white/[0.05] text-suave"
+          }`}
+        >
+          {usuario.nome.trim().charAt(0).toUpperCase() || "?"}
+        </span>
+        <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
             <span className="truncate text-[15px] font-medium text-tinta">{usuario.nome}</span>
             {usuario.admin && (
@@ -246,7 +262,9 @@ function LinhaUsuario({
               : "nunca entrou"}
           </span>
         </span>
-        <span className={`shrink-0 text-apagado transition-transform ${aberto ? "rotate-90" : ""}`}>
+        <span
+          className={`mt-2 shrink-0 text-fantasma transition-transform ${aberto ? "rotate-90" : ""}`}
+        >
           ›
         </span>
       </button>
