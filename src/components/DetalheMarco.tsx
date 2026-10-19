@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Area, Aviso, Botao, Campo } from "@/components/ui";
+import { Area, Aviso, Botao, Brilho, Campo, Secao } from "@/components/ui";
 import { Cronometro } from "@/components/Cronometro";
 import { preset, situacao } from "@/lib/habitos";
 import { dataLonga, duracaoExtenso, impacto, reais, rotuloMs } from "@/lib/formato";
@@ -47,7 +47,8 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
       </header>
 
       {/* --------------------------- cronômetro --------------------------- */}
-      <section className="cartao relative overflow-hidden p-6 text-center">
+      <section className="cartao relative overflow-hidden p-7 text-center">
+        <Brilho className="-top-24 left-1/2 size-64 -translate-x-1/2" />
         <Anel progresso={progresso} />
         <div className="relative">
           <span className="text-3xl">{marco.emoji}</span>
@@ -65,7 +66,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
       {/* ------------------------- próximo marco -------------------------- */}
       {proximo ? (
         <section className="cartao mt-3.5 p-5">
-          <p className="text-[12px] font-medium tracking-wide text-apagado uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-apagado uppercase">
             Próximo marco
           </p>
           <h2 className="mt-1.5 text-[17px] font-semibold text-brand">{proximo.titulo}</h2>
@@ -128,7 +129,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
 
       {marco.porque && (
         <section className="cartao mt-3.5 border-brand/20 bg-brand/[0.05] p-5">
-          <p className="text-[12px] font-medium tracking-wide text-brand/70 uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-brand/75 uppercase">
             Seu porquê
           </p>
           <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-line text-brand">
@@ -182,7 +183,7 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
 
       {/* --------------------------- linha do tempo ----------------------- */}
       <section className="mt-6">
-        <h2 className="mb-3 text-[13px] font-medium text-suave">Linha do tempo</h2>
+        <Secao titulo="Linha do tempo" />
         <ol className="relative space-y-0 border-l border-white/10 pl-5">
           {p.marcos.map((m) => {
             const batido = m.ms <= decorrido;
@@ -229,10 +230,10 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
 
       {marco.recaidas.length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-3 text-[13px] font-medium text-suave">
-            Histórico de recaídas
-            <span className="ml-2 font-normal text-fantasma">— dado, não fracasso</span>
-          </h2>
+          <Secao
+            titulo="Histórico de recaídas"
+            acao={<span className="text-[12px] text-fantasma">dado, não fracasso</span>}
+          />
           <div className="space-y-2">
             {marco.recaidas.map((r) => (
               <div key={r.id} className="cartao p-4">
@@ -295,9 +296,9 @@ function Estatistica({
 }) {
   return (
     <div className="cartao p-4">
-      <p className="text-[11.5px] tracking-wide text-apagado uppercase">{rotulo}</p>
+      <p className="text-[10px] font-semibold tracking-[0.1em] text-apagado uppercase">{rotulo}</p>
       <p
-        className={`numeros mt-1.5 text-[19px] leading-tight font-semibold ${
+        className={`numeros font-display mt-2 text-[19px] leading-tight font-bold ${
           destaque ? "text-brand" : "text-tinta"
         }`}
       >

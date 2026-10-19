@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Cronometro } from "@/components/Cronometro";
 import { Respiracao } from "@/components/Respiracao";
+import { Brilho, Icone } from "@/components/ui";
 import { duracaoExtenso } from "@/lib/formato";
 
 export type Msg = { id: string; papel: "user" | "assistant"; conteudo: string };
@@ -143,9 +144,10 @@ export function Chat({ inicial, situacao }: { inicial: Msg[]; situacao: Situacao
 
       {/* O número fica à vista o tempo todo — é o argumento mais forte que existe. */}
       {situacao.cicloInicio && (
-        <div className="cartao mb-3 flex items-center gap-3 px-4 py-3">
-          <span className="text-lg">{situacao.emoji}</span>
-          <div className="min-w-0 flex-1">
+        <div className="cartao relative mb-3 flex items-center gap-3 overflow-hidden px-4 py-3.5">
+          <Brilho className="-top-12 -left-8 size-40" />
+          <Icone tamanho="sm">{situacao.emoji}</Icone>
+          <div className="relative min-w-0 flex-1">
             <div className="text-[15px] font-semibold">
               <Cronometro desde={situacao.cicloInicio} tamanho="medio" />
             </div>
@@ -195,8 +197,9 @@ export function Chat({ inicial, situacao }: { inicial: Msg[]; situacao: Situacao
         {!respirando && (
           <button
             onClick={() => setRespirando(true)}
-            className="rounded-full border border-brand/30 bg-brand/10 px-3.5 py-2 text-[13px] font-medium text-brand active:bg-brand/20"
+            className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3.5 py-2 text-[13px] font-medium text-brand transition-colors active:bg-brand/20"
           >
+            <span>🫁</span>
             Respirar 4-7-8
           </button>
         )}
@@ -205,7 +208,7 @@ export function Chat({ inicial, situacao }: { inicial: Msg[]; situacao: Situacao
             <button
               key={s}
               onClick={() => enviar(s)}
-              className="rounded-full border border-borda bg-white/[0.04] px-3.5 py-2 text-[13px] text-suave active:bg-white/[0.08]"
+              className="rounded-full border border-borda bg-white/[0.04] px-3.5 py-2 text-[13px] text-suave transition-colors active:bg-white/[0.08]"
             >
               {s}
             </button>
@@ -263,8 +266,8 @@ function Balao({ papel, texto }: { papel: "user" | "assistant"; texto: string })
       <div
         className={`max-w-[85%] rounded-3xl px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap ${
           meu
-            ? "rounded-br-lg bg-brand text-brand-ink"
-            : "rounded-bl-lg border border-white/8 bg-white/[0.06] text-tinta"
+            ? "rounded-br-md bg-brand text-brand-ink shadow-lg shadow-brand/20"
+            : "rounded-bl-md border border-borda bg-superficie/80 text-tinta"
         }`}
       >
         {texto}
@@ -276,7 +279,7 @@ function Balao({ papel, texto }: { papel: "user" | "assistant"; texto: string })
 function Abertura({ temMarcos }: { temMarcos: boolean }) {
   return (
     <div className="cartao px-5 py-7 text-center">
-      <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-2xl">
+      <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/12 text-2xl">
         💬
       </div>
       <h2 className="text-[17px] font-semibold">Fala comigo</h2>
