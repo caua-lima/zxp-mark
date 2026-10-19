@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
-import { usuarioId } from "@/lib/auth";
+import { sessaoValida } from "@/lib/auth";
 import { TabBar } from "@/components/TabBar";
 import { RegistrarSW, VerificarAoAbrir } from "@/components/Push";
 
 export const dynamic = "force-dynamic";
 
 export default async function LayoutApp({ children }: { children: React.ReactNode }) {
-  if (!(await usuarioId())) redirect("/entrar");
+  // Cookie bom com usuário apagado mandava a pessoa pra /entrar, que via o
+  // mesmo cookie e mandava de volta pra /marcos — um vai-e-vem sem saída.
+  if (!(await sessaoValida())) redirect("/entrar");
 
   return (
     <>

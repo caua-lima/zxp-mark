@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { usuarioId } from "@/lib/auth";
+import { sessaoValida } from "@/lib/auth";
 import { FormAuth } from "@/components/FormAuth";
 import { cadastroAberto } from "@/lib/config";
 import { prisma } from "@/lib/db";
@@ -9,7 +9,7 @@ import { Brilho } from "@/components/ui";
 export const dynamic = "force-dynamic";
 
 export default async function Entrar() {
-  if (await usuarioId()) redirect("/marcos");
+  if (await sessaoValida()) redirect("/marcos");
   const aberto = cadastroAberto() || (await prisma.user.count()) === 0;
 
   return (

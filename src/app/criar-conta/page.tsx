@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { usuarioId } from "@/lib/auth";
+import { sessaoValida } from "@/lib/auth";
 import { cadastroAberto } from "@/lib/config";
 import { prisma } from "@/lib/db";
 import { FormAuth } from "@/components/FormAuth";
@@ -15,7 +15,7 @@ const PROMESSAS = [
 ];
 
 export default async function CriarConta() {
-  if (await usuarioId()) redirect("/marcos");
+  if (await sessaoValida()) redirect("/marcos");
   if (!cadastroAberto() && (await prisma.user.count()) > 0) redirect("/entrar");
 
   return (

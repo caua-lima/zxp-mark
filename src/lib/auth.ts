@@ -57,6 +57,20 @@ export async function usuarioId(): Promise<string | null> {
   }
 }
 
+/**
+ * Id do usuário logado **que ainda existe no banco**.
+ *
+ * `usuarioId` confia só no JWT, e o JWT sobrevive ao usuário: um acesso
+ * apagado deixa um cookie válido por 60 dias apontando para ninguém. Quem
+ * for decidir se deixa entrar precisa desta aqui.
+ */
+export async function sessaoValida(): Promise<string | null> {
+  const id = await usuarioId();
+  if (!id) return null;
+  const existe = await prisma.user.findUnique({ where: { id }, select: { id: true } });
+  return existe ? id : null;
+}
+
 export type Usuario = NonNullable<Awaited<ReturnType<typeof usuarioAtual>>>;
 
 /** Usuário logado completo, ou null. */
