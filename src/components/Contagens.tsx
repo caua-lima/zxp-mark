@@ -6,6 +6,7 @@ import {
   Area,
   Aviso,
   Botao,
+  BotaoEditar,
   Brilho,
   Campo,
   Chave,
@@ -159,13 +160,7 @@ function CartaoContagem({
               <p className="mt-0.5 text-[12.5px] text-apagado">{dataLonga(contagem.alvo)}</p>
             </div>
           </div>
-          <button
-            onClick={() => setPainel((v) => !v)}
-            className="shrink-0 px-1 text-[18px] leading-none text-fantasma active:text-suave"
-            aria-label="Opções"
-          >
-            ⋯
-          </button>
+          <BotaoEditar aoClicar={() => setPainel((v) => !v)} aberto={painel} />
         </div>
 
         <div className="mt-5">
@@ -192,7 +187,17 @@ function CartaoContagem({
         )}
 
         {painel && (
-          <div className="surge mt-4 space-y-1 border-t border-borda pt-2">
+          <div className="surge mt-4 border-t border-borda pt-4">
+            <FormEditarContagem
+              contagem={contagem}
+              aoSalvar={() => {
+                setPainel(false);
+                aoMudar();
+              }}
+            />
+
+            <Secao titulo="Avisos" className="mt-6 mb-1" />
+            <div className="space-y-1">
             <Chave
               ligado={diario}
               aoMudar={(v) => {
@@ -212,7 +217,8 @@ function CartaoContagem({
                 }}
               />
             )}
-            <div className="flex items-center justify-between gap-3 border-t border-borda pt-3.5">
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3 border-t border-borda pt-3.5">
               <span className="text-[13px] text-apagado">Apagar esta contagem?</span>
               <div className="flex gap-2">
                 <button
@@ -234,6 +240,126 @@ function CartaoContagem({
         )}
       </div>
     </div>
+  );
+}
+
+/** Data e hora locais de um instante, nos formatos que <input date/time> pede. */
+function partesLocais(iso: string) {
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return {
+    data: `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`,
+    hora: `${p(d.getHours())}:${p(d.getMinutes())}`,
+  };
+}
+
+function FormEditarContagem({
+  contagem,
+  aoSalvar,
+}: {
+  contagem: Contagem;
+  aoSalvar: () => void;
+}) {
+  const inicial = useMemo(() => partesLocais(contagem.alvo), [contagem.alvo]);
+  const [titulo, setTitulo] = useState(contagem.titulo);
+  const [descricao, setDescricao] = useState(contagem.descricao ?? "");
+  const [data, setData] = useState(inicial.data);
+  const [hora, setHora] = useState(inicial.hora);
+  const [erro, setErro] = useState("");
+  const [ocupado, setOcupado] = useState(false);
+
+  // Mesmo comportamento do cadastro: o ícone acompanha o que se escreve.
+  const icone = useMemo(() => iconePara(titulo, descricao), [titulo, descricao]);
+
+  async function enviar(e: React.FormEvent) {
+    e.preventDefault();
+    setErro("");
+
+    const alvo = new Date(`${data}T${hora || "09:00"}`);
+    if (Number.isNaN(alvo.getTime())) {
+      setErro("Escolha uma data válida.");
+      return;
+    }
+
+    // Só manda o que mudou. Mandar `alvo` igual ao que já existe faria a API
+    // tratar como data nova e liberar de novo todos os avisos já enviados.
+    const patch: Record<string, unknown> = {};
+    if (titulo.trim() !== contagem.titulo) patch.titulo = titulo.trim();
+    if (descricao.trim() !== (contagem.descricao ?? "")) {
+      patch.descricao = descricao.trim() || null;
+    }
+    if (alvo.getTime() !== new Date(contagem.alvo).getTime()) {
+      patch.alvo = alvo.toISOString();
+    }
+
+    if (Object.keys(patch).length === 0) {
+      aoSalvar();
+      return;
+    }
+
+    setOcupado(true);
+    try {
+      const r = await fetch(`/api/contagens/${contagem.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!r.ok) {
+        setErro((await r.json().catch(() => null))?.erro ?? "Não consegui salvar.");
+        return;
+      }
+      aoSalvar();
+    } catch {
+      setErro("Sem conexão com o servidor.");
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  return (
+    <form onSubmit={enviar} className="space-y-3.5">
+      <Secao titulo="Editar contagem" className="mb-0" />
+
+      <div className="flex items-end gap-3">
+        <div className="flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-borda bg-white/[0.03] text-2xl">
+          {icone}
+        </div>
+        <div className="min-w-0 flex-1">
+          <Campo
+            rotulo="O que é?"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            maxLength={80}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[1fr_auto] gap-2.5">
+        <Campo
+          rotulo="Data"
+          type="date"
+          value={data}
+          onChange={(e) => setData(e.target.value)}
+          required
+        />
+        <Campo rotulo="Hora" type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
+      </div>
+
+      <Area
+        rotulo="Detalhe (opcional)"
+        value={descricao}
+        onChange={(e) => setDescricao(e.target.value)}
+        rows={2}
+        maxLength={500}
+      />
+
+      <Aviso>{erro}</Aviso>
+
+      <Botao type="submit" carregando={ocupado} className="w-full">
+        Salvar alterações
+      </Botao>
+    </form>
   );
 }
 
