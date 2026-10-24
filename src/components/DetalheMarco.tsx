@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Area, Aviso, Botao, Brilho, Campo, Secao } from "@/components/ui";
+import { Area, Aviso, Botao, BotaoEditar, Brilho, Campo, Secao } from "@/components/ui";
 import { Cronometro } from "@/components/Cronometro";
 import { preset, situacao } from "@/lib/habitos";
 import { dataLonga, duracaoExtenso, impacto, reais, rotuloMs } from "@/lib/formato";
@@ -22,9 +22,30 @@ export type MarcoDetalhe = {
   recaidas: { id: string; quando: string; duracaoMs: number; gatilho: string | null; nota: string | null }[];
 };
 
-export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: number }) {
+export function DetalheMarco({
+  marco,
+  agora,
+  abrirEdicao = false,
+}: {
+  marco: MarcoDetalhe;
+  agora: number;
+  /** vindo do lápis da lista: já cai com o painel de edição aberto */
+  abrirEdicao?: boolean;
+}) {
   const router = useRouter();
-  const [painel, setPainel] = useState<"nenhum" | "recaida" | "ajustar" | "excluir">("nenhum");
+  const [painel, setPainel] = useState<"nenhum" | "recaida" | "ajustar" | "excluir">(
+    abrirEdicao ? "ajustar" : "nenhum"
+  );
+
+  // O painel mora abaixo do cronômetro, fora da tela no celular: sem rolar até
+  // ele, tocar em Editar parecia não fazer nada.
+  useEffect(() => {
+    if (painel !== "ajustar") return;
+    const reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document
+      .getElementById("painel-edicao")
+      ?.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "start" });
+  }, [painel]);
 
   const decorrido = Math.max(0, agora - new Date(marco.cicloInicio).getTime());
   const p = preset(marco.preset);
@@ -38,12 +59,10 @@ export function DetalheMarco({ marco, agora }: { marco: MarcoDetalhe; agora: num
         <Link href="/marcos" className="text-[14px] text-apagado active:text-suave">
           ← Marcos
         </Link>
-        <button
-          onClick={() => setPainel(painel === "ajustar" ? "nenhum" : "ajustar")}
-          className="text-[14px] text-apagado active:text-suave"
-        >
-          Ajustes
-        </button>
+        <BotaoEditar
+          aoClicar={() => setPainel(painel === "ajustar" ? "nenhum" : "ajustar")}
+          aberto={painel === "ajustar"}
+        />
       </header>
 
       {/* --------------------------- cronômetro --------------------------- */}
@@ -431,13 +450,16 @@ function PainelAjustes({
         setErro("Data inválida.");
         return;
       }
+      // O campo só tem precisão de minuto: reenviar o valor intocado encurtaria
+      // os segundos do início e, pior, contaria como correção de data.
+      const dataMudou = inicio !== local(marco.cicloInicio);
       const r = await fetch(`/api/marcos/${marco.id}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           titulo: titulo.trim(),
           porque: porque.trim() || null,
-          cicloInicio: d.toISOString(),
+          ...(dataMudou ? { cicloInicio: d.toISOString() } : {}),
           unidadesPorDia: unidades ? Number(unidades.replace(",", ".")) : null,
           gastoDiario: gasto ? Number(gasto.replace(",", ".")) : null,
         }),
@@ -459,8 +481,8 @@ function PainelAjustes({
   }
 
   return (
-    <section className="cartao surge mt-3.5 space-y-3.5 p-5">
-      <h2 className="text-[16px] font-semibold">Ajustes</h2>
+    <section id="painel-edicao" className="cartao surge mt-3.5 scroll-mt-4 space-y-3.5 p-5">
+      <Secao titulo="Editar marco" className="mb-0" />
 
       <Campo
         rotulo="Nome"

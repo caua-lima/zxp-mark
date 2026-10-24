@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Brilho, Icone, Progresso } from "@/components/ui";
+import { Brilho, Icone, IconeLapis, Progresso } from "@/components/ui";
 import { preset, situacao, DIA } from "@/lib/habitos";
 import { duracao, impacto, reais, rotuloMs } from "@/lib/formato";
 
@@ -100,9 +100,10 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
   const inicio = decorrido < DIA;
 
   return (
+    <div className="surge relative">
     <Link
       href={`/marcos/${marco.id}`}
-      className={`cartao surge relative block overflow-hidden p-5 transition-colors active:bg-white/[0.04] ${
+      className={`cartao relative block overflow-hidden p-5 transition-colors active:bg-white/[0.04] ${
         inicio ? "border-brand/30 shadow-[0_0_40px_-14px_var(--color-brand)]" : ""
       }`}
     >
@@ -119,9 +120,8 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
               )}
             </div>
           </div>
-          <span className="numeros shrink-0 rounded-full bg-white/6 px-2.5 py-1 text-[11px] font-medium text-suave">
-            {atingidos.length}/{p.marcos.length}
-          </span>
+          {/* reserva o espaço do selo e do lápis, que ficam fora do Link */}
+          <span aria-hidden className="w-[88px] shrink-0" />
         </div>
 
         <div className="mt-5">
@@ -168,5 +168,21 @@ export function CartaoMarco({ marco, agora }: { marco: MarcoResumo; agora: numbe
         )}
       </div>
     </Link>
+
+    {/* Fora do Link: <a> dentro de <a> é inválido e o toque iria pro lugar errado.
+        O contêiner deixa o toque passar para o cartão; só o lápis o captura. */}
+    <div className="pointer-events-none absolute top-5 right-5 flex items-center gap-2">
+      <span className="numeros rounded-full bg-white/6 px-2.5 py-1 text-[11px] font-medium text-suave">
+        {atingidos.length}/{p.marcos.length}
+      </span>
+      <Link
+        href={`/marcos/${marco.id}?editar=1`}
+        aria-label={`Editar ${marco.titulo}`}
+        className="pointer-events-auto flex size-8 items-center justify-center rounded-full border border-borda bg-white/[0.04] text-suave transition-colors active:bg-white/[0.1]"
+      >
+        <IconeLapis className="size-3.5" />
+      </Link>
+    </div>
+    </div>
   );
 }
