@@ -34,7 +34,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const { cicloInicio, ...resto } = dados.data;
   const patch: Record<string, unknown> = { ...resto };
 
-  if (cicloInicio) {
+  // Mesmo instante que já está no banco não é correção: tratar como tal
+  // apagaria os avisos já enviados e todo marco antigo seria notificado de novo.
+  if (cicloInicio && new Date(cicloInicio).getTime() !== atual.cicloInicio.getTime()) {
     const d = new Date(cicloInicio);
     if (d.getTime() > Date.now() + 60_000) {
       return NextResponse.json({ erro: "A data não pode ser no futuro." }, { status: 400 });
