@@ -275,3 +275,53 @@ export function Progresso({
     </div>
   );
 }
+
+/** Lápis desenhado à mão: o emoji muda de cara em cada sistema. */
+export function IconeLapis({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z" />
+      <path d="m14.5 7.5 3 3" />
+    </svg>
+  );
+}
+
+/**
+ * Botão de editar, sempre com o rótulo: um "⋯" ou um "Ajustes" cinza no canto
+ * não se acha, e quem quer corrigir uma data erra a procura antes de errar o
+ * toque. `aberto` acende o botão enquanto o painel de edição está na tela.
+ */
+export function BotaoEditar({
+  aoClicar,
+  aberto,
+  rotulo = "Editar",
+}: {
+  aoClicar: () => void;
+  aberto?: boolean;
+  rotulo?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={aoClicar}
+      aria-expanded={aberto}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+        aberto
+          ? "border-brand/40 bg-brand/15 text-brand"
+          : "border-borda bg-white/[0.04] text-suave active:bg-white/[0.08]"
+      }`}
+    >
+      <IconeLapis className="size-3.5" />
+      {aberto ? "Fechar" : rotulo}
+    </button>
+  );
+}
