@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   diasComRegistro,
+  diasRegistrados,
   diasDesdeUltimoRegistro,
   duracaoMs,
   formatarDuracao,
@@ -177,4 +178,18 @@ test("formatarDuracao", () => {
   assert.equal(formatarDuracao(8 * HORA_MS), "8h");
   assert.equal(formatarDuracao(6.25 * HORA_MS), "6h 15min");
   assert.equal(formatarDuracao(-5), "0min");
+});
+
+test("diasRegistrados: dias distintos em ordem; o n-ésimo é o dia de 'n noites registradas'", () => {
+  const registros = [
+    { acordouEm: em("2026-10-20T07:00") },
+    { acordouEm: em("2026-10-02T07:00") },
+    { acordouEm: em("2026-10-20T14:00") }, // mesmo dia do primeiro: não conta de novo
+    { acordouEm: em("2026-10-10T07:00") },
+  ];
+  assert.deepEqual(diasRegistrados(registros, SP), ["2026-10-02", "2026-10-10", "2026-10-20"]);
+  assert.equal(diasRegistrados(registros, SP).length, diasComRegistro(registros, SP));
+  assert.deepEqual(diasRegistrados([], SP), []);
+  // o fuso decide o dia: 01:30 UTC de 26/out ainda é 25/out em São Paulo
+  assert.deepEqual(diasRegistrados([{ acordouEm: new Date("2026-10-26T01:30:00Z") }], SP), ["2026-10-25"]);
 });
