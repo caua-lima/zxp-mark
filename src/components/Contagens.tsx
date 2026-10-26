@@ -19,6 +19,7 @@ import { RegressivaHeroi } from "@/components/Cronometro";
 import { dataLonga } from "@/lib/formato";
 import { iconePara } from "@/lib/deteccao";
 import { DIA } from "@/lib/habitos";
+import { estadoRegressiva } from "@/lib/datas";
 
 export type Contagem = {
   id: string;
@@ -33,20 +34,30 @@ export type Contagem = {
   notificar: boolean;
 };
 
-export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: number }) {
+export function Contagens({
+  inicial,
+  arquivadas,
+  agora,
+  fuso,
+}: {
+  inicial: Contagem[];
+  arquivadas: Contagem[];
+  agora: number;
+  fuso: string;
+}) {
   const router = useRouter();
-  const [criando, setCriando] = useState(inicial.length === 0);
+  const [criando, setCriando] = useState(inicial.length === 0 && arquivadas.length === 0);
 
-  const futuras = inicial.filter((c) => new Date(c.alvo).getTime() > agora);
-  const passadas = inicial.filter((c) => new Date(c.alvo).getTime() <= agora);
+  // "Já aconteceram" é o que ficou para trás no CALENDÁRIO: uma contagem cujo
+  // horário passou hoje ainda é "hoje", não "concluída".
+  const concluida = (c: Contagem) => estadoRegressiva(new Date(c.alvo), agora, fuso).tipo === "concluida";
+  const futuras = inicial.filter((c) => !concluida(c));
+  const passadas = inicial.filter(concluida);
 
   return (
-    <main>
-      <header className="mb-5 flex items-end justify-between gap-3">
-        <div>
-          <p className="text-[13px] text-apagado">O que você está esperando</p>
-          <h1 className="text-[26px] font-semibold tracking-tight">Contagens</h1>
-        </div>
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="text-[13px] text-apagado">O que você está esperando</p>
         <button
           onClick={() => setCriando((v) => !v)}
           className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-light text-brand-ink shadow-lg shadow-brand/25 transition-transform active:scale-95 active:bg-brand-escuro"
@@ -54,7 +65,7 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
         >
           {criando ? "×" : "+"}
         </button>
-      </header>
+      </div>
 
       {criando && (
         <FormContagem
@@ -80,36 +91,110 @@ export function Contagens({ inicial, agora }: { inicial: Contagem[]; agora: numb
 
       <div className="space-y-4">
         {futuras.map((c) => (
-          <CartaoContagem key={c.id} contagem={c} agora={agora} aoMudar={() => router.refresh()} />
+          <CartaoContagem
+            key={c.id}
+            contagem={c}
+            agora={agora}
+            fuso={fuso}
+            aoMudar={() => router.refresh()}
+          />
         ))}
       </div>
 
       {passadas.length > 0 && (
         <>
           <Secao titulo="Já aconteceram" className="mt-7" />
-          <div className="space-y-4 opacity-55">
+          <div className="space-y-4">
             {passadas.map((c) => (
               <CartaoContagem
                 key={c.id}
                 contagem={c}
                 agora={agora}
+                fuso={fuso}
                 aoMudar={() => router.refresh()}
               />
             ))}
           </div>
         </>
       )}
-    </main>
+
+      {arquivadas.length > 0 && (
+        <details className="mt-7">
+          <summary className="cursor-pointer text-[12px] font-semibold tracking-[0.12em] text-apagado uppercase">
+            Arquivadas ({arquivadas.length})
+          </summary>
+          <div className="mt-3 space-y-2">
+            {arquivadas.map((c) => (
+              <LinhaArquivada key={c.id} contagem={c} aoMudar={() => router.refresh()} />
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  );
+}
+
+/** Contagem arquivada: some da lista e para de avisar, mas o histórico fica. */
+function LinhaArquivada({ contagem, aoMudar }: { contagem: Contagem; aoMudar: () => void }) {
+  const [ocupado, setOcupado] = useState(false);
+
+  async function restaurar() {
+    setOcupado(true);
+    await fetch(`/api/contagens/${contagem.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ arquivado: false }),
+    });
+    aoMudar();
+  }
+
+  return (
+    <div className="cartao flex items-center gap-3 px-4 py-3">
+      <Icone tamanho="sm" apagado>
+        {contagem.emoji}
+      </Icone>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14px] text-suave">{contagem.titulo}</p>
+        <p className="text-[12px] text-fantasma">{dataLonga(contagem.alvo)}</p>
+      </div>
+      <button
+        type="button"
+        onClick={restaurar}
+        disabled={ocupado}
+        className="shrink-0 rounded-full border border-borda bg-white/[0.04] px-3 py-1.5 text-[12.5px] font-medium text-suave disabled:opacity-50"
+      >
+        Restaurar
+      </button>
+    </div>
+  );
+}
+
+/** Estado de uma contagem cujo dia já passou: claro, sem número negativo. */
+function Concluida({ dias }: { dias: number }) {
+  return (
+    <div>
+      <p className="font-display flex items-center gap-2 text-[26px] leading-none font-extrabold text-brand">
+        <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="m5 12.5 4.5 4.5L19 7.5" />
+        </svg>
+        Concluída
+      </p>
+      <p className="mt-2 text-[13px] text-suave">
+        {dias === 1 ? "Foi ontem." : `Aconteceu há ${dias} dias.`}
+      </p>
+    </div>
   );
 }
 
 function CartaoContagem({
   contagem,
   agora,
+  fuso,
   aoMudar,
 }: {
   contagem: Contagem;
   agora: number;
+  fuso: string;
   aoMudar: () => void;
 }) {
   const [painel, setPainel] = useState(false);
@@ -118,6 +203,7 @@ function CartaoContagem({
   const [hora, setHora] = useState(contagem.horaAviso);
 
   const alvo = new Date(contagem.alvo).getTime();
+  const estado = estadoRegressiva(alvo, agora, fuso);
   const criado = new Date(contagem.criadoEm).getTime();
   const total = Math.max(1, alvo - criado);
   const progresso = Math.max(0, Math.min(1, (agora - criado) / total));
@@ -138,6 +224,12 @@ function CartaoContagem({
   async function excluir() {
     setOcupado(true);
     await fetch(`/api/contagens/${contagem.id}`, { method: "DELETE" });
+    aoMudar();
+  }
+
+  async function arquivar() {
+    setOcupado(true);
+    await alterar({ arquivado: true });
     aoMudar();
   }
 
@@ -164,10 +256,14 @@ function CartaoContagem({
         </div>
 
         <div className="mt-5">
-          <RegressivaHeroi ate={contagem.alvo} />
+          {estado.tipo === "concluida" ? (
+            <Concluida dias={estado.dias} />
+          ) : (
+            <RegressivaHeroi ate={contagem.alvo} />
+          )}
         </div>
 
-        {alvo > agora && (
+        {estado.tipo === "futura" && (
           <div className="mt-5">
             <Progresso fracao={progresso} percentual sufixo="do caminho" />
           </div>
@@ -177,7 +273,7 @@ function CartaoContagem({
           <p className="mt-3 text-[13.5px] leading-relaxed text-suave">{contagem.descricao}</p>
         )}
 
-        {contagem.notificar && alvo > agora && (
+        {contagem.notificar && estado.tipo === "futura" && (
           <p className="mt-3 flex items-center gap-1.5 text-[12px] text-fantasma">
             <span>🔔</span>
             {diario
@@ -218,22 +314,37 @@ function CartaoContagem({
               />
             )}
             </div>
-            <div className="mt-3 flex items-center justify-between gap-3 border-t border-borda pt-3.5">
-              <span className="text-[13px] text-apagado">Apagar esta contagem?</span>
-              <div className="flex gap-2">
+            <div className="mt-3 space-y-3 border-t border-borda pt-3.5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[13px] text-apagado">
+                  Arquivar guarda o histórico e para os avisos.
+                </span>
                 <button
-                  onClick={() => setPainel(false)}
-                  className="rounded-xl px-3 py-2 text-[13px] text-suave"
-                >
-                  Fechar
-                </button>
-                <button
-                  onClick={excluir}
+                  type="button"
+                  onClick={arquivar}
                   disabled={ocupado}
-                  className="rounded-xl bg-perigo/15 px-3 py-2 text-[13px] font-medium text-perigo disabled:opacity-50"
+                  className="shrink-0 rounded-xl border border-borda bg-white/[0.04] px-3 py-2 text-[13px] font-medium text-suave disabled:opacity-50"
                 >
-                  Apagar
+                  Arquivar
                 </button>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[13px] text-apagado">Apagar de vez?</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPainel(false)}
+                    className="rounded-xl px-3 py-2 text-[13px] text-suave"
+                  >
+                    Fechar
+                  </button>
+                  <button
+                    onClick={excluir}
+                    disabled={ocupado}
+                    className="rounded-xl bg-perigo/15 px-3 py-2 text-[13px] font-medium text-perigo disabled:opacity-50"
+                  >
+                    Apagar
+                  </button>
+                </div>
               </div>
             </div>
           </div>

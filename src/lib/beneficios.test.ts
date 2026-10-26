@@ -7,6 +7,7 @@ import {
   beneficioDe,
   chavesComBeneficio,
   conteudoDaEtapa,
+  rotuloDoBeneficio,
 } from "./beneficios.ts";
 import { PRESETS } from "./habitos.ts";
 import { etapasDoAcompanhamento, etapasDoMarco, etapasDoSono } from "./progressao.ts";
@@ -182,4 +183,14 @@ test("a abertura da trilha nunca ganha benefício", () => {
   const r = conteudoDaEtapa({ tipo: "marco", presetId: "cigarro", etapa: etapas[0], proxima: etapas[1] });
   assert.equal(r.beneficio.tipo, "factual");
   assert.match(r.conquista, /Você começou/);
+});
+
+test("só conteúdo com fonte se chama benefício — o resto nunca ganha esse título", () => {
+  assert.equal(rotuloDoBeneficio("fonte"), "Benefício possível");
+  assert.ok(!/benef/i.test(rotuloDoBeneficio("factual")));
+  // e todo conteúdo de tratamento cai no rótulo que não promete nada
+  for (const e of etapasDoAcompanhamento()) {
+    const r = conteudoDaEtapa({ tipo: "acompanhamento", categoria: "tratamento", etapa: e, proxima: null });
+    assert.ok(!/benef/i.test(rotuloDoBeneficio(r.beneficio.tipo)), e.chave);
+  }
 });

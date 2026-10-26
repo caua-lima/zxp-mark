@@ -146,6 +146,11 @@ export const TODOS_OS_BENEFICIOS: Record<string, Record<string, Beneficio>> = {
 export const AVISO_BENEFICIO =
   "Informação geral, sem garantia individual: o ritmo é diferente para cada pessoa, e isto não substitui a orientação de um profissional de saúde.";
 
+/** O título do bloco depende do conteúdo: só o que tem fonte pode se chamar benefício. */
+export function rotuloDoBeneficio(tipo: "fonte" | "factual"): string {
+  return tipo === "fonte" ? "Benefício possível" : "O que esta etapa mostra";
+}
+
 /* --------------------------- conteúdo de uma etapa ------------------------ */
 
 export type ContextoEtapa = {

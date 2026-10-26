@@ -5,7 +5,7 @@ import { Area, Brilho, Secao } from "@/components/ui";
 import { janela } from "@/lib/progressao";
 import { dataLonga } from "@/lib/formato";
 import type { EtapaPainel, PainelProgresso } from "@/lib/painel-progresso";
-import type { Fonte } from "@/lib/beneficios";
+import { rotuloDoBeneficio, type Fonte } from "@/lib/beneficios";
 
 /** "2024-05-15" → "15/05/2024", sem passar por Date (que deslocaria o dia pelo fuso). */
 function dataCurta(iso: string): string {
@@ -253,7 +253,12 @@ function DetalheDaEtapa({ painel, etapa }: { painel: PainelProgresso; etapa: Eta
         </Bloco>
       )}
 
-      <Bloco rotulo="Benefício possível" tom="suave">
+      {/* Só é "benefício" quando há fonte. Sem ela o texto é sobre o registro, e
+          chamá-lo de benefício sugeriria um ganho que o conteúdo nega. */}
+      <Bloco
+        rotulo={rotuloDoBeneficio(c.beneficio.tipo)}
+        tom="suave"
+      >
         <p>{c.beneficio.texto}</p>
         {c.beneficio.tipo === "fonte" && (
           <div className="mt-2 space-y-1.5 text-[12px] leading-relaxed text-apagado">
