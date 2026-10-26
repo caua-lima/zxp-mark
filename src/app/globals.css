@@ -195,3 +195,129 @@ select {
 .pulso {
   animation: pulso 1.6s ease-in-out infinite;
 }
+
+/* ------------------------------------------------------------------------ */
+/* Movimento e animações da trilha (o foco por teclado já é :focus-visible)  */
+/* ------------------------------------------------------------------------ */
+
+/*
+ * Quem pede menos movimento não recebe NENHUMA animação: nem as antigas
+ * (surge, pulso) nem as novas (trilha, celebração). O estado final de cada
+ * uma continua certo — só o caminho até ele some.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Trilha: a etapa que é o próximo alvo respira, discretamente. */
+@keyframes alvo-respira {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-brand) 0%, transparent);
+  }
+}
+.alvo-respira {
+  animation: alvo-respira 2.4s ease-out infinite;
+}
+
+/* Trilha: a barra de avanço cresce até onde está, em vez de aparecer pronta. */
+@keyframes avanco {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.avanco {
+  transform-origin: left;
+  animation: avanco 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Etapa recém-desbloqueada: um pequeno "pop". */
+@keyframes desbloqueia {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.desbloqueia {
+  animation: desbloqueia 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+/* Celebração grande: halo que abre e faíscas curtas que sobem. Sem confete. */
+@keyframes halo {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.halo {
+  animation: halo 0.7s ease-out both;
+}
+
+@keyframes faisca {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+    opacity: 0;
+  }
+}
+.faisca {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--color-brand);
+  animation: faisca 1.3s ease-out both;
+}
+
+/* Aviso discreto no topo: entra e sai sozinho. */
+@keyframes aviso-topo {
+  0% {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+  10%,
+  88% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}
+.aviso-topo {
+  animation: aviso-topo 6s ease-in-out both;
+}
