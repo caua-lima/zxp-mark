@@ -4,6 +4,10 @@ import { usuarioId } from "@/lib/auth";
 import { CartaoMarco } from "@/components/CartaoMarco";
 import { BannerNotificacoes } from "@/components/Push";
 import { ResumoGeral } from "@/components/ResumoGeral";
+import { CartaoSono } from "@/components/CartaoSono";
+import { fusoDoUsuario } from "@/lib/usuario";
+import { carregarSono } from "@/lib/servicos/sono";
+import { duracaoMs } from "@/lib/sono";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +22,7 @@ export default async function PaginaMarcos() {
   ]);
 
   const agora = Date.now();
+  const sono = await carregarSono(prisma, uid, await fusoDoUsuario(uid), agora);
 
   return (
     <main>
@@ -45,6 +50,11 @@ export default async function PaginaMarcos() {
       </header>
 
       <BannerNotificacoes />
+
+      <CartaoSono
+        resumo={sono.resumo}
+        ultimaDuracaoMs={sono.historico[0] ? duracaoMs(sono.historico[0]) : null}
+      />
 
       <ResumoGeral agora={agora} marcos={marcos.map((m) => ({ ...m, melhorMs: Number(m.melhorMs) }))} />
 
