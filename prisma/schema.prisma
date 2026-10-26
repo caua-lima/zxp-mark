@@ -42,6 +42,10 @@ model User {
   inscricoes    Inscricao[]
   mensagens     Mensagem[]
   enviadas      Enviada[]
+  acompanhamentos  Acompanhamento[]
+  conquistasVistas ConquistaVista[]
+  percepcoes       Percepcao[]
+  sonos            Sono[]
 
   @@index([email])
 }
@@ -106,8 +110,91 @@ model Contagem {
   /// Dias de antecedencia, usados quando avisoDiario esta desligado.
   avisos    Int[]    @default([30, 14, 7, 3, 1, 0])
   notificar Boolean  @default(true)
+  /// Arquivada some da lista principal, mas o historico fica e ela para de avisar.
+  arquivadoEm DateTime?
 
   @@index([userId])
+}
+
+/// Contagem crescente: o tempo corrido desde uma data (inicio de um tratamento,
+/// de uma rotina, de um projeto). NAO e habito de abstinencia — nao tem recaida,
+/// e o tempo que passa nao prova nada alem do tempo que passou.
+model Acompanhamento {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  titulo      String
+  /// tratamento | rotina | projeto | pessoal  (validado em src/lib/acompanhamento.ts)
+  categoria   String   @default("pessoal")
+  emoji       String   @default("📍")
+  /// Cor de destaque, sempre dentro dos tokens do app: magenta | marfim | sucesso
+  tom         String   @default("magenta")
+  descricao   String?  @db.Text
+  inicio      DateTime
+  arquivadoEm DateTime?
+  criadoEm    DateTime @default(now())
+
+  @@index([userId, arquivadoEm])
+}
+
+/// Etapa da trilha que a pessoa ja viu comemorar. E o que impede a mesma
+/// celebracao de aparecer de novo ao recarregar a pagina.
+///
+/// A linha com chave "_base" marca "ja olhei este ciclo pela primeira vez": as
+/// etapas que ja tinham sido atingidas ficam como vistas em silencio, para
+/// corrigir uma data ou abrir um marco antigo nao disparar uma enxurrada.
+model ConquistaVista {
+  id      String   @id @default(cuid())
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// marco | acompanhamento | sono
+  tipo    String
+  refId   String
+  chave   String
+  /// cicloInicio do marco / inicio do acompanhamento (sono usa a epoca)
+  ciclo   DateTime
+  vistaEm DateTime @default(now())
+
+  @@unique([userId, refId, chave, ciclo])
+  @@index([userId])
+}
+
+/// "Como voce esta se sentindo?" — melhora PERCEBIDA, escrita pela propria
+/// pessoa. Opcional, por etapa, e nunca vira obrigacao diaria.
+model Percepcao {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tipo         String
+  refId        String
+  chave        String
+  ciclo        DateTime
+  /// 1 (dificil) a 5 (muito bem); opcional
+  humor        Int?
+  nota         String?  @db.Text
+  criadaEm     DateTime @default(now())
+  atualizadaEm DateTime @updatedAt
+
+  @@unique([userId, refId, chave, ciclo])
+  @@index([userId])
+}
+
+/// Um periodo de sono informado pela pessoa. Instantes reais (UTC); quem
+/// interpreta "que dia foi essa noite" e o fuso do usuario, em src/lib/datas.ts.
+/// Noite sem registro NAO e zero hora: simplesmente nao existe linha.
+model Sono {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dormiuEm  DateTime
+  acordouEm DateTime
+  /// 1 a 5, percebida
+  qualidade Int
+  nota      String?  @db.Text
+  criadoEm  DateTime @default(now())
+
+  @@index([userId, dormiuEm])
 }
 
 model Inscricao {
