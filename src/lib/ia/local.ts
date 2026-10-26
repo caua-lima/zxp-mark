@@ -115,8 +115,8 @@ function respVontade(r: Retrato, m: RetratoMarco, s: number): string {
   l.push(
     escolher(
       [
-        "A vontade é química e vem em onda: sobe, estoura e cai em 3 a 5 minutos. Ela não cresce pra sempre.",
-        "Isso que você está sentindo tem prazo. Onda de fissura dura poucos minutos — o que você faz nesses minutos é que decide.",
+        "A vontade vem em onda: costuma subir, estourar e cair em poucos minutos. Ela não cresce pra sempre.",
+        "Isso que você está sentindo tem prazo. Onda de fissura costuma durar poucos minutos — o que você faz nesses minutos é que decide.",
         "Normal, esperado, e temporário. Não é fraqueza sua: é o corpo cobrando um hábito antigo.",
       ],
       s
@@ -400,7 +400,7 @@ function respSoUm(m: RetratoMarco, s: number): string {
 
 function respDuracao(): string {
   return [
-    "Uma onda de fissura dura de 3 a 5 minutos. Não meia hora, não a tarde inteira — minutos.",
+    "Uma onda de fissura costuma durar poucos minutos. Em geral não é meia hora nem a tarde inteira — é questão de minutos.",
     "",
     "Ela sobe rápido, estoura e cai. O erro clássico é achar que vai piorar pra sempre e ceder no pico, que é justo o momento em que ela já ia começar a descer.",
     "",
@@ -489,11 +489,11 @@ function respSono(): string {
 
 function respPeso(m: RetratoMarco): string {
   return [
-    "Preocupação legítima, e vale colocar na proporção certa: o ganho médio ao parar de fumar fica em poucos quilos, e some com o tempo. O dano de voltar a fumar não some.",
+    "Preocupação legítima. Algumas pessoas ganham algum peso ao parar de fumar, e dá para lidar com isso: comer com atenção e se movimentar ajudam. Se isso te preocupa muito, vale conversar com um profissional de saúde.",
     "",
     "Parte disso é a boca procurando o que fazer, não fome. Ajuda ter à mão: água gelada, chiclete sem açúcar, cenoura, maçã, gelo pra mastigar.",
     "",
-    `E tem um bônus: ${m.decorridoMs > 7 * DIA ? "sua capacidade pulmonar já melhorou o suficiente pra caminhada e corrida ficarem mais fáceis" : "em uma semana sua respiração já melhora e exercício fica mais viável"}.`,
+    "E pode haver um bônus: segundo o NHS, nos primeiros dias ou semanas sem fumar a respiração pode ficar mais fácil, o que ajuda a se exercitar.",
     "",
     "Uma coisa de cada vez. Primeiro o hábito, depois o peso.",
   ].join("\n");

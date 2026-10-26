@@ -1,8 +1,24 @@
 /**
  * Catálogo de hábitos e a linha do tempo de marcos de cada um.
  *
- * Cada marco vira: um item na timeline dentro do app + uma notificação push
+ * Cada marco vira: um item na trilha dentro do app + uma notificação push
  * disparada no instante exato em que a pessoa o atinge.
+ *
+ * REVISÃO DE CONTEÚDO (2026-10-26)
+ * Os textos anteriores afirmavam prazos de recuperação como se valessem para
+ * todo mundo ("nicotina zero em 72h", "o cérebro reorganiza em 90 dias", "21
+ * dias para virar automático", "risco de infarto igual ao de quem nunca
+ * fumou em 2 anos") — vários contrariam as fontes oficiais. Regra agora:
+ *
+ *   - `corpo` fala de constância, gatilhos e do que a pessoa fez. Não promete
+ *     recuperação nem dá prazo universal.
+ *   - Afirmação de saúde só entra com fonte, e fica em `./beneficios.ts`
+ *     (com referência e data de revisão). Para o cigarro, onde há fonte, o
+ *     `corpo` repete o texto dessa afirmação e diz "segundo o CDC/NHS".
+ *   - Sem suporte verificado → mensagem factual sobre o registro ou a rotina.
+ *
+ * As `chave`s, os tempos e os títulos NÃO mudam: a chave deduplica notificações
+ * já enviadas (Enviada), e mexer nela reenviaria tudo.
  */
 
 export const MIN = 60_000;
@@ -19,7 +35,7 @@ export type MarcoDef = {
   ms: number;
   /** título da notificação */
   titulo: string;
-  /** corpo da notificação — o que o corpo/cabeça está fazendo agora */
+  /** corpo da notificação — constância e gatilhos; saúde só com fonte */
   corpo: string;
 };
 
@@ -37,7 +53,7 @@ export type Preset = {
   gastoDiarioPadrao?: number;
   /** minutos de vida recuperados por unidade evitada (0 = não exibir) */
   minutosDeVidaPorUnidade?: number;
-  /** contexto clínico curto que vai no prompt do chat */
+  /** contexto curto que vai no prompt do chat; sem prazos de recuperação */
   contexto: string;
   marcos: MarcoDef[];
 };
@@ -45,28 +61,28 @@ export type Preset = {
 /** Marcos genéricos de tempo — servem de base para qualquer hábito. */
 function base(sufixo: string): MarcoDef[] {
   return [
-    { chave: "1h", ms: HORA, titulo: `1 hora ${sufixo}`, corpo: "A primeira hora é a mais barulhenta. Você atravessou. A vontade vem em ondas de 3 a 5 minutos — ela sempre passa, você é que fica." },
-    { chave: "3h", ms: 3 * HORA, titulo: `3 horas ${sufixo}`, corpo: "Três horas. Seu cérebro está começando a entender que a regra mudou. Beba água, respire fundo, ocupe as mãos." },
-    { chave: "6h", ms: 6 * HORA, titulo: `6 horas ${sufixo}`, corpo: "Meio dia de vitória. A irritação que você talvez sinta agora é abstinência, não personalidade. Ela é temporária." },
-    { chave: "12h", ms: 12 * HORA, titulo: `12 horas ${sufixo}`, corpo: "12 horas limpas. Você já provou pra si mesmo que consegue. Amanhã de manhã seu corpo vai pedir — segure firme, é só um pedido, não uma ordem." },
-    { chave: "1d", ms: DIA, titulo: `24 horas ${sufixo}`, corpo: "Um dia inteiro. Isso não é sorte, é decisão repetida. Você tomou essa decisão dezenas de vezes hoje e ganhou todas." },
-    { chave: "2d", ms: 2 * DIA, titulo: `2 dias ${sufixo}`, corpo: "48 horas. O pior costuma ser entre o segundo e o terceiro dia. Se passar hoje, você passa por qualquer coisa." },
-    { chave: "3d", ms: 3 * DIA, titulo: `3 dias ${sufixo}`, corpo: "72 horas. O pico da abstinência física fica para trás a partir de agora. Daqui pra frente é mais cabeça do que corpo." },
-    { chave: "5d", ms: 5 * DIA, titulo: `5 dias ${sufixo}`, corpo: "Cinco dias. Seu sono e seu humor começam a se reorganizar. Continue." },
-    { chave: "7d", ms: SEMANA, titulo: `1 semana ${sufixo}`, corpo: "Uma semana inteira. Você já não é a mesma pessoa de sete dias atrás. Isso já é uma história diferente." },
-    { chave: "14d", ms: 2 * SEMANA, titulo: `2 semanas ${sufixo}`, corpo: "Duas semanas. Aqui costuma aparecer o pensamento perigoso: só uma não faz mal. Faz. Ele te leva de volta ao dia zero." },
-    { chave: "21d", ms: 21 * DIA, titulo: `21 dias ${sufixo}`, corpo: "21 dias. É o tempo em que um comportamento começa a virar automático. O esforço diminui a partir daqui." },
-    { chave: "30d", ms: MES, titulo: `1 mês ${sufixo}`, corpo: "Um mês. Olhe pra trás e conte quantas vezes você quase desistiu e não desistiu. Esse é o seu currículo agora." },
-    { chave: "60d", ms: 2 * MES, titulo: `2 meses ${sufixo}`, corpo: "Dois meses. Já não é mais estou tentando parar. Você parou." },
-    { chave: "90d", ms: 3 * MES, titulo: `3 meses ${sufixo}`, corpo: "90 dias. É o marco clássico de reorganização do sistema de recompensa. As coisas simples voltam a dar prazer." },
-    { chave: "180d", ms: 6 * MES, titulo: `6 meses ${sufixo}`, corpo: "Meio ano. Metade de um ano da sua vida vivida de um jeito diferente. Isso muda quem você é, não só o que você faz." },
-    { chave: "270d", ms: 9 * MES, titulo: `9 meses ${sufixo}`, corpo: "Nove meses. Tempo suficiente para gerar uma vida inteira — e você usou para reconstruir a sua." },
-    { chave: "1a", ms: ANO, titulo: `1 ANO ${sufixo}`, corpo: "Um ano completo. 365 dias de escolhas. Guarde essa data: hoje é o seu aniversário de liberdade." },
-    { chave: "18m", ms: 18 * MES, titulo: `1 ano e meio ${sufixo}`, corpo: "18 meses. Você já passou por todas as estações, todos os feriados, todas as desculpas — e continuou." },
-    { chave: "2a", ms: 2 * ANO, titulo: `2 ANOS ${sufixo}`, corpo: "Dois anos. Isso já não é força de vontade, é identidade." },
-    { chave: "3a", ms: 3 * ANO, titulo: `3 ANOS ${sufixo}`, corpo: "Três anos. Poucas pessoas mantêm qualquer coisa por três anos. Você mantém." },
+    { chave: "1h", ms: HORA, titulo: `1 hora ${sufixo}`, corpo: "A primeira hora é a mais barulhenta. Você atravessou. A vontade vem em ondas e costuma passar em poucos minutos — respire fundo e ocupe as mãos." },
+    { chave: "3h", ms: 3 * HORA, titulo: `3 horas ${sufixo}`, corpo: "Três horas. Beba água, respire fundo, ocupe as mãos. Cada hora que passa é uma hora que você escolheu." },
+    { chave: "6h", ms: 6 * HORA, titulo: `6 horas ${sufixo}`, corpo: "Meio dia de vitória. Se bater irritação ou inquietação, é comum — não significa que algo está errado. Segure mais um pouco." },
+    { chave: "12h", ms: 12 * HORA, titulo: `12 horas ${sufixo}`, corpo: "12 horas. Você já provou pra si mesmo que consegue. Amanhã cedo pode vir um pedido forte — é só um pedido, não uma ordem." },
+    { chave: "1d", ms: DIA, titulo: `24 horas ${sufixo}`, corpo: "Um dia inteiro. Isso não é sorte, é decisão repetida: você tomou essa decisão várias vezes hoje." },
+    { chave: "2d", ms: 2 * DIA, titulo: `2 dias ${sufixo}`, corpo: "48 horas. Os primeiros dias costumam ser os mais difíceis para muita gente. Se passar hoje, você passa por mais um." },
+    { chave: "3d", ms: 3 * DIA, titulo: `3 dias ${sufixo}`, corpo: "Três dias. Daqui pra frente vale prestar atenção nos gatilhos: o horário, o lugar, a companhia. Conhecer o gatilho tira o poder dele." },
+    { chave: "5d", ms: 5 * DIA, titulo: `5 dias ${sufixo}`, corpo: "Cinco dias. Continue — e repare no que ficou mais fácil desde o primeiro dia." },
+    { chave: "7d", ms: SEMANA, titulo: `1 semana ${sufixo}`, corpo: "Uma semana inteira. Sete dias de escolhas. Isso já é uma história diferente da de sete dias atrás." },
+    { chave: "14d", ms: 2 * SEMANA, titulo: `2 semanas ${sufixo}`, corpo: "Duas semanas. É comum aparecer o pensamento \"só dessa vez\". Vale lembrar do que você escolheu e por quê." },
+    { chave: "21d", ms: 21 * DIA, titulo: `21 dias ${sufixo}`, corpo: "21 dias — três semanas de decisões. Não existe um número mágico para algo virar automático: varia muito de pessoa pra pessoa. Mas você já construiu rotina." },
+    { chave: "30d", ms: MES, titulo: `1 mês ${sufixo}`, corpo: "Um mês. Olhe pra trás e conte quantas vezes você pensou em desistir e não desistiu. Esse é o seu histórico agora." },
+    { chave: "60d", ms: 2 * MES, titulo: `2 meses ${sufixo}`, corpo: "Dois meses. Já não é \"estou tentando\": é o que você tem feito, dia após dia." },
+    { chave: "90d", ms: 3 * MES, titulo: `3 meses ${sufixo}`, corpo: "90 dias. Três meses de constância. Se algum dia for difícil, lembre do caminho que já foi percorrido." },
+    { chave: "180d", ms: 6 * MES, titulo: `6 meses ${sufixo}`, corpo: "Meio ano. Metade de um ano da sua vida vivida de um jeito diferente." },
+    { chave: "270d", ms: 9 * MES, titulo: `9 meses ${sufixo}`, corpo: "Nove meses. Um tempo longo — e você continuou." },
+    { chave: "1a", ms: ANO, titulo: `1 ANO ${sufixo}`, corpo: "Um ano completo. 365 dias de escolhas. Guarde essa data: ela é sua." },
+    { chave: "18m", ms: 18 * MES, titulo: `1 ano e meio ${sufixo}`, corpo: "18 meses. Você já passou por aniversários, feriados e dias ruins — e continuou." },
+    { chave: "2a", ms: 2 * ANO, titulo: `2 ANOS ${sufixo}`, corpo: "Dois anos. Isso já faz parte de quem você é." },
+    { chave: "3a", ms: 3 * ANO, titulo: `3 ANOS ${sufixo}`, corpo: "Três anos de constância." },
     { chave: "5a", ms: 5 * ANO, titulo: `5 ANOS ${sufixo}`, corpo: "Cinco anos. Um capítulo inteiro da sua vida. Agradeça à pessoa que você era lá atrás por não ter desistido." },
-    { chave: "10a", ms: 10 * ANO, titulo: `10 ANOS ${sufixo}`, corpo: "Uma década. Você virou a prova viva de que dá." },
+    { chave: "10a", ms: 10 * ANO, titulo: `10 ANOS ${sufixo}`, corpo: "Uma década. Dez anos de uma decisão sustentada." },
   ];
 }
 
@@ -78,101 +94,107 @@ function montar(sufixo: string, especificos: MarcoDef[]): MarcoDef[] {
   return [...mapa.values()].sort((a, b) => a.ms - b.ms);
 }
 
+/**
+ * Cigarro: as afirmações de saúde vêm de CDC ("Benefits of Quitting", página de
+ * 15/05/2024) e NHS ("Benefits of quitting smoking") e estão em beneficios.ts.
+ * Onde o `corpo` as repete, diz "segundo" a fonte. Nada de prazo individual.
+ */
 const CIGARRO: MarcoDef[] = [
-  { chave: "20min", ms: 20 * MIN, titulo: "20 minutos sem fumar", corpo: "Sua frequência cardíaca e sua pressão arterial já caíram para níveis normais. Vinte minutos e seu corpo já respondeu." },
-  { chave: "1h", ms: HORA, titulo: "1 hora sem fumar", corpo: "Uma hora. A circulação nas mãos e nos pés já começou a melhorar. A vontade vem em ondas de 3 a 5 minutos — ela passa, você fica." },
-  { chave: "2h", ms: 2 * HORA, titulo: "2 horas sem fumar", corpo: "Duas horas. A nicotina no seu sangue já caiu pela metade. É por isso que a fissura aparece agora — é o corpo cobrando, não você fraquejando." },
-  { chave: "3h", ms: 3 * HORA, titulo: "3 horas sem fumar", corpo: "Três horas. Seus brônquios começam a relaxar e respirar fica mais fácil. Beba água: acelera a eliminação da nicotina." },
-  { chave: "6h", ms: 6 * HORA, titulo: "6 HORAS SEM FUMAR", corpo: "Seu corpo já está se livrando da nicotina de verdade. Quando você acordar amanhã, ele vai pedir — é o pico matinal. Segure firme: passa em minutos e você volta a mandar." },
-  { chave: "8h", ms: 8 * HORA, titulo: "8 horas sem fumar", corpo: "O monóxido de carbono no seu sangue caiu pela metade e o oxigênio subiu. Seu cérebro está sendo melhor irrigado agora do que ontem." },
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem fumar", corpo: "O monóxido de carbono voltou ao nível normal. Seu sangue está limpo dele. Metade de um dia — e o mais difícil já ficou para trás." },
-  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM FUMAR", corpo: "Um dia inteiro. A partir de agora seu risco de infarto já começou a cair. Você não teve sorte: você decidiu isso umas cinquenta vezes hoje e ganhou todas." },
-  { chave: "2d", ms: 2 * DIA, titulo: "48 horas sem fumar", corpo: "Suas terminações nervosas estão se regenerando. Paladar e olfato voltando. Coma alguma coisa que você ama — vai ter gosto diferente." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 HORAS SEM FUMAR", corpo: "Nicotina ZERO no seu corpo. Acabou a parte química. Tudo daqui pra frente é hábito e cabeça — e essas duas coisas você controla." },
-  { chave: "5d", ms: 5 * DIA, titulo: "5 dias sem fumar", corpo: "Cinco dias. A ansiedade dos primeiros dias já está cedendo e a capacidade pulmonar começa a subir. Respire fundo agora e sinta." },
-  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM FUMAR", corpo: "Sete dias. Quem passa da primeira semana tem muito mais chance de nunca mais voltar. Você está do lado certo da estatística." },
-  { chave: "10d", ms: 10 * DIA, titulo: "10 dias sem fumar", corpo: "Os episódios de fissura já estão mais curtos e mais raros. Seu cérebro está reaprendendo a funcionar sem nicotina." },
-  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem fumar", corpo: "Circulação nitidamente melhor e função pulmonar bem maior. Cuidado com o pensamento só um não faz mal — é o único caminho de volta ao dia zero." },
-  { chave: "21d", ms: 21 * DIA, titulo: "21 dias sem fumar", corpo: "Os receptores de nicotina do seu cérebro estão voltando ao número normal. O desejo automático está literalmente desaparecendo do hardware." },
-  { chave: "30d", ms: MES, titulo: "1 MÊS SEM FUMAR", corpo: "Um mês. Os cílios dos seus pulmões voltaram a crescer e já estão varrendo o alcatrão para fora. Tossir um pouco agora é limpeza, não doença." },
-  { chave: "60d", ms: 2 * MES, titulo: "2 meses sem fumar", corpo: "Dois meses. Sua pele está mais oxigenada, sua respiração no esforço melhorou e o cheiro de cigarro já saiu de você." },
-  { chave: "90d", ms: 3 * MES, titulo: "3 MESES SEM FUMAR", corpo: "Função pulmonar significativamente recuperada e circulação normalizada. Subir escada não é mais o mesmo evento que era três meses atrás." },
-  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem fumar", corpo: "Meio ano. A tosse crônica, o catarro e a falta de ar diminuíram muito. Seus pulmões estão fazendo o trabalho deles de novo." },
-  { chave: "270d", ms: 9 * MES, titulo: "9 meses sem fumar", corpo: "Os cílios pulmonares estão praticamente recuperados. Infecção respiratória agora é bem menos provável do que era." },
-  { chave: "1a", ms: ANO, titulo: "1 ANO SEM FUMAR", corpo: "Seu risco de doença coronariana caiu pela METADE em relação a quem continuou fumando. Um ano de decisões diárias comprou isso. Guarde essa data." },
-  { chave: "18m", ms: 18 * MES, titulo: "1 ano e meio sem fumar", corpo: "18 meses. Você já atravessou todos os gatilhos do calendário: aniversários, brigas, festas, viagens, cerveja. E continuou." },
-  { chave: "2a", ms: 2 * ANO, titulo: "2 ANOS sem fumar", corpo: "Dois anos. Seu risco de infarto se aproxima muito do de quem nunca fumou. Isso não é mais tentativa, é quem você é." },
-  { chave: "5a", ms: 5 * ANO, titulo: "5 ANOS SEM FUMAR", corpo: "Seu risco de AVC caiu para perto do de um não fumante. Cinco anos atrás você tomou uma decisão que ainda está te protegendo hoje." },
-  { chave: "10a", ms: 10 * ANO, titulo: "10 ANOS SEM FUMAR", corpo: "Seu risco de morrer de câncer de pulmão é cerca de METADE do de quem continuou fumando. Uma década de vida comprada de volta." },
-  { chave: "15a", ms: 15 * ANO, titulo: "15 ANOS SEM FUMAR", corpo: "Seu risco cardiovascular é praticamente igual ao de alguém que nunca fumou na vida. Você desfez o que parecia irreversível." },
+  { chave: "20min", ms: 20 * MIN, titulo: "20 minutos sem fumar", corpo: "Vinte minutos. A frequência cardíaca começa a cair em poucos minutos sem fumar, segundo o CDC. Seu corpo já está reagindo." },
+  { chave: "1h", ms: HORA, titulo: "1 hora sem fumar", corpo: "Uma hora. A vontade vem em ondas e costuma passar em poucos minutos — ela passa, você fica." },
+  { chave: "2h", ms: 2 * HORA, titulo: "2 horas sem fumar", corpo: "Duas horas. É por volta daqui que a vontade costuma aparecer: o corpo está acostumado a receber nicotina com frequência. É o hábito cobrando, não fraqueza sua." },
+  { chave: "3h", ms: 3 * HORA, titulo: "3 horas sem fumar", corpo: "Três horas. Beba água, respire fundo e mude de ambiente por alguns minutos." },
+  { chave: "6h", ms: 6 * HORA, titulo: "6 HORAS SEM FUMAR", corpo: "Seu corpo já está eliminando a nicotina. Quando você acordar amanhã, é comum vir um pedido forte — segure firme: passa em minutos e você volta a mandar." },
+  { chave: "8h", ms: 8 * HORA, titulo: "8 horas sem fumar", corpo: "Oito horas — um turno inteiro. Enfrente um gatilho de cada vez: o café, a pausa, o telefone." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem fumar", corpo: "Meio dia sem fumar. O pior momento de cada dia costuma ser o do hábito (o café, a pausa) — e você já enfrentou vários." },
+  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM FUMAR", corpo: "Um dia inteiro. Segundo o CDC, o nível de nicotina no sangue cai a zero em cerca de 24 horas. Você não teve sorte: decidiu isso várias vezes hoje e manteve." },
+  { chave: "2d", ms: 2 * DIA, titulo: "48 horas sem fumar", corpo: "Dois dias. Nos primeiros dias ou semanas, paladar e olfato podem melhorar, segundo o NHS. Coma algo de que você gosta e repare." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 HORAS SEM FUMAR", corpo: "Três dias. Em alguns dias, o monóxido de carbono no sangue cai ao nível de quem não fuma, segundo o CDC. Daqui pra frente o foco é o hábito: o gatilho, o horário, a companhia." },
+  { chave: "5d", ms: 5 * DIA, titulo: "5 dias sem fumar", corpo: "Cinco dias. Siga atento aos gatilhos: café, pausa, telefone, estresse. Respire fundo agora e sinta." },
+  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM FUMAR", corpo: "Sete dias. Uma semana de decisões. O que ficou mais fácil desde o primeiro dia?" },
+  { chave: "10d", ms: 10 * DIA, titulo: "10 dias sem fumar", corpo: "Dez dias. Os gatilhos continuam, mas você já sabe o que fazer com eles." },
+  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem fumar", corpo: "Duas semanas. Cuidado com o pensamento \"só um não faz mal\": para quem está parando, ele costuma ser o caminho de volta." },
+  { chave: "21d", ms: 21 * DIA, titulo: "21 dias sem fumar", corpo: "21 dias — três semanas. Não existe número mágico para um comportamento virar automático, mas cada dia ajuda." },
+  { chave: "30d", ms: MES, titulo: "1 MÊS SEM FUMAR", corpo: "Um mês. Entre 1 e 12 meses sem fumar, tosse e falta de ar tendem a diminuir, segundo o CDC. Se a tosse persistir, vale conversar com um profissional de saúde." },
+  { chave: "60d", ms: 2 * MES, titulo: "2 meses sem fumar", corpo: "Dois meses. O NHS aponta que benefícios para a saúde mental podem aparecer a partir de cerca de 6 semanas. Repare como você tem se sentido." },
+  { chave: "90d", ms: 3 * MES, titulo: "3 MESES SEM FUMAR", corpo: "Três meses de constância. Olhe quanto já foi poupado e quanto caminho já foi percorrido." },
+  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem fumar", corpo: "Meio ano sem fumar. Metade de um ano vivida de um jeito diferente." },
+  { chave: "270d", ms: 9 * MES, titulo: "9 meses sem fumar", corpo: "Nove meses sem fumar. Siga assim." },
+  { chave: "1a", ms: ANO, titulo: "1 ANO SEM FUMAR", corpo: "Um ano. Entre 1 e 2 anos sem fumar, o risco de infarto cai de forma acentuada em comparação com continuar fumando, segundo o CDC. Guarde essa data." },
+  { chave: "18m", ms: 18 * MES, titulo: "1 ano e meio sem fumar", corpo: "18 meses. Você já atravessou aniversários, festas, viagens e dias difíceis — e continuou." },
+  { chave: "2a", ms: 2 * ANO, titulo: "2 ANOS sem fumar", corpo: "Dois anos. Isso já não é tentativa: é rotina." },
+  { chave: "5a", ms: 5 * ANO, titulo: "5 ANOS SEM FUMAR", corpo: "Cinco anos. Entre 5 e 10 anos sem fumar, o risco de AVC diminui, segundo o CDC. Cinco anos atrás você tomou uma decisão que segue valendo." },
+  { chave: "10a", ms: 10 * ANO, titulo: "10 ANOS SEM FUMAR", corpo: "Uma década. Após 10 a 15 anos sem fumar, o risco adicional de câncer de pulmão cai pela metade, segundo o CDC." },
+  { chave: "15a", ms: 15 * ANO, titulo: "15 ANOS SEM FUMAR", corpo: "Quinze anos. O risco de doença coronariana fica próximo ao de quem nunca fumou, segundo o CDC e o NHS." },
 ];
 
+/** Álcool: sem afirmação de benefício. Mantém só o aviso de segurança. */
 const ALCOOL: MarcoDef[] = [
-  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem beber", corpo: "Sua glicemia está se estabilizando e o fígado já saiu do modo emergência. Beba água e coma alguma coisa." },
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem beber", corpo: "Doze horas. Se aparecer ansiedade ou tremor, é abstinência — passa. Se for intenso ou vier com confusão mental, procure um médico." },
-  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM BEBER", corpo: "Seu corpo está oficialmente livre de álcool. A partir de agora tudo que acontece é reconstrução." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 horas sem beber", corpo: "A parte mais dura da abstinência ficou para trás. Sua energia começa a voltar e a névoa mental a se dissipar." },
-  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM BEBER", corpo: "Seu sono profundo voltou — é por isso que você está acordando diferente. Pele mais hidratada e pressão mais baixa." },
-  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem beber", corpo: "Duas semanas. A queima de gordura no fígado já começou e azia e refluxo tendem a sumir." },
-  { chave: "30d", ms: MES, titulo: "1 MÊS SEM BEBER", corpo: "Um mês. Gordura no fígado bem menor, pressão arterial melhor e a qualidade do seu sono é outra." },
-  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem beber", corpo: "Memória, concentração e humor visivelmente melhores. Seu fígado se regenera rápido quando você deixa ele trabalhar." },
-  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem beber", corpo: "Meio ano. Risco cardiovascular e inflamação bem menores. Seu corpo agradece em silêncio todos os dias." },
-  { chave: "1a", ms: ANO, titulo: "1 ANO SEM BEBER", corpo: "Um ano inteiro. Você provou que a sua vida social, seu luto, sua alegria e seu tédio nunca dependeram disso." },
+  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem beber", corpo: "Seis horas. Beba água e coma alguma coisa. Se você bebia muito e com frequência, não pare de repente sem orientação médica: a abstinência de álcool pode ser perigosa." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem beber", corpo: "Doze horas. Ansiedade e tremor leve podem aparecer em quem bebia com frequência. Se for intenso, vier com confusão mental ou convulsão, procure atendimento médico agora." },
+  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM BEBER", corpo: "Um dia inteiro. Hoje você tomou uma decisão e manteve." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 horas sem beber", corpo: "Três dias. Repare nos gatilhos: o horário, o lugar, a companhia. Sexta-feira e fim de expediente costumam ser os mais fortes." },
+  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM BEBER", corpo: "Uma semana. Sete dias de escolhas. O que ficou diferente na sua rotina?" },
+  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem beber", corpo: "Duas semanas. Continue — e repare em como você tem passado os momentos que antes eram de bebida." },
+  { chave: "30d", ms: MES, titulo: "1 MÊS SEM BEBER", corpo: "Um mês. Olhe pra trás: quantas situações você atravessou sem beber?" },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem beber", corpo: "Três meses de constância. Você tem mostrado que a sua rotina social e a sua alegria não dependem disso." },
+  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem beber", corpo: "Meio ano. Metade de um ano vivida de outro jeito." },
+  { chave: "1a", ms: ANO, titulo: "1 ANO SEM BEBER", corpo: "Um ano inteiro. 365 dias de escolhas." },
 ];
 
 const VAPE: MarcoDef[] = [
   { chave: "1h", ms: HORA, titulo: "1 hora sem vape", corpo: "A primeira hora sem tragar. O reflexo de levar a mão ao bolso vai aparecer — é só um reflexo. Ocupe as mãos." },
-  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem vape", corpo: "Seis horas. Como o vape entrega nicotina o dia inteiro, seu corpo sente a falta de forma contínua. É desconfortável e é temporário." },
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem vape", corpo: "Sua oxigenação melhorou e a irritação na garganta já começa a ceder." },
-  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM VAPE", corpo: "Um dia. Sua frequência cardíaca em repouso já caiu e a irritação das vias aéreas começa a diminuir." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 HORAS SEM VAPE", corpo: "Nicotina zerada. Acabou a parte química — o resto é o hábito de levar a mão à boca, e esse você desmonta com repetição." },
-  { chave: "7d", ms: SEMANA, titulo: "1 semana sem vape", corpo: "Uma semana. Tosse e falta de ar reduzindo, capacidade pulmonar subindo. Você não está mais inalando nada que não seja ar." },
-  { chave: "30d", ms: MES, titulo: "1 MÊS SEM VAPE", corpo: "Um mês. Vias aéreas bem menos inflamadas, sono melhor, dependência química desfeita. Você quebrou o loop." },
+  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem vape", corpo: "Seis horas. Como o vape costuma ser usado o dia inteiro, a falta pode ser sentida de forma contínua. É desconfortável e dá pra atravessar." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem vape", corpo: "Doze horas. Troque o gesto: água, chiclete, uma caneta na mão." },
+  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM VAPE", corpo: "Um dia sem vape. Você decidiu isso várias vezes hoje e manteve." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 HORAS SEM VAPE", corpo: "Três dias. Boa parte do que sobra é o hábito de levar a mão à boca — e esse você desmonta com repetição." },
+  { chave: "7d", ms: SEMANA, titulo: "1 semana sem vape", corpo: "Uma semana. Sete dias de escolhas. Note quantas vezes a mão foi ao bolso e voltou." },
+  { chave: "30d", ms: MES, titulo: "1 MÊS SEM VAPE", corpo: "Um mês inteiro. Você quebrou o ritmo do hábito." },
 ];
 
 const ACUCAR: MarcoDef[] = [
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem açúcar", corpo: "Sua insulina está caindo e seu corpo começando a usar gordura como energia. A vontade de doce agora é hábito, não fome." },
-  { chave: "1d", ms: DIA, titulo: "24 horas sem açúcar", corpo: "Um dia. Os picos e quedas de energia que te derrubavam à tarde vão começar a sumir." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 horas sem açúcar", corpo: "O pico da fissura por doce é aqui. Se você passar de hoje, a partir de amanhã fica visivelmente mais fácil." },
-  { chave: "7d", ms: SEMANA, titulo: "1 semana sem açúcar", corpo: "Seu paladar está recalibrando: fruta vai voltar a parecer doce de verdade. Menos inflamação, menos inchaço." },
-  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem açúcar", corpo: "Energia mais estável o dia inteiro, menos névoa mental, pele geralmente melhor." },
-  { chave: "30d", ms: MES, titulo: "1 mês sem açúcar", corpo: "Um mês. Sensibilidade à insulina melhor, triglicérides caindo e o desejo compulsivo bem mais fraco." },
-  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem açúcar", corpo: "Marcadores metabólicos melhores e um paladar completamente reeducado. Doce industrializado agora enjoa." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem açúcar", corpo: "Doze horas. A vontade de doce costuma ser mais hábito do que fome: repare em que momento ela aparece." },
+  { chave: "1d", ms: DIA, titulo: "24 horas sem açúcar", corpo: "Um dia. Planejar o lanche da tarde ajuda a atravessar o horário mais difícil." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 horas sem açúcar", corpo: "Três dias. A vontade vai e vem; costuma passar se você esperar alguns minutos. Beba água e mude de ambiente." },
+  { chave: "7d", ms: SEMANA, titulo: "1 semana sem açúcar", corpo: "Uma semana. Repare se o seu paladar está diferente e se os horários de vontade mudaram." },
+  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem açúcar", corpo: "Duas semanas. Continue anotando como você se sente ao longo do dia." },
+  { chave: "30d", ms: MES, titulo: "1 mês sem açúcar", corpo: "Um mês. Olhe pra trás: quantas vezes você escolheu outra coisa?" },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem açúcar", corpo: "Três meses de constância. Isso já é um jeito novo de comer." },
 ];
 
 const PORNOGRAFIA: MarcoDef[] = [
-  { chave: "1d", ms: DIA, titulo: "24 horas", corpo: "Um dia. O impulso vem junto com tédio, estresse e solidão — não com desejo. Reconhecer isso já é metade do trabalho." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 horas", corpo: "Três dias. Aqui a fissura costuma ser mais forte. Saia do lugar, mude de ambiente, fale com alguém. Não decida nada deitado." },
-  { chave: "7d", ms: SEMANA, titulo: "1 semana", corpo: "Uma semana. Foco e motivação começam a voltar conforme seu sistema de recompensa sai da superestimulação." },
-  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas", corpo: "Duas semanas. Menos névoa mental, mais presença nas interações reais. Continue." },
-  { chave: "30d", ms: MES, titulo: "1 mês", corpo: "Um mês. Ansiedade menor, sono melhor e mais interesse em pessoas de verdade. Seu cérebro está recalibrando o que é recompensa." },
-  { chave: "90d", ms: 3 * MES, titulo: "90 DIAS", corpo: "90 dias — o marco clássico de reset. As coisas simples voltam a ser suficientes. Você recuperou o controle." },
-  { chave: "180d", ms: 6 * MES, titulo: "6 meses", corpo: "Meio ano. Isso já não é uma luta diária, é o seu normal." },
+  { chave: "1d", ms: DIA, titulo: "24 horas", corpo: "Um dia. O impulso costuma vir junto com tédio, estresse ou solidão — não só com desejo. Reconhecer isso já ajuda." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 horas", corpo: "Três dias. Se a vontade apertar, saia do lugar, mude de ambiente, fale com alguém. Evite decidir deitado, sozinho, com o celular." },
+  { chave: "7d", ms: SEMANA, titulo: "1 semana", corpo: "Uma semana. Repare em como você tem usado o tempo que antes ia para isso." },
+  { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas", corpo: "Duas semanas. Continue — e repare em como você tem se sentido nas interações do dia a dia." },
+  { chave: "30d", ms: MES, titulo: "1 mês", corpo: "Um mês. Olhe pra trás: quantas vezes o impulso veio e você escolheu outra coisa?" },
+  { chave: "90d", ms: 3 * MES, titulo: "90 DIAS", corpo: "Três meses de constância. Se algum dia for difícil, lembre do caminho percorrido e converse com alguém de confiança ou com um profissional." },
+  { chave: "180d", ms: 6 * MES, titulo: "6 meses", corpo: "Meio ano. Metade de um ano vivida de outro jeito." },
 ];
 
 const REDES: MarcoDef[] = [
-  { chave: "6h", ms: 6 * HORA, titulo: "6 horas fora das redes", corpo: "Seis horas. A vontade de desbloquear o celular sem motivo é o loop de dopamina te chamando. Ele enfraquece com repetição." },
-  { chave: "1d", ms: DIA, titulo: "24 horas fora das redes", corpo: "Um dia. Sua capacidade de ficar entediado sem fugir está voltando — e é dela que sai criatividade." },
-  { chave: "3d", ms: 3 * DIA, titulo: "3 dias fora das redes", corpo: "Três dias. O impulso de checar já está mais espaçado. Note quantas vezes hoje você pegou o celular e largou." },
-  { chave: "7d", ms: SEMANA, titulo: "1 semana fora das redes", corpo: "Uma semana. Atenção mais longa, comparação social menor, ansiedade menor. Você ganhou horas de volta." },
+  { chave: "6h", ms: 6 * HORA, titulo: "6 horas fora das redes", corpo: "Seis horas. A vontade de desbloquear o celular sem motivo costuma ser um reflexo; ela enfraquece com a repetição." },
+  { chave: "1d", ms: DIA, titulo: "24 horas fora das redes", corpo: "Um dia. Repare no que você fez com o tempo que costumava ir para o celular." },
+  { chave: "3d", ms: 3 * DIA, titulo: "3 dias fora das redes", corpo: "Três dias. Note quantas vezes hoje você pegou o celular e largou." },
+  { chave: "7d", ms: SEMANA, titulo: "1 semana fora das redes", corpo: "Uma semana. Quantas horas você ganhou de volta? Vale somar." },
   { chave: "30d", ms: MES, titulo: "1 mês fora das redes", corpo: "Um mês inteiro em que a sua vida aconteceu em primeira pessoa." },
-  { chave: "90d", ms: 3 * MES, titulo: "3 meses fora das redes", corpo: "90 dias. Sua atenção voltou a ser sua. Isso é raro hoje em dia." },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses fora das redes", corpo: "90 dias. A sua atenção, no seu comando." },
 ];
 
 const APOSTAS: MarcoDef[] = [
-  { chave: "1d", ms: DIA, titulo: "24 horas sem apostar", corpo: "Um dia sem apostar. Cada hora sem entrar no app é dinheiro que continua sendo seu. A casa sempre ganha no longo prazo — sempre." },
-  { chave: "3d", ms: 3 * DIA, titulo: "3 dias sem apostar", corpo: "Três dias. O impulso de recuperar o prejuízo é a armadilha central. Você não recupera apostando: você recupera parando." },
-  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM APOSTAR", corpo: "Uma semana. Ansiedade menor, sono melhor e saldo intacto. Some o que você teria perdido nesses 7 dias." },
-  { chave: "30d", ms: MES, titulo: "1 mês sem apostar", corpo: "Um mês. Seu dinheiro, sua atenção e sua paz voltaram a ser seus. Se ainda tem dívida, agora ela só diminui." },
-  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem apostar", corpo: "90 dias. Você quebrou o ciclo. Manter a autoexclusão ativa e apoio por perto protege o que você construiu." },
+  { chave: "1d", ms: DIA, titulo: "24 horas sem apostar", corpo: "Um dia sem apostar. Em jogos de azar, a vantagem matemática é da casa: cada hora sem entrar no app é dinheiro que continua sendo seu." },
+  { chave: "3d", ms: 3 * DIA, titulo: "3 dias sem apostar", corpo: "Três dias. O impulso de recuperar o prejuízo é a armadilha central. Você não recupera apostando: recupera parando." },
+  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM APOSTAR", corpo: "Uma semana. Some o que você teria apostado nesses 7 dias. Esse valor ficou com você." },
+  { chave: "30d", ms: MES, titulo: "1 mês sem apostar", corpo: "Um mês. O seu dinheiro e a sua atenção continuaram com você. Se ainda tem dívida, agora ela só diminui." },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem apostar", corpo: "90 dias. Manter a autoexclusão ativa nas plataformas e ter apoio por perto protege o que você construiu." },
 ];
 
 const CAFEINA: MarcoDef[] = [
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem cafeína", corpo: "A cafeína já saiu quase toda do seu sangue. A dor de cabeça que pode vir é vasodilatação — passa em poucos dias." },
-  { chave: "1d", ms: DIA, titulo: "24 horas sem cafeína", corpo: "Um dia. Seus receptores de adenosina começam a normalizar. Hidrate-se bem: reduz muito a dor de cabeça." },
-  { chave: "2d", ms: 2 * DIA, titulo: "48 horas sem cafeína", corpo: "Aqui costuma ser o pico do desconforto. É o último empurrão — a partir daqui só melhora." },
-  { chave: "7d", ms: SEMANA, titulo: "1 semana sem cafeína", corpo: "Uma semana. Seu sono profundo está mais longo e sua energia mais estável, sem os altos e baixos." },
-  { chave: "30d", ms: MES, titulo: "1 mês sem cafeína", corpo: "Um mês. Ansiedade basal menor e sono reorganizado. Se voltar a tomar, será por prazer e não por dependência." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem cafeína", corpo: "Doze horas. Dor de cabeça e sonolência podem aparecer nos primeiros dias de quem cortou. Hidrate-se bem." },
+  { chave: "1d", ms: DIA, titulo: "24 horas sem cafeína", corpo: "Um dia. Beba água ao longo do dia e durma um pouco mais cedo, se puder." },
+  { chave: "2d", ms: 2 * DIA, titulo: "48 horas sem cafeína", corpo: "Dois dias. O desconforto dos primeiros dias costuma ser temporário. Siga firme." },
+  { chave: "7d", ms: SEMANA, titulo: "1 semana sem cafeína", corpo: "Uma semana. Repare no seu sono e no seu nível de energia ao longo do dia." },
+  { chave: "30d", ms: MES, titulo: "1 mês sem cafeína", corpo: "Um mês. Se um dia voltar a tomar, que seja uma escolha e não um automático." },
 ];
 
 export const PRESETS: Preset[] = [
@@ -186,7 +208,7 @@ export const PRESETS: Preset[] = [
     gastoDiarioPadrao: 12,
     minutosDeVidaPorUnidade: 11,
     contexto:
-      "Dependência de nicotina. A nicotina tem meia-vida de cerca de 2h e é eliminada por completo em cerca de 72h; depois disso a fissura é psicológica/condicionada, dura de 3 a 5 minutos por onda e diminui em frequência com o tempo. Gatilhos clássicos: café, álcool, pós-refeição, telefone, direção, estresse, ver alguém fumando, primeira hora do dia.",
+      "Dependência de nicotina. A vontade vem em ondas curtas, que costumam passar em poucos minutos, e tende a diminuir de frequência com o tempo. Gatilhos clássicos: café, álcool, pós-refeição, telefone, direção, estresse, ver alguém fumando, primeira hora do dia. Não cite prazos de recuperação como regra: o ritmo varia de pessoa para pessoa.",
     marcos: montar("sem fumar", CIGARRO),
   },
   {
@@ -198,7 +220,7 @@ export const PRESETS: Preset[] = [
     unidadesPorDiaPadrao: 0.5,
     gastoDiarioPadrao: 10,
     contexto:
-      "Dependência de nicotina por vape/pod. Costuma gerar consumo contínuo ao longo do dia, o que mantém nicotina alta e cria um hábito motor muito frequente (levar a mão à boca). Eliminação completa em cerca de 72h.",
+      "Dependência de nicotina por vape/pod. Costuma gerar uso contínuo ao longo do dia e um hábito motor muito frequente (levar a mão à boca). Não cite prazos de recuperação como regra.",
     marcos: montar("sem vape", VAPE),
   },
   {
@@ -210,7 +232,7 @@ export const PRESETS: Preset[] = [
     unidadesPorDiaPadrao: 3,
     gastoDiarioPadrao: 25,
     contexto:
-      "Redução/cessação de álcool. ATENÇÃO: em dependência física severa a abstinência pode ser perigosa (tremor intenso, confusão, convulsão) e exige acompanhamento médico. Gatilhos clássicos: sexta-feira, futebol, churrasco, briga, fim de expediente.",
+      "Redução/cessação de álcool. ATENÇÃO: em dependência física a abstinência pode ser perigosa (tremor intenso, confusão, convulsão) e exige acompanhamento médico. Gatilhos clássicos: sexta-feira, futebol, churrasco, briga, fim de expediente.",
     marcos: montar("sem beber", ALCOOL),
   },
   {
@@ -222,7 +244,7 @@ export const PRESETS: Preset[] = [
     unidadesPorDiaPadrao: 2,
     gastoDiarioPadrao: 8,
     contexto:
-      "Corte de açúcar adicionado/ultraprocessado. A fissura costuma ter pico em cerca de 72h e cair muito depois de 1-2 semanas, quando o paladar recalibra. Gatilhos: fim de refeição, cansaço à tarde, estresse, noite.",
+      "Corte de açúcar adicionado/ultraprocessado. A vontade costuma ir e vir e passar em alguns minutos. Gatilhos: fim de refeição, cansaço à tarde, estresse, noite. Não cite prazos de recuperação ou efeitos metabólicos como regra.",
     marcos: montar("sem açúcar", ACUCAR),
   },
   {
@@ -232,7 +254,7 @@ export const PRESETS: Preset[] = [
     sufixo: "limpo",
     unidade: "episódios",
     contexto:
-      "Uso compulsivo de pornografia. O impulso é fortemente ligado a tédio, estresse, solidão e ao estar sozinho com o celular à noite. A estratégia central é mudar de ambiente e de estado físico quando o impulso chega.",
+      "Uso compulsivo de pornografia. O impulso costuma ser ligado a tédio, estresse, solidão e a estar sozinho com o celular à noite. A estratégia central é mudar de ambiente e de estado físico quando o impulso chega. Não faça afirmações neurológicas nem cite prazos de recuperação.",
     marcos: montar("limpo", PORNOGRAFIA),
   },
   {
@@ -242,7 +264,7 @@ export const PRESETS: Preset[] = [
     sufixo: "fora das redes",
     unidade: "sessões",
     contexto:
-      "Uso compulsivo de redes sociais/celular. O loop é de recompensa variável: o impulso de checar aparece sem motivo consciente. Melhora com fricção (apps fora da tela inicial, sem notificação) e com substituição da ação.",
+      "Uso compulsivo de redes sociais/celular. O impulso de checar aparece muitas vezes sem motivo consciente. Ajuda ter fricção (apps fora da tela inicial, sem notificação) e substituir a ação.",
     marcos: montar("fora das redes", REDES),
   },
   {
@@ -253,7 +275,7 @@ export const PRESETS: Preset[] = [
     unidade: "apostas",
     gastoDiarioPadrao: 30,
     contexto:
-      "Jogo/aposta compulsiva. O pensamento mais perigoso é vou recuperar o que perdi. Autoexclusão nas plataformas, bloqueio de pagamento e apoio externo aumentam muito a chance de sucesso. No Brasil há apoio gratuito em grupos de Jogadores Anônimos e no CVV (188).",
+      "Jogo/aposta compulsiva. O pensamento mais perigoso é \"vou recuperar o que perdi\". Autoexclusão nas plataformas, bloqueio de pagamento e apoio externo ajudam. No Brasil há apoio gratuito em grupos de Jogadores Anônimos e no CVV (188).",
     marcos: montar("sem apostar", APOSTAS),
   },
   {
@@ -265,7 +287,7 @@ export const PRESETS: Preset[] = [
     unidadesPorDiaPadrao: 4,
     gastoDiarioPadrao: 12,
     contexto:
-      "Corte de cafeína. Abstinência típica: dor de cabeça, sonolência e irritabilidade, com pico em 24-48h e resolução em cerca de 7 dias. Reduzir gradualmente diminui muito o desconforto.",
+      "Corte de cafeína. Pode causar dor de cabeça, sonolência e irritabilidade nos primeiros dias; reduzir aos poucos costuma diminuir o desconforto. Não cite prazos exatos como regra.",
     marcos: montar("sem cafeína", CAFEINA),
   },
   {
