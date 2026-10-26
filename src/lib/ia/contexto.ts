@@ -78,7 +78,7 @@ export async function retratoDoUsuario(userId: string, agora = new Date()): Prom
         orderBy: { criadoEm: "asc" },
         include: { recaidas: { orderBy: { quando: "desc" }, take: 5 } },
       },
-      contagens: { orderBy: { alvo: "asc" } },
+      contagens: { where: { arquivadoEm: null }, orderBy: { alvo: "asc" } },
     },
   });
   if (!u) return null;

@@ -14,6 +14,8 @@ const Patch = z.object({
   horaAviso: z.number().int().min(0).max(23).optional(),
   avisos: z.array(z.number().int().min(0).max(365)).max(12).optional(),
   notificar: z.boolean().optional(),
+  /** true arquiva (some da lista e para os avisos); false restaura */
+  arquivado: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -27,8 +29,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const dados = Patch.safeParse(await req.json().catch(() => null));
   if (!dados.success) return NextResponse.json({ erro: "Dados inválidos" }, { status: 400 });
 
-  const { alvo, avisos, ...resto } = dados.data;
+  const { alvo, avisos, arquivado, ...resto } = dados.data;
   const patch: Record<string, unknown> = { ...resto };
+  if (arquivado !== undefined) patch.arquivadoEm = arquivado ? new Date() : null;
 
   // Título ou descrição mudou: o ícone é derivado deles, então recalcula.
   if (dados.data.titulo !== undefined || dados.data.descricao !== undefined) {

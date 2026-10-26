@@ -61,7 +61,9 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
     where: { id: userId },
     include: {
       marcos: { where: { ativo: true, arquivadoEm: null } },
-      contagens: true,
+      // Arquivar uma contagem também a silencia: sem isso arquivar só esconderia
+      // e os avisos diários continuariam chegando.
+      contagens: { where: { arquivadoEm: null } },
       _count: { select: { inscricoes: true } },
     },
   });
