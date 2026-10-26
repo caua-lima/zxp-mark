@@ -156,10 +156,10 @@ export function posicionar(etapas: Etapa[], valor: number): Posicao {
  * Pedaço da trilha que cabe na tela, centrado no alvo atual. Devolve também
  * quantas etapas ficaram escondidas de cada lado, para a interface dizer "+4".
  */
-export function janela(
-  etapas: EtapaComEstado[],
+export function janela<T extends { estado: EstadoEtapa }>(
+  etapas: T[],
   tamanho = 6
-): { itens: EtapaComEstado[]; antes: number; depois: number } {
+): { itens: T[]; antes: number; depois: number } {
   if (etapas.length <= tamanho) return { itens: etapas, antes: 0, depois: 0 };
   const iAtual = etapas.findIndex((e) => e.estado === "atual");
   const centro = iAtual === -1 ? etapas.length - 1 : iAtual;

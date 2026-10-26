@@ -321,3 +321,24 @@ select {
 .aviso-topo {
   animation: aviso-topo 6s ease-in-out both;
 }
+
+/*
+ * Exceção ao "pular para o estado final": o aviso do topo TERMINA invisível,
+ * então sem animação ele nunca apareceria. Para movimento reduzido ele fica
+ * parado e visível; quem o fecha é o temporizador do componente.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .aviso-topo {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Rolagem horizontal sem a barra grossa (a trilha continua rolável por toque/teclado). */
+.sem-barra {
+  scrollbar-width: none;
+}
+.sem-barra::-webkit-scrollbar {
+  display: none;
+}

@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Area, Aviso, Botao, BotaoEditar, Brilho, Campo, Secao } from "@/components/ui";
 import { Cronometro } from "@/components/Cronometro";
+import { Trilha } from "@/components/Trilha";
+import { Celebracao } from "@/components/Celebracao";
+import type { PainelProgresso } from "@/lib/painel-progresso";
 import { preset, situacao } from "@/lib/habitos";
 import { dataLonga, duracaoExtenso, impacto, reais, rotuloMs } from "@/lib/formato";
 
@@ -25,10 +28,12 @@ export type MarcoDetalhe = {
 export function DetalheMarco({
   marco,
   agora,
+  trilha,
   abrirEdicao = false,
 }: {
   marco: MarcoDetalhe;
   agora: number;
+  trilha: PainelProgresso;
   /** vindo do lápis da lista: já cai com o painel de edição aberto */
   abrirEdicao?: boolean;
 }) {
@@ -197,6 +202,19 @@ export function DetalheMarco({
             router.replace("/marcos");
             router.refresh();
           }}
+        />
+      )}
+
+      {/* ------------------------------ trilha ---------------------------- */}
+      <div className="mt-3.5">
+        <Trilha progresso={trilha} />
+      </div>
+      {trilha.celebracao && (
+        <Celebracao
+          celebracao={trilha.celebracao}
+          tipo={trilha.tipo}
+          refId={trilha.refId}
+          pendentes={trilha.pendentes}
         />
       )}
 
