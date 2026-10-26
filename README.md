@@ -8,13 +8,16 @@ Parte da família **ZXP Solutions**. DNA comum: onyx `#10100E`, marfim `#F6F3E8`
 
 ## O que ele faz
 
-**Marcos** — você **escreve** o que quer largar, com as suas palavras, e o sistema reconhece o hábito para carregar a linha do tempo certa ("quero largar o cigarro" → 27 marcos de cessação de nicotina). Não reconheceu, usa a linha geral. O cronômetro começa na hora. Cada hábito tem uma linha do tempo própria, baseada no que de fato acontece no corpo: 20 minutos, 1h, 6h, 8h, 12h, 24h, 72h, 1 semana, 1 mês… até 15 anos. A cada marco atingido chega uma notificação com o que está acontecendo com você *naquele momento*.
+**Marcos** — você **escreve** o que quer largar, com as suas palavras, e o sistema reconhece o hábito para carregar a linha do tempo certa ("quero largar o cigarro" → 27 marcos de cessação de nicotina). Não reconheceu, usa a linha geral. O cronômetro começa na hora. Cada hábito tem uma linha do tempo própria: 20 minutos, 1h, 6h, 8h, 12h, 24h, 72h, 1 semana, 1 mês… até 15 anos. A cada marco atingido chega uma notificação com constância, gatilhos e — **só para o cigarro, e só com fonte citada** — o que a literatura aponta como benefício possível (veja [Conteúdo de saúde](#conteúdo-de-saúde-fonte-ou-nada)).
 
 > 🚭 **6 HORAS SEM FUMAR**
-> Seu corpo já está se livrando da nicotina de verdade. Quando você acordar amanhã, ele vai pedir — é o pico matinal. Segure firme: passa em minutos e você volta a mandar.
+> Seu corpo já está eliminando a nicotina. Quando você acordar amanhã, é comum vir um pedido forte — segure firme: passa em minutos e você volta a mandar.
 > *R$ 3,00 economizados · 5 cigarros a menos*
 
-**Contagens** — marque uma data e ela vira contagem regressiva ao vivo. O ícone é escolhido pelo sistema a partir do título ("Viagem para a praia" vira ✈️, "Prova do ENEM" vira 📝) e por padrão chega **um aviso por dia**: faltam 66 dias, faltam 65 dias, e assim por diante. Dá para trocar por avisos só em D-30, D-14, D-7, D-3, D-1 e no dia.
+**Contagem** — uma aba com dois jeitos de contar, escolhidos pela URL (`/contagem?modo=desde` ou `?modo=regressiva`; sem parâmetro abre na Regressiva).
+
+- **Desde o início** — o tempo corrido desde uma data: início de um tratamento, de uma rotina, de um projeto. O número grande são os **dias completos** (24 h vividas) e o **“dia N”** aparece ao lado, com o dia do início contado como dia 1. Antes de 24 h o destaque são as horas. Em **tratamento** a frase é “12 dias desde o início do tratamento” e o contador diz que não registra doses nem substitui orientação profissional. Não tem recaída, não tem “streak” e não manda notificação.
+- **Regressiva** — marque uma data e ela vira contagem regressiva ao vivo. Quando o dia passa, o cartão mostra **Concluída · aconteceu há N dias** (nunca número negativo) e pode ser arquivado. O ícone é escolhido pelo sistema a partir do título ("Viagem para a praia" vira ✈️, "Prova do ENEM" vira 📝) e por padrão chega **um aviso por dia**: faltam 66 dias, faltam 65 dias, e assim por diante. Dá para trocar por avisos só em D-30, D-14, D-7, D-3, D-1 e no dia.
 
 **Ajuda** — chat que recebe, a cada mensagem, o seu retrato exato: tempo da sequência atual, próximo marco e quanto falta, dinheiro economizado, histórico de recaídas e gatilhos, o "porquê" que você escreveu, e as contagens em aberto. Pergunte *"por que não devo fumar agora?"* e a resposta usa os seus números, não conselho genérico. **Funciona de graça, sem nenhuma API** — veja [Chat: quanto custa](#chat-quanto-custa-nada).
 
@@ -25,6 +28,10 @@ Parte da família **ZXP Solutions**. DNA comum: onyx `#10100E`, marfim `#F6F3E8`
 **Acesso** — aba própria para trocar a própria senha e, para quem é admin, criar, editar, promover e apagar acessos. Com `CADASTRO_ABERTO=false` o cadastro público fecha e só o admin abre porta.
 
 **Recaída** não é fracasso: registra o gatilho, guarda quanto durou a sequência, mantém o recorde pessoal e reinicia o relógio.
+
+**Trilha de progresso** — cada hábito e cada contagem desde o início tem uma trilha de etapas: onde você está, o que já conquistou, o próximo passo e por que vale continuar. Cada etapa separa três coisas que nunca se misturam: **conquista registrada** (dados do app), **benefício possível** (educativo, com fonte e data) e **melhora percebida** (o que *você* escreve, opcional, nunca obrigatório). Celebração grande só nas etapas relevantes (dia, semana, mês…); o resto é um aviso discreto. Não repete ao recarregar, não duplica com toque duplo, e corrigir uma data de início **não** gera recompensa retroativa.
+
+**Sono** — acessado por um cartão em Marcos (não é uma aba nova). Registre quando dormiu e quando acordou (pode atravessar a meia-noite), com qualidade de 1 a 5 e observação opcional. Gráfico dos últimos 7 dias, média, noites registradas e histórico. Dia sem registro fica em branco — **nunca conta como zero hora** — e a média divide só pelos dias com dado. A duração é a do intervalo informado, não do sono em si. A trilha reconhece o hábito de **registrar**, nunca dormir mais, e pausas não apagam o que já foi registrado.
 
 ---
 
@@ -219,6 +226,13 @@ scripts/gerar-icones.mjs  reamostra os ícones do PWA a partir de public/marca
 scripts/prisma-com-env.mjs  faz o Prisma CLI enxergar o .env.local
 public/sw.js              push + cache do casco para funcionar offline
 src/lib/habitos.ts        catálogo de hábitos e a linha do tempo de cada um
+src/lib/beneficios.ts     benefícios possíveis, cada um com fonte, órgão e data de revisão
+src/lib/datas.ts          regras de data e fuso: dia completo vs dia N, relógio de parede → instante
+src/lib/progressao.ts     trilha de etapas e escolha da celebração (puro, testado)
+src/lib/acompanhamento.ts regras da contagem crescente (puro, testado)
+src/lib/sono.ts           validação, sobreposição e resumo de 7 dias (puro, testado)
+src/lib/servicos/         persistência com autorização por dono + testes de integração
+src/lib/painel-progresso.ts monta, no servidor, tudo que a trilha mostra
 src/lib/motor.ts          decide o que está vencido e dispara — com dedupe
 src/lib/ia/contexto.ts    retrato ao vivo do usuário (fonte única de verdade)
 src/lib/ia/local.ts       motor local gratuito + detector de crise
@@ -228,14 +242,16 @@ src/lib/senha.ts          scrypt puro, compartilhado com os scripts de CLI
 src/lib/auth.ts           JWT e sessão
 src/lib/admin.ts          guarda de rota para as ações de admin
 scripts/criar-acesso.mjs  cria o primeiro admin direto no banco
-src/app/(app)/            as quatro abas + conquistas
+src/app/(app)/            as abas (marcos, contagem, ajuda, acesso, perfil) + conquistas e sono
 src/app/offline/          tela util quando nao ha conexao
 src/app/api/              rotas
 ```
 
 ### Onde mexer para ajustar o conteúdo
 
-- **Textos das notificações e marcos de cada hábito** → `src/lib/habitos.ts`. Cada entrada tem `chave`, `ms`, `titulo` e `corpo`. Adicionar um marco novo é adicionar um objeto ao array.
+- **Textos das notificações e marcos de cada hábito** → `src/lib/habitos.ts`. Cada entrada tem `chave`, `ms`, `titulo` e `corpo`. Adicionar um marco novo é adicionar um objeto ao array. **Não mude `chave`, `ms` nem `titulo` de um marco existente**: a chave deduplica notificações já enviadas. E leia antes a [política de conteúdo de saúde](#conteúdo-de-saúde-fonte-ou-nada).
+- **Benefícios com fonte** → `src/lib/beneficios.ts`.
+- **Etapas da trilha** (marcos de engajamento, noites de sono) → `src/lib/progressao.ts`.
 - **Respostas do motor gratuito** → `src/lib/ia/local.ts`. As ações de 5 minutos estão em `ACOES_MADRUGADA`/`MANHA`/`TARDE`/`NOITE`.
 - **Reconhecimento de hábito e ícone** → `src/lib/deteccao.ts`. Adicionar um termo é acrescentar uma palavra numa lista.
 - **Personalidade do chat com LLM** → a constante `INSTRUCOES` em `src/lib/ia/instrucoes.ts`.
@@ -257,9 +273,45 @@ src/app/api/              rotas
 
 **Hidratação.** Os cronômetros renderizam vazios no servidor e só começam a contar depois de montados — o relógio do servidor nunca bate com o do celular.
 
+**Celebração não repete.** Cada (usuário, item, etapa, ciclo) é único em `ConquistaVista`; a etapa é marcada como vista quando a celebração *aparece* (não quando é fechada), então recarregar não a traz de volta. O primeiro olhar a um ciclo semeia as etapas já atingidas em silêncio (linha `_base`) — é isso que impede data corrigida ou marco antigo de virar uma enxurrada de comemorações.
+
+**Sono: duplo toque não duplica.** Conferir sobreposição e gravar rodam numa transação com `pg_advisory_xact_lock` por usuário. Sem a trava, duas requisições simultâneas conferem juntas, acham o caminho livre e gravam as duas.
+
+**Hora digitada é do fuso do usuário.** O servidor roda em UTC; “23:00” digitado em São Paulo é convertido com o fuso do perfil (`instanteLocal` em `datas.ts`), que também recusa o que não existe (30/fev, horário pulado no horário de verão).
+
 **Chat que não cai.** O provedor externo é a camada de cima, nunca a base. Se ele der erro, estourar o limite ou devolver vazio, o motor local completa a resposta na mesma requisição — sem mensagem de erro para o usuário. Limite de 120 mensagens por hora por conta.
 
 **Crise tem resposta fixa.** Frases de risco de vida ou de abstinência grave são detectadas por regex antes de qualquer provedor ser chamado, e a resposta com CVV 188 / SAMU 192 sai sempre — não depende de o modelo lembrar do número. A detecção usa regex e não busca de substring de propósito: "não quero *mais* viver" não bate com a string "não quero viver", e um falso negativo aqui é inaceitável.
+
+---
+
+## Conteúdo de saúde: fonte ou nada
+
+Nenhum texto do app promete recuperação, dá prazo universal ou afirma algo sobre o cérebro sem fonte. A regra, travada por testes (`src/lib/beneficios.test.ts`):
+
+- O `corpo` de cada marco fala de **constância e gatilhos**. Afirmação de saúde só entra com fonte em `beneficios.ts` (órgão, URL, data da página, data da conferência e se a página foi lida ou só o resumo de busca) e o texto diz “segundo o CDC/NHS”.
+- Hoje **só o cigarro** tem benefícios (CDC, *Benefits of Quitting*, página de 15/05/2024; NHS, *Benefits of quitting smoking*). Os demais hábitos têm mensagem factual sobre o registro.
+- **Tratamento** nunca ganha benefício: o bloco se chama “O que esta etapa mostra” e diz que o contador mede só o tempo. **Sono** fala em observar o padrão, nunca em dormir mais ou melhor. **Viagem** fica com preparação e expectativa.
+- Para revisar: abra a página da fonte, compare o prazo, atualize `verificadoEm`. Se a fonte mudar o que diz, o teste que compara prazos corrigidos (`as afirmações do corpo não contradizem as da fonte`) é o lugar de atualizar.
+
+## Testes
+
+```bash
+npm test                      # regras puras: datas, sono, progressão, conteúdo (sem banco)
+ZXP_TESTE_DB=1 npm test      # inclui os de integração, contra o banco do .env.local
+```
+
+Os de integração (persistência, autorização entre contas, deduplicação, concorrência) **usam o banco do `.env.local`** — não há banco de teste separado. Eles só criam usuários `teste-…@zxpmark.local`, cada processo apaga apenas os que criou, e resíduos com mais de 1 h de execuções interrompidas. Sem a variável `ZXP_TESTE_DB=1` eles são pulados. Se você apontar o `.env.local` para produção, prefira rodá-los num momento calmo.
+
+## Atualizando um banco já existente
+
+Esta versão **só adiciona**: 1 coluna nullable (`Contagem.arquivadoEm`) e 4 tabelas (`Acompanhamento`, `ConquistaVista`, `Percepcao`, `Sono`). Nenhum dado existente é alterado. Antes de publicar o código desta versão, rode uma vez:
+
+```bash
+npm run db:push
+```
+
+(sem `--accept-data-loss`: se algum dia o Prisma pedir isso, pare e leia o que ele vai apagar).
 
 ---
 
