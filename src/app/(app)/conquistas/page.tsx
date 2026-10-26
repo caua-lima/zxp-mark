@@ -2,6 +2,11 @@ import { prisma } from "@/lib/db";
 import { usuarioId } from "@/lib/auth";
 import { preset, situacao, DIA } from "@/lib/habitos";
 import { impacto } from "@/lib/formato";
+import { conteudoDaEtapa } from "@/lib/beneficios";
+import { etapasDoAcompanhamento, etapasDoSono, posicionar } from "@/lib/progressao";
+import { diasRegistrados } from "@/lib/sono";
+import { fusoDoUsuario } from "@/lib/usuario";
+import { instanteLocal } from "@/lib/datas";
 import {
   Conquistas,
   type Conquista,
@@ -74,6 +79,60 @@ export default async function PaginaConquistas() {
         },
         agora
       ).dinheiroEconomizado ?? 0;
+  }
+
+  // A contagem crescente e o sono entram na MESMA lista: um só lugar para ver o
+  // que foi conquistado, em vez de um segundo sistema de conquistas.
+  const [acompanhamentos, sonos, fuso] = await Promise.all([
+    prisma.acompanhamento.findMany({ where: { userId: uid, arquivadoEm: null } }),
+    prisma.sono.findMany({ where: { userId: uid }, select: { acordouEm: true } }),
+    fusoDoUsuario(uid),
+  ]);
+
+  const etapasA = etapasDoAcompanhamento();
+  for (const a of acompanhamentos) {
+    const decorrido = Math.max(0, agora - a.inicio.getTime());
+    const pos = posicionar(etapasA, decorrido);
+    for (const e of etapasA) {
+      if (e.inicial || e.limiar > decorrido) continue;
+      conquistas.push({
+        marcoId: a.id,
+        marcoTitulo: a.titulo,
+        emoji: a.emoji,
+        chave: e.chave,
+        titulo: e.titulo,
+        corpo: conteudoDaEtapa({ tipo: "acompanhamento", categoria: a.categoria, etapa: e, proxima: null }).conquista,
+        ms: e.limiar,
+        em: new Date(a.inicio.getTime() + e.limiar).toISOString(),
+      });
+    }
+    if (pos.atual) {
+      proximas.push({
+        marcoId: a.id,
+        emoji: a.emoji,
+        titulo: pos.atual.titulo,
+        faltaMs: pos.falta,
+        ms: pos.atual.limiar,
+      });
+    }
+  }
+
+  const noites = diasRegistrados(sonos, fuso);
+  for (const e of etapasDoSono()) {
+    if (e.inicial || e.limiar > noites.length) continue;
+    const quando = instanteLocal(noites[e.limiar - 1], fuso);
+    if (!quando) continue;
+    conquistas.push({
+      marcoId: "sono",
+      marcoTitulo: "Sono",
+      emoji: "🌙",
+      chave: e.chave,
+      titulo: e.titulo,
+      corpo: conteudoDaEtapa({ tipo: "sono", etapa: e, proxima: null }).conquista,
+      ms: e.limiar,
+      rotulo: `${e.limiar} ${e.limiar === 1 ? "noite" : "noites"}`,
+      em: quando.toISOString(),
+    });
   }
 
   conquistas.sort((a, b) => new Date(b.em).getTime() - new Date(a.em).getTime());

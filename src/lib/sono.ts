@@ -209,6 +209,17 @@ export function diasComRegistro(
   return new Set(registros.map((r) => diaDoRegistro(r, tz))).size;
 }
 
+/**
+ * Os dias com registro, do mais antigo ao mais novo ("YYYY-MM-DD"). O n-ésimo
+ * é o dia em que a pessoa chegou a "n noites registradas".
+ */
+export function diasRegistrados(
+  registros: { acordouEm: Date | number }[],
+  tz: string
+): string[] {
+  return [...new Set(registros.map((r) => diaDoRegistro(r, tz)))].sort();
+}
+
 /** Quantos dias separam o último registro de hoje (null se nunca registrou). */
 export function diasDesdeUltimoRegistro(
   registros: { acordouEm: Date | number }[],

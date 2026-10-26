@@ -42,7 +42,36 @@ export async function GET() {
       },
       contagens: {
         orderBy: { alvo: "asc" },
-        select: { titulo: true, emoji: true, descricao: true, alvo: true, avisos: true, criadoEm: true },
+        select: {
+          titulo: true,
+          emoji: true,
+          descricao: true,
+          alvo: true,
+          avisos: true,
+          arquivadoEm: true,
+          criadoEm: true,
+        },
+      },
+      acompanhamentos: {
+        orderBy: { inicio: "asc" },
+        select: {
+          titulo: true,
+          categoria: true,
+          emoji: true,
+          tom: true,
+          descricao: true,
+          inicio: true,
+          arquivadoEm: true,
+          criadoEm: true,
+        },
+      },
+      sonos: {
+        orderBy: { dormiuEm: "asc" },
+        select: { dormiuEm: true, acordouEm: true, qualidade: true, nota: true },
+      },
+      percepcoes: {
+        orderBy: { criadaEm: "asc" },
+        select: { tipo: true, refId: true, chave: true, humor: true, nota: true, criadaEm: true },
       },
       mensagens: {
         orderBy: { criadaEm: "asc" },
@@ -51,6 +80,13 @@ export async function GET() {
     },
   });
   if (!u) return NextResponse.json({ erro: "Usuário não encontrado" }, { status: 404 });
+
+  // O refId de uma percepção não diz nada a quem lê o arquivo: troca pelo título.
+  const [marcosDaConta, acompanhamentosDaConta] = await Promise.all([
+    prisma.marco.findMany({ where: { userId: uid }, select: { id: true, titulo: true } }),
+    prisma.acompanhamento.findMany({ where: { userId: uid }, select: { id: true, titulo: true } }),
+  ]);
+  const titulos = new Map([...marcosDaConta, ...acompanhamentosDaConta].map((x) => [x.id, x.titulo]));
 
   const dados = {
     app: "ZXP Mark",
@@ -62,6 +98,13 @@ export async function GET() {
       recaidas: m.recaidas.map((r) => ({ ...r, duracaoMs: Number(r.duracaoMs) })),
     })),
     contagens: u.contagens,
+    acompanhamentos: u.acompanhamentos,
+    sono: u.sonos,
+    // "melhora percebida": o que a própria pessoa escreveu sobre como se sentia
+    percepcoes: u.percepcoes.map(({ refId, ...resto }) => ({
+      ...resto,
+      item: resto.tipo === "sono" ? "Sono" : (titulos.get(refId) ?? null),
+    })),
     conversas: u.mensagens,
   };
 

@@ -13,6 +13,8 @@ export type Conquista = {
   titulo: string;
   corpo: string;
   ms: number;
+  /** quando o limiar não é tempo (ex.: noites registradas), o texto do selo */
+  rotulo?: string;
   em: string;
 };
 
@@ -54,7 +56,7 @@ export function Conquistas({
       <section className="cartao relative mb-3.5 overflow-hidden p-7 text-center">
         <Brilho className="-top-24 left-1/2 size-64 -translate-x-1/2" />
         <p className="relative text-[11px] font-semibold tracking-[0.18em] text-apagado uppercase">
-          Marcos conquistados
+          Etapas conquistadas
         </p>
         <p className="numeros font-display relative mt-3 text-[76px] leading-[0.82] font-extrabold text-brand">
           {recordes.total}
@@ -121,7 +123,7 @@ export function Conquistas({
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-[14.5px] font-medium text-tinta">{c.titulo}</h3>
                 <span className="numeros shrink-0 text-[11.5px] text-fantasma">
-                  {rotuloMs(c.ms)}
+                  {c.rotulo ?? rotuloMs(c.ms)}
                 </span>
               </div>
               <p className="mt-1 text-[13px] leading-relaxed text-suave">{c.corpo}</p>
