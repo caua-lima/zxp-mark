@@ -8,8 +8,29 @@ import { CartaoSono } from "@/components/CartaoSono";
 import { fusoDoUsuario } from "@/lib/usuario";
 import { carregarSono } from "@/lib/servicos/sono";
 import { duracaoMs } from "@/lib/sono";
+import { listarTratamentos } from "@/lib/servicos/tratamento";
+import { resumirTratamento } from "@/lib/rastreio/medicamento";
+import { tabelaAusente } from "@/lib/servicos/preferencias";
+import { diaLocalDe } from "@/lib/datas";
 
 export const dynamic = "force-dynamic";
+
+/** Tratamentos que a pessoa acompanha, como cartões da aba (sem tabelas novas no banco: lista vazia). */
+async function tratamentosDoUsuario(uid: string, tz: string, agora: number) {
+  try {
+    const lista = await listarTratamentos(prisma, uid);
+    return lista.map((t) => ({
+      id: t.id,
+      nome: t.nome,
+      medicamentoId: t.medicamentoId,
+      inicio: diaLocalDe(t.inicio, tz),
+      diaN: resumirTratamento(t.inicio, [], [], agora, tz).desdeInicio.diaN,
+    }));
+  } catch (e) {
+    if (tabelaAusente(e)) return [];
+    throw e;
+  }
+}
 
 export default async function PaginaMarcos() {
   const uid = (await usuarioId())!;
@@ -22,7 +43,9 @@ export default async function PaginaMarcos() {
   ]);
 
   const agora = Date.now();
-  const sono = await carregarSono(prisma, uid, await fusoDoUsuario(uid), agora);
+  const tz = await fusoDoUsuario(uid);
+  const sono = await carregarSono(prisma, uid, tz, agora);
+  const tratamentos = await tratamentosDoUsuario(uid, tz, agora);
 
   return (
     <main>
@@ -65,7 +88,7 @@ export default async function PaginaMarcos() {
 
       <ResumoGeral agora={agora} marcos={marcos.map((m) => ({ ...m, melhorMs: Number(m.melhorMs) }))} />
 
-      {marcos.length === 0 ? (
+      {marcos.length === 0 && tratamentos.length === 0 ? (
         <Vazio />
       ) : (
         <div className="space-y-4">
@@ -86,6 +109,33 @@ export default async function PaginaMarcos() {
             />
           ))}
         </div>
+      )}
+
+      {tratamentos.length > 0 && (
+        <section className="mt-5" aria-label="Tratamentos">
+          <h2 className="mb-3 text-[12px] font-semibold tracking-[0.12em] text-apagado uppercase">Tratamentos</h2>
+          <div className="space-y-3">
+            {tratamentos.map((t) => (
+              <Link
+                key={t.id}
+                href={t.medicamentoId === "outro" ? "/temas" : `/temas/${t.medicamentoId}`}
+                className="cartao flex items-center justify-between gap-3 p-5 active:bg-white/[0.04]"
+              >
+                <div className="min-w-0">
+                  <p className="text-[12px] font-semibold tracking-[0.12em] text-brand uppercase">Tratamento</p>
+                  <p className="mt-1 truncate text-[17px] font-semibold">{t.nome}</p>
+                  <p className="mt-0.5 text-[13px] text-apagado">
+                    desde {t.inicio.split("-").reverse().slice(0, 2).join("/")} · registros, doses e etapas
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="numeros text-[30px] leading-none font-semibold">{t.diaN}</p>
+                  <p className="mt-1 text-[12px] text-apagado">dia do tratamento</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       {marcos.length > 0 && (
