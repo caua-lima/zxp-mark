@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { usuarioId } from "@/lib/auth";
+import { fusoDoUsuario } from "@/lib/usuario";
+import { registrarEvento } from "@/lib/servicos/habitos";
+import { diaLocalDe } from "@/lib/datas";
 
 export const runtime = "nodejs";
 
@@ -47,6 +50,17 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       data: { cicloInicio: quando, melhorMs: melhor },
     }),
   ]);
+
+  // "Roí" também é um episódio no acompanhamento por registros, se a pessoa o tiver. Melhor esforço:
+  // sem as tabelas, sem acompanhamento ou com data fora do período, a recaída do marco vale do mesmo jeito.
+  if (marco.preset === "unhas") {
+    try {
+      const tz = await fusoDoUsuario(uid);
+      await registrarEvento(prisma, uid, "unhas", { tipo: "episodio", dia: diaLocalDe(quando, tz), contexto: null, nota: dados.data.gatilho?.trim() || null }, tz);
+    } catch {
+      /* ignora */
+    }
+  }
 
   return NextResponse.json({
     ok: true,

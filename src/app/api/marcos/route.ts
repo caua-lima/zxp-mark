@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { usuarioId } from "@/lib/auth";
 import { PRESETS, preset } from "@/lib/habitos";
+import { iniciarHabito } from "@/lib/servicos/habitos";
 
 export const runtime = "nodejs";
 
@@ -74,6 +75,15 @@ export async function POST(req: Request) {
       gastoDiario: dados.data.gastoDiario ?? null,
     },
   });
+
+  // Marco de unhas começa também o acompanhamento por registros (idempotente). Melhor esforço.
+  if (presetId === "unhas") {
+    try {
+      await iniciarHabito(prisma, uid, { temaId: "unhas" });
+    } catch {
+      /* tabelas ainda não existem: o marco funciona sem */
+    }
+  }
 
   return NextResponse.json({ ok: true, marco: { ...marco, melhorMs: Number(marco.melhorMs) } });
 }

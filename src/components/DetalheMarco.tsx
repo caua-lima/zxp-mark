@@ -8,7 +8,7 @@ import { Cronometro } from "@/components/Cronometro";
 import { Trilha } from "@/components/Trilha";
 import { Celebracao } from "@/components/Celebracao";
 import type { PainelProgresso } from "@/lib/painel-progresso";
-import { preset, situacao } from "@/lib/habitos";
+import { preset, situacao, TEMA_DO_PRESET } from "@/lib/habitos";
 import { dataLonga, duracaoExtenso, impacto, reais, rotuloMs } from "@/lib/formato";
 
 export type MarcoDetalhe = {
@@ -160,6 +160,18 @@ export function DetalheMarco({
             {marco.porque}
           </p>
         </section>
+      )}
+
+      {TEMA_DO_PRESET[marco.preset] && (
+        <Link
+          href={`/temas/${TEMA_DO_PRESET[marco.preset]}`}
+          className="cartao mt-3.5 flex items-center justify-between gap-3 p-4 active:bg-white/[0.04]"
+        >
+          <span className="text-[14px] leading-snug text-suave">
+            Benefícios possíveis, o que observar, perguntas e fontes{marco.preset === "unhas" ? ", e registro de episódios" : ""}
+          </span>
+          <span aria-hidden className="text-apagado">›</span>
+        </Link>
       )}
 
       {/* ----------------------------- ações ------------------------------ */}
