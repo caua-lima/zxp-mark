@@ -7,9 +7,9 @@ import { diaLocalDe } from "@/lib/datas";
 import { temaPorId } from "@/lib/conhecimento/catalogo";
 import { TemaConteudo } from "@/components/TemaConteudo";
 import { RastreioUnhas, type DadosUnhas } from "@/components/saude/RastreioUnhas";
-import { RastreioTratamento, type DadosTratamentoUI, type TratamentoUI } from "@/components/saude/RastreioTratamento";
+import { RastreioTratamento, type DadosTratamentoUI } from "@/components/saude/RastreioTratamento";
 import { carregarRastreio } from "@/lib/servicos/habitos";
-import { carregarTratamento, listarTratamentos } from "@/lib/servicos/tratamento";
+import { tratamentosUI } from "@/lib/tratamento-ui";
 import { tabelaAusente } from "@/lib/servicos/preferencias";
 
 export const dynamic = "force-dynamic";
@@ -43,29 +43,8 @@ async function dadosUnhas(uid: string, temaId: string, tz: string): Promise<Dado
 
 async function dadosTratamento(uid: string, temaId: string, tz: string): Promise<DadosTratamentoUI> {
   try {
-    const agora = Date.now();
-    const lista = await listarTratamentos(prisma, uid);
-    const tratamentos: TratamentoUI[] = [];
-    for (const l of lista) {
-      const c = await carregarTratamento(prisma, uid, l.id, tz, agora);
-      if (!c) continue;
-      tratamentos.push({
-        id: c.tratamento.id,
-        nome: c.tratamento.nome,
-        inicio: diaLocalDe(c.tratamento.inicio, tz),
-        horario: c.tratamento.horario,
-        lembrete: c.tratamento.lembrete,
-        lembreteDetalhado: c.tratamento.lembreteDetalhado,
-        doCatalogo: c.tratamento.medicamentoId === temaId,
-        resumo: c.resumo,
-        cartoes: c.cartoes,
-        doses: c.doses.map((d) => ({ id: d.id, descricao: d.descricao, desdeDia: diaLocalDe(d.desde, tz), nota: d.nota })),
-        efeitos: c.efeitos.map((e) => ({ id: e.id, dia: e.dia, descricao: e.descricao, intensidade: e.intensidade })),
-        tomadasRecentes: c.tomadas.slice(0, 14).map((t) => ({ dia: t.dia, estado: t.estado })),
-        resumoParaConsulta: c.resumoParaConsulta,
-      });
-    }
-    return { estado: "pronto", tratamentos, hoje: diaLocalDe(agora, tz) };
+    const { tratamentos, hoje } = await tratamentosUI(uid, tz, Date.now(), temaId);
+    return { estado: "pronto", tratamentos, hoje };
   } catch (e) {
     if (tabelaAusente(e)) return { estado: "indisponivel" };
     throw e;

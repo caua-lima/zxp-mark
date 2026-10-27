@@ -11,6 +11,7 @@ import { ComoEstou } from "./ComoEstou";
 export type TratamentoUI = {
   id: string;
   nome: string;
+  medicamentoId: string;
   inicio: string;
   horario: string | null;
   lembrete: boolean;
@@ -617,10 +618,24 @@ function Rodape({ aoFechar, salvar, ocupado }: { aoFechar: () => void; salvar: (
   );
 }
 
-function FormDia({ id, inicio, hoje, aoFechar }: { id: string; inicio: string; hoje: string; aoFechar: () => void }) {
+export function FormDia({
+  id,
+  inicio,
+  hoje,
+  aoFechar,
+  diaInicial,
+  estadoInicial,
+}: {
+  id: string;
+  inicio: string;
+  hoje: string;
+  aoFechar: () => void;
+  diaInicial?: string;
+  estadoInicial?: "tomou" | "nao_tomou";
+}) {
   const router = useRouter();
-  const [dia, setDia] = useState(hoje);
-  const [estado, setEstado] = useState<"tomou" | "nao_tomou" | null>(null);
+  const [dia, setDia] = useState(diaInicial ?? hoje);
+  const [estado, setEstado] = useState<"tomou" | "nao_tomou" | null>(estadoInicial ?? null);
   const [erro, setErro] = useState("");
   const [ocupado, setOcupado] = useState(false);
 

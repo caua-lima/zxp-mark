@@ -8,26 +8,18 @@ import { CartaoSono } from "@/components/CartaoSono";
 import { fusoDoUsuario } from "@/lib/usuario";
 import { carregarSono } from "@/lib/servicos/sono";
 import { duracaoMs } from "@/lib/sono";
-import { listarTratamentos } from "@/lib/servicos/tratamento";
-import { resumirTratamento } from "@/lib/rastreio/medicamento";
+import { tratamentosUI } from "@/lib/tratamento-ui";
+import { CartaoTratamento } from "@/components/saude/CartaoTratamento";
 import { tabelaAusente } from "@/lib/servicos/preferencias";
-import { diaLocalDe } from "@/lib/datas";
 
 export const dynamic = "force-dynamic";
 
-/** Tratamentos que a pessoa acompanha, como cartões da aba (sem tabelas novas no banco: lista vazia). */
+/** Tratamentos que a pessoa acompanha (sem as tabelas novas no banco: nenhum). */
 async function tratamentosDoUsuario(uid: string, tz: string, agora: number) {
   try {
-    const lista = await listarTratamentos(prisma, uid);
-    return lista.map((t) => ({
-      id: t.id,
-      nome: t.nome,
-      medicamentoId: t.medicamentoId,
-      inicio: diaLocalDe(t.inicio, tz),
-      diaN: resumirTratamento(t.inicio, [], [], agora, tz).desdeInicio.diaN,
-    }));
+    return await tratamentosUI(uid, tz, agora);
   } catch (e) {
-    if (tabelaAusente(e)) return [];
+    if (tabelaAusente(e)) return { tratamentos: [], hoje: "" };
     throw e;
   }
 }
@@ -45,7 +37,7 @@ export default async function PaginaMarcos() {
   const agora = Date.now();
   const tz = await fusoDoUsuario(uid);
   const sono = await carregarSono(prisma, uid, tz, agora);
-  const tratamentos = await tratamentosDoUsuario(uid, tz, agora);
+  const { tratamentos, hoje } = await tratamentosDoUsuario(uid, tz, agora);
 
   return (
     <main>
@@ -116,23 +108,7 @@ export default async function PaginaMarcos() {
           <h2 className="mb-3 text-[12px] font-semibold tracking-[0.12em] text-apagado uppercase">Tratamentos</h2>
           <div className="space-y-3">
             {tratamentos.map((t) => (
-              <Link
-                key={t.id}
-                href={t.medicamentoId === "outro" ? "/temas" : `/temas/${t.medicamentoId}`}
-                className="cartao flex items-center justify-between gap-3 p-5 active:bg-white/[0.04]"
-              >
-                <div className="min-w-0">
-                  <p className="text-[12px] font-semibold tracking-[0.12em] text-brand uppercase">Tratamento</p>
-                  <p className="mt-1 truncate text-[17px] font-semibold">{t.nome}</p>
-                  <p className="mt-0.5 text-[13px] text-apagado">
-                    desde {t.inicio.split("-").reverse().slice(0, 2).join("/")} · registros, doses e etapas
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="numeros text-[30px] leading-none font-semibold">{t.diaN}</p>
-                  <p className="mt-1 text-[12px] text-apagado">dia do tratamento</p>
-                </div>
-              </Link>
+              <CartaoTratamento key={t.id} t={t} hoje={hoje} />
             ))}
           </div>
         </section>
