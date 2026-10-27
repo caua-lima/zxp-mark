@@ -1,10 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Area, Aviso, Botao, Campo, Secao } from "@/components/ui";
 import { PRESETS, preset as achar } from "@/lib/habitos";
 import { detectarHabito } from "@/lib/deteccao";
+import { TEMAS } from "@/lib/conhecimento/catalogo";
+import { reconhecer } from "@/lib/conhecimento/indice";
 
 function agoraLocal() {
   const d = new Date();
@@ -33,6 +36,8 @@ export function FormMarco() {
   const presetId = forcado ?? detectado.preset;
   const p = useMemo(() => achar(presetId), [presetId]);
   const mostrarDeteccao = titulo.trim().length >= 3;
+  // O catálogo de temas (com fontes e acompanhamento por registros) é outro caminho além do marco de tempo.
+  const tema = useMemo(() => (titulo.trim().length >= 3 ? reconhecer(titulo, TEMAS) : null), [titulo]);
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -145,6 +150,23 @@ export function FormMarco() {
               </div>
             )}
           </div>
+        )}
+
+        {tema && (tema.tipo === "exato" || tema.tipo === "incerto") && (
+          <Link
+            href={`/temas/${tema.tema.id}`}
+            className="surge mt-2.5 block rounded-2xl border border-brand/30 bg-brand/[0.07] px-4 py-3 active:bg-brand/[0.12]"
+          >
+            <p className="text-[13px] leading-relaxed text-suave">
+              {tema.tipo === "incerto" ? (
+                <>Você quis dizer <span className="font-medium text-brand">{tema.tema.titulo}</span>? </>
+              ) : (
+                <>Tenho um tema sobre <span className="font-medium text-brand">{tema.tema.titulo}</span>: </>
+              )}
+              conteúdo com fontes{tema.tema.rastreio.tipo === "episodios" || tema.tema.rastreio.tipo === "medicamento" ? " e acompanhamento por registros (episódios, dias sem, o que você notar)" : ""}.{" "}
+              <span className="underline underline-offset-2">Abrir o tema →</span>
+            </p>
+          </Link>
         )}
       </div>
 
