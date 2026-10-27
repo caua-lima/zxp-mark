@@ -175,6 +175,7 @@ export function TemaConteudo({ tema, progresso }: { tema: Tema; progresso: React
         </Bloco>
       )}
 
+      {tema.marcos.length > 0 && (
       <Bloco id="marcos" titulo="Etapas da jornada">
         <p className="text-[13px] leading-relaxed text-apagado">
           Os números organizam a jornada; não são prazos de melhora. Você pode ler as etapas futuras, nada é trancado.
@@ -187,6 +188,7 @@ export function TemaConteudo({ tema, progresso }: { tema: Tema; progresso: React
           ))}
         </div>
       </Bloco>
+      )}
 
       <Bloco id="limites" titulo="O que este conteúdo não pode afirmar">
         <ul className="list-disc space-y-2 pl-5 text-[13.5px] leading-relaxed text-suave marker:text-apagado">

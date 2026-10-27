@@ -70,6 +70,17 @@ async function dadosTratamento(uid: string, temaId: string, tz: string): Promise
   }
 }
 
+function Atalho({ texto, href, rotulo }: { texto: string; href: string; rotulo: string }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-[14px] leading-relaxed text-suave">{texto}</p>
+      <Link href={href} className="inline-block rounded-2xl border border-white/12 bg-white/5 px-5 py-3 text-[14.5px] text-tinta active:bg-white/10">
+        {rotulo}
+      </Link>
+    </div>
+  );
+}
+
 export default async function PaginaTema({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const tema = temaPorId(id);
@@ -83,10 +94,14 @@ export default async function PaginaTema({ params }: { params: Promise<{ id: str
     progresso = <RastreioUnhas temaId={tema.id} dados={await dadosUnhas(uid, tema.id, tz)} />;
   } else if (tema.rastreio.tipo === "medicamento") {
     progresso = <RastreioTratamento tituloTema={tema.titulo} dados={await dadosTratamento(uid, tema.id, tz)} />;
+  } else if (tema.rastreio.tipo === "sono") {
+    progresso = <Atalho texto="O registro de sono fica na aba de sono, e o que você registrar lá é seu." href="/sono" rotulo="Abrir o registro de sono" />;
+  } else if (tema.rastreio.tipo === "marcos") {
+    progresso = <Atalho texto="O seu tempo sem fumar é acompanhado em Marcos, com os benefícios de cada etapa." href="/marcos" rotulo="Abrir Marcos" />;
   } else {
     progresso = (
       <p className="text-[14px] leading-relaxed text-suave">
-        Este tema ainda não tem acompanhamento por registros. Você pode ler o conteúdo abaixo e usar as contagens em Marcos.
+        Este tema não tem acompanhamento por registros: é conteúdo para ler e usar no seu ritmo. Se quiser contar um tempo, crie um marco em Marcos.
       </p>
     );
   }
