@@ -12,7 +12,10 @@ import type { Fonte, Tema } from "./tipos.ts";
 
 /** Linguagem de promessa e de pressão. Aplicada a TODO texto de tema. */
 export const PROMESSAS =
-  /\b(garant\w*|cura\w*|curad[oa]s?|comprovad[oa]s?|certamente|com certeza|100%|milagr\w*|resultado assegurado|vai melhorar|voc[eê] j[aá] deveria|j[aá] deveria estar|perdeu (a |o |sua |seu )?(sequ[eê]ncia|progresso)|perder (a |sua )?sequ[eê]ncia|n[aã]o pode falhar|precisa continuar para|funciona mais r[aá]pido|normaliz\w+ (a |sua )?serotonina|serotonina (est[aá] )?normaliz\w+|% conclu[ií]d\w+)/i;
+  // O "é" acentuado não conta como letra para \b, então a forma afirmativa de
+  // "comprovado" fica numa alternativa própria — e "não há prazo comprovado",
+  // que é o oposto de uma promessa, continua permitido.
+  /\b(garant\w*|cura\w*|curad[oa]s?|certamente|com certeza|100%|milagr\w*|resultado assegurado|vai melhorar|voc[eê] j[aá] deveria|j[aá] deveria estar|perdeu (a |o |sua |seu )?(sequ[eê]ncia|progresso)|perder (a |sua )?sequ[eê]ncia|n[aã]o pode falhar|precisa continuar para|funciona mais r[aá]pido|normaliz\w+ (a |sua )?serotonina|serotonina (est[aá] )?normaliz\w+|% conclu[ií]d\w+)|(?:^|\s)(?:[eé]|s[aã]o|est[aá]|est[aã]o|foi|foram|cientificamente|totalmente|plenamente) comprovad[oa]s?/i;
 
 /** Dizer a quem usa medicamento o que fazer com a dose. */
 export const INSTRUCAO_DE_DOSE =

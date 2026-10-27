@@ -272,3 +272,12 @@ test("palavras de alerta ativam os sinais de procurar ajuda", () => {
     assert.ok(s.sinais.length > 0, f);
   }
 });
+
+test("'comprovado' afirmado é promessa; 'não há prazo comprovado' é o oposto e passa", () => {
+  const com = (f: string) => modelo({ limites: [f, "Outro limite válido."] });
+  assert.ok(contem(ok(com("Esse efeito é comprovado.")), /promessa/));
+  assert.ok(contem(ok(com("Está comprovado que funciona.")), /promessa/));
+  for (const honesto of ["Não há prazo comprovado para a recuperação.", "Os marcos não são prazos comprovados.", "Nenhum efeito foi comprovado aqui."]) {
+    assert.deepEqual(ok(com(honesto)), [], honesto);
+  }
+});
