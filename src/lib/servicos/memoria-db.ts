@@ -214,9 +214,10 @@ export function bancoEmMemoria() {
     ]
   );
   const registroHumor = new Tabela("RegistroHumor", [["userId", "dia"]]);
+  const preferenciaSaude = new Tabela("PreferenciaSaude", [["userId"]], () => ({ assistenteUsaSaude: false }));
   const user = new Tabela("User", [], () => ({ timezone: "America/Sao_Paulo", assistenteUsaSaude: false }));
 
-  const tabelas = { user, habitoAcompanhado, eventoHabito, tratamento, doseTratamento, tomadaDia, efeitoRegistrado, registroHumor };
+  const tabelas = { user, habitoAcompanhado, eventoHabito, tratamento, doseTratamento, tomadaDia, efeitoRegistrado, registroHumor, preferenciaSaude };
   const db = {
     ...tabelas,
     // Sem isolamento nem trava: só o suficiente para os serviços rodarem.

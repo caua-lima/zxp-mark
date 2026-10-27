@@ -35,10 +35,6 @@ model User {
   horaFoco          Int      @default(12)  // 0-23, hora local
   horaNoite         Int      @default(21)  // 0-23, hora local
 
-  /// O assistente só lê registros de saúde (medicamento, sono, episódios de hábito)
-  /// se a pessoa ligar isto. Nasce DESLIGADO: privacidade por padrão.
-  assistenteUsaSaude Boolean @default(false)
-
   criadoEm          DateTime @default(now())
 
   marcos        Marco[]
@@ -53,6 +49,7 @@ model User {
   habitos          HabitoAcompanhado[]
   tratamentos      Tratamento[]
   humores          RegistroHumor[]
+  preferenciaSaude PreferenciaSaude?
 
   @@index([email])
 }
@@ -410,4 +407,17 @@ model RegistroHumor {
 
   @@unique([userId, dia])
   @@index([userId])
+}
+
+/// Preferências de privacidade dos dados de saúde. Tabela PRÓPRIA (e não coluna de User)
+/// de propósito: uma coluna nova em User seria selecionada por TODA consulta ao usuário,
+/// e o login quebraria se o código fosse publicado antes do db push. Aqui, linha
+/// ausente significa "tudo desligado" — o padrão seguro.
+model PreferenciaSaude {
+  userId             String   @id
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// O assistente só lê registros de saúde (medicamento, sono, humor, episódios de
+  /// hábito) se a pessoa ligar isto. Sem linha = desligado.
+  assistenteUsaSaude Boolean  @default(false)
+  atualizadaEm       DateTime @updatedAt
 }
