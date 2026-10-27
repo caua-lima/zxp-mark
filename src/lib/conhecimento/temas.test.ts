@@ -136,3 +136,129 @@ test("unhas: o CVV é citado com o número brasileiro", () => {
   const sinais = unhas.sinaisDeAjuda.map((s) => s.texto).join(" ");
   assert.match(sinais, /CVV atende pelo 188/);
 });
+
+/* ------------------------------ escitalopram ------------------------------ */
+
+const esc = temaPorId("escitalopram")!;
+
+test("escitalopram: reconhece o nome, o composto e a marca; sugere (sem assumir) em erro de digitação", () => {
+  for (const f of ["tomo escitalopram", "oxalato de escitalopram 20 mg", "Lexapro", "Escitalopram"]) {
+    const r = reconhecer(f, TEMAS);
+    assert.equal(r?.tipo, "exato", f);
+    assert.equal(r && "tema" in r ? r.tema.id : null, "escitalopram", f);
+  }
+  const typo = reconhecer("tomo exscitalopram", TEMAS);
+  assert.equal(typo?.tipo, "incerto");
+  assert.equal(typo && "sugestao" in typo ? typo.sugestao : null, "escitalopram");
+});
+
+test("escitalopram: citalopram é OUTRO medicamento e nunca cai neste tema", () => {
+  const r = reconhecer("tomo citalopram há dois meses", TEMAS);
+  assert.equal(r?.tipo, "outro-medicamento");
+  assert.ok(!buscar("citalopram", TEMAS).some((x) => x.tema.id === "escitalopram"));
+  const faq = esc.faq.find((f) => f.id === "citalopram")!;
+  assert.match(faq.resposta, /medicamentos diferentes/);
+  assert.match(faq.resposta, /só tem conteúdo sobre o escitalopram/);
+});
+
+test("escitalopram: os marcos são dias 1, 3, 7, 10, 14, 21, 30, 42 e 60", () => {
+  assert.deepEqual(esc.marcos.map((m) => m.limiar), [1, 3, 7, 10, 14, 21, 30, 42, 60]);
+  for (const m of esc.marcos) {
+    assert.match(m.tituloSemRegistro, /desde o início informado/);
+    assert.ok(m.acoes.length > 0 && !m.acoes.includes("nenhuma"), m.chave);
+  }
+});
+
+test("escitalopram: o marco de 10 dias é exatamente o do briefing, com as duas ações", () => {
+  const m = esc.marcos.find((x) => x.chave === "10d")!;
+  assert.equal(m.titulo, "10 dias consecutivos com tomada registrada");
+  assert.equal(
+    m.texto,
+    "Você registrou a tomada por 10 dias seguidos. O efeito do escitalopram pode levar várias semanas; este marco, sozinho, não determina sua resposta ao tratamento. Como ficaram seu humor, sono e bem-estar nesse período?"
+  );
+  assert.deepEqual(m.acoes, ["registrar-como-estou", "ver-historico"]);
+  assert.equal(m.tituloSemRegistro, "10 dias desde o início informado");
+});
+
+test("escitalopram: nenhuma das afirmações proibidas aparece em lugar nenhum", () => {
+  const tudo = JSON.stringify(esc);
+  for (const proibido of [
+    /serotonina (est[aá] )?normaliz/i,
+    /voc[eê] j[aá] deveria/i,
+    /20 ?mg funciona mais r[aá]pid/i,
+    /\d+ ?% (do tratamento )?conclu/i,
+    /precisa continuar para n[aã]o perder/i,
+    /perder (a )?sua sequ[eê]ncia/i,
+    /\b(aumente|reduza|suspenda) a dose\b/i,
+    /\bdose recomendada\b/i,
+    /tudo isso [eé] (normal|adapta[cç][aã]o)/i,
+  ]) {
+    assert.doesNotMatch(tudo, proibido);
+  }
+});
+
+test("escitalopram: nenhuma dose nem dado pessoal mora no catálogo", () => {
+  const tudo = JSON.stringify(esc);
+  // as únicas menções a miligramas são exemplos de limite ("20 mg ou qualquer outra") e comprimidos de bula
+  const mencoes = tudo.match(/\d+ ?mg/gi) ?? [];
+  assert.ok(mencoes.length <= 1, `menções a dose: ${mencoes.join(", ")}`);
+  assert.doesNotMatch(tudo, /@|senha|cpf/i);
+  assert.match(esc.limites.join(" "), /dado do seu acompanhamento/);
+});
+
+test("escitalopram: esquecimento de dose segue a bula brasileira e não calcula compensação", () => {
+  const f = esc.faq.find((x) => x.id === "esqueci-de-tomar")!;
+  assert.match(f.resposta, /até antes de deitar/);
+  assert.match(f.resposta, /ignore a dose esquecida/);
+  assert.match(f.resposta, /Não tome em dobro/);
+  assert.match(f.resposta, /O app não calcula compensações/);
+  assert.deepEqual(f.fontes, ["bula-escitalopram-br"]);
+});
+
+test("escitalopram: 'esqueci de registrar' separa registro de tratamento e não ameaça a sequência", () => {
+  const f = esc.faq.find((x) => x.id === "esqueci-de-registrar")!;
+  assert.match(f.resposta, /não perdeu o tratamento nem o histórico/i);
+  assert.match(f.resposta, /Esquecer de registrar não é esquecer de tomar/);
+  assert.match(f.resposta, /recalculada/);
+});
+
+test("escitalopram: 'mudei a dose' mantém as duas datas separadas e não recalcula previsão", () => {
+  const f = esc.faq.find((x) => x.id === "mudei-a-dose")!;
+  assert.match(f.resposta, /duas datas separadas/);
+  assert.match(f.resposta, /nada é apagado e nada recomeça/);
+  assert.match(f.resposta, /não calcula nova previsão/);
+});
+
+test("escitalopram: 'estou pior' orienta procurar ajuda, com números do Brasil, e não normaliza o sintoma", () => {
+  const f = esc.faq.find((x) => x.id === "pior-desde-que-comecei")!;
+  assert.match(f.resposta, /192 \(SAMU\)/);
+  assert.match(f.resposta, /188 \(CVV/);
+  assert.match(f.resposta, /não consegue saber se é o medicamento/);
+  assert.doesNotMatch(f.resposta, /normal|adapta[cç][aã]o|vai passar/i);
+  assert.ok(esc.sinaisDeAjuda.some((s) => s.nivel === "urgencia" && /192/.test(s.texto) && /188/.test(s.texto)));
+});
+
+test("escitalopram: os cartões que citam fontes ligam o marco às afirmações educativas", () => {
+  for (const m of esc.marcos) {
+    if (/bula|NHS|MedlinePlus/.test(m.texto)) {
+      assert.ok((m.afirmacoes?.length ?? 0) > 0, `${m.chave} cita fonte e precisa de afirmacoes`);
+    }
+  }
+});
+
+test("escitalopram: a nota editorial admite o que não foi lido e que não houve revisão profissional", () => {
+  assert.match(esc.notaEditorial ?? "", /HSE .*403/);
+  assert.match(esc.notaEditorial ?? "", /Bulário Eletrônico da Anvisa não foi consultado/);
+  assert.match(esc.notaEditorial ?? "", /Não houve revisão por médico ou farmacêutico/);
+  assert.equal(esc.rastreio.tipo, "medicamento");
+});
+
+test("perguntas do briefing sobre escitalopram caem na resposta certa", () => {
+  const sel = (q: string) => selecionar(esc, q).faq[0]?.id;
+  assert.equal(sel("Estou há 10 dias tomando escitalopram 20 mg. O que já melhorou?"), "dez-dias-o-que-melhorou");
+  assert.equal(sel("Esqueci de registrar ontem. Perdi minha sequência?"), "esqueci-de-registrar");
+  assert.equal(sel("Mudei a dose há 3 dias, mas comecei há um mês."), "mudei-a-dose");
+  assert.equal(sel("Estou pior desde que comecei."), "pior-desde-que-comecei");
+  assert.equal(sel("esqueci de tomar hoje de manhã, o que eu faço?"), "esqueci-de-tomar");
+  assert.equal(selecionar(esc, "Estou pior desde que comecei.").alerta, true);
+});

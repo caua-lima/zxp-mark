@@ -19,7 +19,9 @@ export const PROMESSAS =
 
 /** Dizer a quem usa medicamento o que fazer com a dose. */
 export const INSTRUCAO_DE_DOSE =
-  /\b(aumente|aumentar a dose|reduza|reduzir a dose|diminua a dose|suspenda|dobre a dose|tome (o dobro|em dobro|dois comprimidos)|compense a dose)\b|(?<!n[aã]o )\b(pare|parar) de tomar\b/i;
+  // Cada alternativa admite a negação ("não tome em dobro", "não pare de tomar"),
+  // que é exatamente o que a bula orienta e o app precisa poder dizer.
+  /(?<!n[aã]o )\b(aumente|aumentar a dose|reduza|reduzir a dose|diminua a dose|suspenda|dobre a dose|compense a dose)\b|(?<!n[aã]o )\btome (a dose )?(o dobro|em dobro|dois comprimidos)\b|(?<!n[aã]o )\b(pare|parar) de tomar\b/i;
 
 /** Diagnosticar a pessoa a partir de um comportamento ou de um registro. */
 export const DIAGNOSTICO =
