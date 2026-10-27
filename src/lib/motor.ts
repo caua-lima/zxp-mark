@@ -11,13 +11,24 @@ import { enviarPush, type Payload } from "@/lib/push";
 import { DIA, preset, situacao } from "@/lib/habitos";
 import { diaLocal, duracaoExtenso, horaLocal, reais, rotuloMs, impacto } from "@/lib/formato";
 import { textoContagem, textoFoco } from "@/lib/mensagens";
+import { decidirLembrete, minutosLocais } from "@/lib/rastreio/lembrete";
+import { doseVigente } from "@/lib/rastreio/medicamento";
+import { tabelaAusente } from "@/lib/servicos/preferencias";
 
 const EPOCH = new Date(0);
 
 /** Marcos atingidos há mais tempo que isso são registrados sem notificar. */
 const JANELA_ATRASO = 6 * 60 * 60 * 1000;
 
-type Item = { tipo: string; refId: string; chave: string; ciclo: Date; payload: Payload };
+type Item = {
+  tipo: string;
+  refId: string;
+  chave: string;
+  ciclo: Date;
+  payload: Payload;
+  /** o que fica gravado em `Enviada`, quando não deve ser o texto enviado (ex.: lembrete de saúde) */
+  registro?: { titulo: string; corpo: string };
+};
 
 /**
  * Grava o registro e envia. Retorna false se já tinha sido enviada antes.
@@ -31,8 +42,8 @@ async function despachar(userId: string, item: Item, mudo = false): Promise<bool
         refId: item.refId,
         chave: item.chave,
         ciclo: item.ciclo,
-        titulo: item.payload.titulo,
-        corpo: item.payload.corpo,
+        titulo: item.registro?.titulo ?? item.payload.titulo,
+        corpo: item.registro?.corpo ?? item.payload.corpo,
       },
     });
   } catch {
@@ -355,6 +366,46 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
       enviadas++;
       detalhes.push("fecho da noite");
     }
+  }
+
+  /* ------------------- lembrete de medicamento (opt-in) ------------------ */
+  // Só para quem ligou o lembrete de um acompanhamento e informou o horário. O texto padrão é
+  // neutro; nome e dose só vão na notificação se a pessoa escolheu o texto detalhado. Em `Enviada`
+  // fica sempre o texto neutro: o registro de envios não guarda nome de medicamento.
+  try {
+    const tratamentos = await prisma.tratamento.findMany({
+      where: { userId, lembrete: true, arquivadoEm: null, horario: { not: null } },
+      include: { doses: true, tomadas: { where: { dia: hoje }, select: { id: true } } },
+    });
+    for (const t of tratamentos) {
+      const texto = decidirLembrete({
+        lembrete: t.lembrete,
+        lembreteDetalhado: t.lembreteDetalhado,
+        horario: t.horario,
+        arquivado: false,
+        nome: t.nome,
+        dose: doseVigente(t.doses, agora.getTime())?.descricao ?? null,
+        registradoHoje: t.tomadas.length > 0,
+        minutosAgora: minutosLocais(tz, agora),
+      });
+      if (!texto) continue;
+      const neutro = decidirLembrete({ lembrete: true, lembreteDetalhado: false, horario: t.horario, arquivado: false, nome: t.nome, dose: null, registradoHoje: false, minutosAgora: minutosLocais(tz, agora) })!;
+      const ok = await despachar(userId, {
+        tipo: "medicamento",
+        refId: t.id,
+        chave: `med-${hoje}`,
+        ciclo: EPOCH,
+        payload: { ...texto, url: t.medicamentoId === "outro" ? "/temas" : `/temas/${t.medicamentoId}`, tag: `med-${t.id}`, acoes: [{ acao: "abrir", titulo: "Abrir o app" }] },
+        registro: neutro,
+      });
+      if (ok) {
+        enviadas++;
+        detalhes.push("lembrete de registro");
+      }
+    }
+  } catch (e) {
+    // Banco ainda sem as tabelas novas: nada a lembrar, e o resto do motor segue.
+    if (!tabelaAusente(e)) console.error("[motor] lembrete de medicamento", userId, e);
   }
 
   return { enviadas, detalhes };
