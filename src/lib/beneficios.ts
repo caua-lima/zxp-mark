@@ -25,11 +25,12 @@ import type { Etapa, TipoProgresso } from "./progressao.ts";
 // O registro de fontes é único e mora em conhecimento/fontes.ts; reexportado aqui
 // para não quebrar quem já importa de beneficios.
 import { FONTES } from "./conhecimento/fontes.ts";
+import { unhas as temaUnhas } from "./conhecimento/temas/unhas.ts";
 import type { Fonte } from "./conhecimento/tipos.ts";
 export { FONTES };
 export type { Fonte };
 
-export type Beneficio = { texto: string; fonteId: string };
+export type Beneficio = { texto: string; fonteId: string; /** o que a fonte NÃO diz sobre isto; mostrado junto */ ressalva?: string };
 
 /**
  * Cigarro. Cada linha espelha uma linha da tabela de prazos da fonte, sempre
@@ -79,6 +80,27 @@ const CIGARRO: Record<string, Beneficio> = {
   },
 };
 
+/**
+ * Roer unhas. Os benefícios vêm do tema do catálogo (uma só fonte de verdade: AAD e TLC Foundation),
+ * ligados a algumas etapas. Nenhum deles afirma recuperação das unhas ou da pele: a ressalva do tema,
+ * que diz que nenhuma fonte informa esse prazo, viaja junto e aparece na tela. As etapas que não têm
+ * benefício aqui (3 dias e as de meses) ficam com a mensagem factual sobre o registro.
+ */
+const BENEFICIO_DE_UNHAS_POR_ETAPA: Record<string, string> = {
+  "1d": "contaminacao",
+  "7d": "infeccao-local",
+  "10d": "pele-e-unha",
+  "14d": "dentes",
+  "30d": "autoestima",
+};
+const UNHAS: Record<string, Beneficio> = Object.fromEntries(
+  Object.entries(BENEFICIO_DE_UNHAS_POR_ETAPA).map(([chave, id]) => {
+    const b = temaUnhas.beneficios.find((x) => x.id === id);
+    if (!b) throw new Error(`tema unhas: benefício "${id}" não existe`);
+    return [chave, { texto: b.texto, fonteId: b.fontes[0], ressalva: b.ressalva }];
+  })
+);
+
 /** Vale para qualquer hábito: não é efeito de saúde, é sobre como hábitos se formam. */
 const GERAIS: Record<string, Beneficio> = {
   "21d": {
@@ -88,13 +110,13 @@ const GERAIS: Record<string, Beneficio> = {
   },
 };
 
-const POR_PRESET: Record<string, Record<string, Beneficio>> = { cigarro: CIGARRO };
+const POR_PRESET: Record<string, Record<string, Beneficio>> = { cigarro: CIGARRO, unhas: UNHAS };
 
-export function beneficioDe(presetId: string, chave: string): { texto: string; fonte: Fonte } | null {
+export function beneficioDe(presetId: string, chave: string): { texto: string; fonte: Fonte; ressalva?: string } | null {
   const b = POR_PRESET[presetId]?.[chave] ?? GERAIS[chave];
   if (!b) return null;
   const fonte = FONTES[b.fonteId];
-  return fonte ? { texto: b.texto, fonte } : null;
+  return fonte ? { texto: b.texto, fonte, ressalva: b.ressalva } : null;
 }
 
 /** Todas as chaves de etapa que têm benefício para um preset (usado nos testes). */
@@ -133,7 +155,7 @@ export type ConteudoEtapa = {
   conquista: string;
   /** 2. educativo; "fonte" tem referência, "factual" é só sobre o registro */
   beneficio:
-    | { tipo: "fonte"; texto: string; fonte: Fonte; aviso: string }
+    | { tipo: "fonte"; texto: string; fonte: Fonte; aviso: string; ressalva?: string }
     | { tipo: "factual"; texto: string };
   /** o que vem depois; sempre uma frase, nunca uma cobrança */
   proximoPasso: string;
@@ -185,7 +207,7 @@ export function conteudoDaEtapa(c: ContextoEtapa): ConteudoEtapa {
     c.tipo === "marco" && c.presetId && !c.etapa.inicial ? beneficioDe(c.presetId, c.etapa.chave) : null;
 
   const beneficio: ConteudoEtapa["beneficio"] = achado
-    ? { tipo: "fonte", texto: achado.texto, fonte: achado.fonte, aviso: AVISO_BENEFICIO }
+    ? { tipo: "fonte", texto: achado.texto, fonte: achado.fonte, aviso: AVISO_BENEFICIO, ressalva: achado.ressalva }
     : { tipo: "factual", texto: factualDe(c) };
 
   const proximoPasso = c.proxima

@@ -42,7 +42,7 @@ export const unhas: Tema = {
       texto:
         "Morder as unhas com frequência pode levar bactérias e vírus da boca para os dedos e das unhas para o rosto e a boca. Menos episódios significam menos oportunidades para esse caminho.",
       fontes: ["aad-unhas", "bfrb-unhas"],
-      ressalva: "A segunda frase é consequência direta do mecanismo descrito, não uma medição de risco.",
+      ressalva: "As fontes descrevem o caminho dos germes. Que menos episódios deem menos oportunidades é consequência direta disso, não uma medição do seu risco.",
     },
     {
       id: "pele-e-unha",

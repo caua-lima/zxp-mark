@@ -262,6 +262,7 @@ function DetalheDaEtapa({ painel, etapa }: { painel: PainelProgresso; etapa: Eta
         <p>{c.beneficio.texto}</p>
         {c.beneficio.tipo === "fonte" && (
           <div className="mt-2 space-y-1.5 text-[12px] leading-relaxed text-apagado">
+            {c.beneficio.ressalva && <p>{c.beneficio.ressalva}</p>}
             <p>{c.beneficio.aviso}</p>
             <Referencia fonte={c.beneficio.fonte} />
           </div>

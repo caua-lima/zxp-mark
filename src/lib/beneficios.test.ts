@@ -49,9 +49,9 @@ test("toda chave de benefício existe como etapa do hábito (sem benefício órf
   }
 });
 
-test("só o cigarro tem benefício de saúde — nenhum outro hábito ganha afirmação sem fonte", () => {
-  assert.deepEqual(Object.keys(TODOS_OS_BENEFICIOS).sort(), ["cigarro", "geral"]);
-  for (const p of PRESETS.filter((p) => p.id !== "cigarro")) {
+test("só cigarro e unhas têm benefício de saúde (ambos com fonte) — nenhum outro hábito ganha afirmação sem fonte", () => {
+  assert.deepEqual(Object.keys(TODOS_OS_BENEFICIOS).sort(), ["cigarro", "geral", "unhas"]);
+  for (const p of PRESETS.filter((p) => p.id !== "cigarro" && p.id !== "unhas")) {
     for (const m of p.marcos) {
       const b = beneficioDe(p.id, m.chave);
       // só a nota geral sobre formação de hábito pode aparecer fora do cigarro
@@ -195,4 +195,19 @@ test("só conteúdo com fonte se chama benefício — o resto nunca ganha esse t
     const r = conteudoDaEtapa({ tipo: "acompanhamento", categoria: "tratamento", etapa: e, proxima: null });
     assert.ok(!/benef/i.test(rotuloDoBeneficio(r.beneficio.tipo)), e.chave);
   }
+});
+
+test("unhas: os benefícios das etapas vêm do tema, com fonte lida, e nenhum afirma recuperação nem prazo", () => {
+  const etapas = ["1d", "7d", "10d", "14d", "30d"];
+  for (const chave of etapas) {
+    const b = beneficioDe("unhas", chave);
+    assert.ok(b, chave);
+    assert.equal(b.fonte.verificacao, "pagina lida", chave);
+    assert.doesNotMatch(b.texto, /recuperad|cicatriz|curad|voltam ao normal|em \d+ dias/i, chave);
+  }
+  // 10 dias: a ressalva do tema (nenhuma fonte informa o prazo de recuperação) viaja com o benefício
+  assert.match(beneficioDe("unhas", "10d")!.ressalva ?? "", /nenhuma informa quanto tempo/);
+  // etapas sem benefício caem na mensagem factual, nunca num benefício inventado
+  assert.equal(beneficioDe("unhas", "3d"), null);
+  assert.equal(beneficioDe("unhas", "180d"), null);
 });
