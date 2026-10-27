@@ -35,6 +35,10 @@ model User {
   horaFoco          Int      @default(12)  // 0-23, hora local
   horaNoite         Int      @default(21)  // 0-23, hora local
 
+  /// O assistente só lê registros de saúde (medicamento, sono, episódios de hábito)
+  /// se a pessoa ligar isto. Nasce DESLIGADO: privacidade por padrão.
+  assistenteUsaSaude Boolean @default(false)
+
   criadoEm          DateTime @default(now())
 
   marcos        Marco[]
@@ -46,6 +50,8 @@ model User {
   conquistasVistas ConquistaVista[]
   percepcoes       Percepcao[]
   sonos            Sono[]
+  habitos          HabitoAcompanhado[]
+  tratamentos      Tratamento[]
 
   @@index([email])
 }
@@ -237,4 +243,149 @@ model Enviada {
 
   @@unique([refId, chave, ciclo])
   @@index([userId, enviadaEm])
+}
+
+/// Um hábito que a pessoa acompanha por REGISTROS (roer unhas, caminhada...), não
+/// por tempo corrido. O conteúdo vem do catálogo (src/lib/conhecimento); aqui
+/// mora só o que é da pessoa. Uma linha por (usuário, tema).
+model HabitoAcompanhado {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// id do tema no catálogo ("unhas", "caminhada"...)
+  temaId      String
+  /// Quando a pessoa começou a acompanhar. A contagem nunca vem de antes disto.
+  inicio      DateTime
+  /// Objetivo pessoal, escrito pela pessoa. Opcional.
+  objetivo    String?  @db.Text
+  /// Meta pessoal por semana (dias ou minutos, conforme o tema). Opcional.
+  metaSemanal Float?
+  arquivadoEm DateTime?
+  criadoEm    DateTime @default(now())
+
+  eventos     EventoHabito[]
+
+  @@unique([userId, temaId])
+  @@index([userId])
+}
+
+/// Um registro de hábito. tipo: episodio | vontade | dia_sem | pratica.
+/// "dia_sem" é a confirmação "hoje não roí": falta de registro NÃO equivale a ela.
+model EventoHabito {
+  id         String   @id @default(cuid())
+  habitoId   String
+  habito     HabitoAcompanhado @relation(fields: [habitoId], references: [id], onDelete: Cascade)
+  /// redundante de propósito: toda consulta filtra por dono sem precisar de join
+  userId     String
+
+  tipo       String
+  quando     DateTime
+  /// dia local "YYYY-MM-DD" no fuso do usuário NO MOMENTO do registro
+  dia        String
+  /// 1 a 5, percebida
+  intensidade Int?
+  /// trabalho | estudo | tedio | tensao | outro
+  contexto   String?
+  estrategia String?
+  /// 1 a 5, percebido
+  desconforto Int?
+  aparencia  Int?
+  /// minutos, vezes ou doses, conforme o tema (só tipo "pratica")
+  valor      Float?
+  nota       String?  @db.Text
+  criadoEm   DateTime @default(now())
+
+  @@index([habitoId, dia])
+  @@index([userId])
+}
+
+/// Acompanhamento de um medicamento. É sobre REGISTRO: não prescreve, não calcula
+/// eficácia e não decide dose. O dia de início do tratamento e o da dose atual são
+/// coisas diferentes e moram em lugares diferentes.
+model Tratamento {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// id do tema no catálogo ("escitalopram") ou "outro"
+  medicamentoId String
+  /// como a pessoa informou, já confirmado
+  nome          String
+  /// início do TRATAMENTO (não da dose atual)
+  inicio        DateTime
+  /// horário previsto, "HH:mm", conforme a prescrição que a pessoa informou
+  horario       String?
+  /// lembrete é opt-in; o texto padrão não cita medicamento nem dose
+  lembrete          Boolean @default(false)
+  lembreteDetalhado Boolean @default(false)
+  arquivadoEm   DateTime?
+  criadoEm      DateTime @default(now())
+
+  doses         DoseTratamento[]
+  tomadas       TomadaDia[]
+  efeitos       EfeitoRegistrado[]
+
+  @@index([userId])
+}
+
+/// Histórico de doses INFORMADAS. Mudar de dose acrescenta uma linha; nada é apagado
+/// e nada recomeça. A dose vigente é a de maior "desde" que já começou.
+model DoseTratamento {
+  id            String   @id @default(cuid())
+  tratamentoId  String
+  tratamento    Tratamento @relation(fields: [tratamentoId], references: [id], onDelete: Cascade)
+  userId        String
+
+  /// texto livre como a pessoa informou ("20 mg")
+  descricao     String
+  mg            Float?
+  /// início DESTA dose
+  desde         DateTime
+  nota          String?  @db.Text
+  criadoEm      DateTime @default(now())
+
+  @@index([tratamentoId, desde])
+  @@index([userId])
+}
+
+/// Um dia com informação sobre a tomada. Dia SEM linha = sem informação (não é "não
+/// tomou"). Único por (tratamento, dia): editar e registrar de novo não duplica.
+model TomadaDia {
+  id            String   @id @default(cuid())
+  tratamentoId  String
+  tratamento    Tratamento @relation(fields: [tratamentoId], references: [id], onDelete: Cascade)
+  userId        String
+
+  /// dia local "YYYY-MM-DD"
+  dia           String
+  /// tomou | nao_tomou
+  estado        String
+  /// horário em que tomou, "HH:mm", opcional
+  horario       String?
+  nota          String?  @db.Text
+  criadoEm      DateTime @default(now())
+  atualizadaEm  DateTime @updatedAt
+
+  @@unique([tratamentoId, dia])
+  @@index([userId])
+}
+
+/// Efeito indesejado relatado pela pessoa. É dado dela: o app não o interpreta.
+model EfeitoRegistrado {
+  id            String   @id @default(cuid())
+  tratamentoId  String
+  tratamento    Tratamento @relation(fields: [tratamentoId], references: [id], onDelete: Cascade)
+  userId        String
+
+  quando        DateTime
+  dia           String
+  descricao     String   @db.Text
+  /// 1 leve, 2 moderado, 3 forte
+  intensidade   Int?
+  nota          String?  @db.Text
+  criadoEm      DateTime @default(now())
+
+  @@index([tratamentoId, dia])
+  @@index([userId])
 }
