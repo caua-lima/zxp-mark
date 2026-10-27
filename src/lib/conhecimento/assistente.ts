@@ -179,7 +179,10 @@ export function responderComConhecimento(
   const t = normalizar(pergunta);
 
   /* --- sono e humor: observar, nunca concluir causa --- */
-  if (SOBRE_SONO_HUMOR.test(t) && PEDE_RELACAO.test(t) && !reconhecer(pergunta, TEMAS)) {
+  const rec = reconhecer(pergunta, TEMAS);
+  // Nomear o tema geral "sono" não tira a pergunta da comparação de registros; nomear um medicamento ou hábito tira.
+  const nomeouOutroTema = rec !== null && !(rec.tipo === "exato" && rec.tema.id === "sono");
+  if (SOBRE_SONO_HUMOR.test(t) && PEDE_RELACAO.test(t) && !nomeouOutroTema) {
     if (!dados.autorizado) {
       return { texto: `Eu consigo mostrar o que aparece nos seus registros de sono e de humor lado a lado. ${PEDIR_PERMISSAO}`, temaId: null, fontes: [], usouRegistros: false };
     }
@@ -226,6 +229,8 @@ export function responderComConhecimento(
     blocos.push(sel.beneficios.map((b) => b.texto).join(" "));
     for (const b of sel.beneficios) fontes.push(...b.fontes);
   } else if (!sel.alerta) {
+    // Temas gerais sem nada relevante à pergunta deixam o motor de sempre responder (ex.: apoio na vontade de fumar).
+    if (tema.categoria !== "medicamento" && tema.rastreio.tipo !== "episodios") return null;
     const consulta = tema.categoria === "medicamento" ? " Para isso, a bula do seu medicamento e o profissional que o prescreveu são a referência." : "";
     return {
       texto: `Não tenho informação verificada sobre isso no que o app tem sobre ${tema.titulo.toLowerCase()}, e prefiro não completar com palpite.${consulta}`,
