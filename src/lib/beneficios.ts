@@ -22,48 +22,12 @@
  */
 import type { Etapa, TipoProgresso } from "./progressao.ts";
 
-export type Fonte = {
-  id: string;
-  titulo: string;
-  orgao: string;
-  url: string;
-  /** data que a própria página exibe; null se ela não exibe nenhuma */
-  dataDaPagina: string | null;
-  /** quando alguém do projeto conferiu o conteúdo contra a fonte */
-  verificadoEm: string;
-  /** "pagina lida": o texto foi lido na fonte. "resumo de busca": só o resumo. */
-  verificacao: "pagina lida" | "resumo de busca";
-};
-
-export const FONTES: Record<string, Fonte> = {
-  cdc: {
-    id: "cdc",
-    titulo: "Benefits of Quitting",
-    orgao: "CDC (EUA)",
-    url: "https://www.cdc.gov/tobacco/about/benefits-of-quitting.html",
-    dataDaPagina: "2024-05-15",
-    verificadoEm: "2026-10-26",
-    verificacao: "pagina lida",
-  },
-  nhs: {
-    id: "nhs",
-    titulo: "Benefits of quitting smoking",
-    orgao: "NHS (Reino Unido)",
-    url: "https://www.nhs.uk/better-health/quit-smoking/benefits-of-quitting-smoking/",
-    dataDaPagina: null,
-    verificadoEm: "2026-10-26",
-    verificacao: "pagina lida",
-  },
-  lally: {
-    id: "lally",
-    titulo: "How are habits formed: Modelling habit formation in the real world",
-    orgao: "Lally et al., European Journal of Social Psychology, 2010",
-    url: "https://bps.org.uk/research-digest/how-form-habit",
-    dataDaPagina: null,
-    verificadoEm: "2026-10-26",
-    verificacao: "resumo de busca",
-  },
-};
+// O registro de fontes é único e mora em conhecimento/fontes.ts; reexportado aqui
+// para não quebrar quem já importa de beneficios.
+import { FONTES } from "./conhecimento/fontes.ts";
+import type { Fonte } from "./conhecimento/tipos.ts";
+export { FONTES };
+export type { Fonte };
 
 export type Beneficio = { texto: string; fonteId: string };
 
