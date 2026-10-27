@@ -161,8 +161,8 @@ test("escitalopram: citalopram é OUTRO medicamento e nunca cai neste tema", () 
   assert.match(faq.resposta, /só tem conteúdo sobre o escitalopram/);
 });
 
-test("escitalopram: os marcos são dias 1, 3, 7, 10, 14, 21, 30, 42 e 60", () => {
-  assert.deepEqual(esc.marcos.map((m) => m.limiar), [1, 3, 7, 10, 14, 21, 30, 42, 60]);
+test("escitalopram: os marcos são dias 1, 3, 7, 10, 14, 21, 30, 42, 60, 90 e 180", () => {
+  assert.deepEqual(esc.marcos.map((m) => m.limiar), [1, 3, 7, 10, 14, 21, 30, 42, 60, 90, 180]);
   for (const m of esc.marcos) {
     assert.match(m.tituloSemRegistro, /de tratamento$/);
     assert.ok(m.acoes.length > 0 && !m.acoes.includes("nenhuma"), m.chave);

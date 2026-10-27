@@ -196,9 +196,9 @@ test("sem marcar nada, as etapas já vividas aparecem fortes (presumido) e as fu
   assert.ok(futuro.marco.texto.length > 50);
 });
 
-test("os cartões 1, 3, 7, 10, 14, 21, 30, 42 e 60 existem, e 42 e 60 ficam 'futuro' no primeiro mês", () => {
+test("os cartões 1, 3, 7, 10, 14, 21, 30, 42, 60, 90 e 180 existem, e 42 e 60 ficam 'futuro' no primeiro mês", () => {
   const s = situacaoDosCartoes(escitalopram.marcos, resumo(tomou(dias("2026-09-12", "2026-10-11"))));
-  assert.deepEqual(s.map((x) => x.marco.limiar), [1, 3, 7, 10, 14, 21, 30, 42, 60]);
+  assert.deepEqual(s.map((x) => x.marco.limiar), [1, 3, 7, 10, 14, 21, 30, 42, 60, 90, 180]);
   assert.equal(s.find((x) => x.marco.limiar === 30)?.estado, "sustentado");
   assert.equal(s.find((x) => x.marco.limiar === 42)?.estado, "futuro");
   const f = s.find((x) => x.marco.limiar === 42)!;

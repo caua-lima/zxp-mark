@@ -96,6 +96,33 @@ export const escitalopram: Tema = {
       fontes: ["bula-escitalopram-br", "nhs-escitalopram"],
     },
     {
+      id: "efeitos-semanas",
+      texto:
+        "Segundo o NHS, a maioria dos efeitos colaterais deve aliviar depois de algumas semanas, à medida que o corpo se acostuma ao medicamento, mas alguns podem durar mais.",
+      fontes: ["nhs-escitalopram-efeitos"],
+      ressalva: "Se um efeito incomodar ou não passar, fale com o médico ou o farmacêutico; não pare por conta própria.",
+    },
+    {
+      id: "ansiedade-inicial",
+      texto:
+        "A bula descreve que pessoas com crises de pânico podem ter aumento da ansiedade logo depois de começar, e que isso costuma se normalizar nas 2 primeiras semanas. Inquietação ou dificuldade de ficar sentado ou parado também podem aparecer nas primeiras semanas, e a bula pede para avisar o médico.",
+      fontes: ["bula-escitalopram-br"],
+    },
+    {
+      id: "resposta-semanas",
+      texto:
+        "Segundo a bula, na depressão costumam ser necessárias de 2 a 4 semanas para a resposta ao tratamento; na ansiedade social, um mínimo de 2 a 4 semanas para o alívio dos sintomas. O NHS diz que pode levar várias semanas até os sintomas começarem a melhorar.",
+      fontes: ["bula-escitalopram-br", "nhs-escitalopram-perguntas"],
+      ressalva: "O app não sabe a sua indicação nem a sua resposta: esses prazos são das fontes, não uma previsão para você.",
+    },
+    {
+      id: "duracao",
+      texto:
+        "Segundo a bula, no transtorno do pânico a melhora total costuma ser atingida após cerca de 3 meses; na ansiedade generalizada e na social, recomenda-se pelo menos 3 meses para consolidar a resposta; e o período mínimo usual de tratamento é de 6 meses. Para depressão, o NHS diz que provavelmente serão 6 meses ou mais.",
+      fontes: ["bula-escitalopram-br", "nhs-escitalopram-perguntas"],
+      ressalva: "A duração é individual e decidida com o médico. Chegar a um desses prazos não quer dizer que é hora de parar.",
+    },
+    {
       id: "alcool",
       texto:
         "A bula diz que o escitalopram não potencializa os efeitos do álcool, mas recomenda não ingerir álcool durante o tratamento.",
@@ -109,7 +136,7 @@ export const escitalopram: Tema = {
       limiar: 1,
       titulo: "1 dia sem esquecer",
       texto:
-        "Um dia de tratamento sem esquecimento registrado: conforme você informou, o app presume que você tomou. Náusea e dor de cabeça estão entre os efeitos mais frequentes segundo a bula, e muitos costumam ser leves. Anote o que notar; se algo incomodar muito ou não passar, fale com o médico ou o farmacêutico.",
+        "Um dia de tratamento sem esquecimento registrado: conforme você informou, o app presume que você tomou. Segundo a bula, os efeitos colaterais costumam ser leves e desaparecer em alguns dias; náusea e dor de cabeça estão entre os mais frequentes. Anote o que notar; se algo incomodar muito ou não passar, fale com o médico ou o farmacêutico.",
       tituloSemRegistro: "1 dia de tratamento",
       textoSemRegistro:
         "Passou 1 dia desde o início informado, e você marcou um esquecimento. O tratamento segue contando e nada se perde: esquecer acontece.",
@@ -121,24 +148,24 @@ export const escitalopram: Tema = {
       limiar: 3,
       titulo: "3 dias seguidos sem esquecer",
       texto:
-        "Você não registrou esquecimento em 3 dias seguidos: conforme você informou, o tratamento seguiu todos os dias. Sono, apetite e energia podem mudar por causa do tratamento ou da própria condição, e o app não distingue uma coisa da outra. Que tal anotar como eles estão?",
+        "Você não registrou esquecimento em 3 dias seguidos: conforme você informou, o tratamento seguiu todos os dias. Esta é a fase em que náusea, dor de cabeça e mudanças no sono e no apetite costumam aparecer; segundo a bula, geralmente são leves e somem em alguns dias, e segundo o NHS a maioria alivia em algumas semanas. Inquietação ou dificuldade de ficar parado nas primeiras semanas: avise o médico, como pede a bula.",
       tituloSemRegistro: "3 dias de tratamento",
       textoSemRegistro:
         "Passaram 3 dias desde o início informado, com um esquecimento marcado nesse período. A contagem sem esquecer recomeçou; o tratamento e o seu histórico continuam.",
       acoes: ["registrar-como-estou"],
-      afirmacoes: ["sono-e-medicamento"],
+      afirmacoes: ["efeitos-frequentes", "sono-e-medicamento", "efeitos-semanas"],
     },
     {
       chave: "7d",
       limiar: 7,
       titulo: "7 dias seguidos sem esquecer",
       texto:
-        "Uma semana sem esquecimento registrado. Você já tem material para observar o seu padrão. O efeito do escitalopram leva algumas semanas (a bula cita cerca de duas; NHS e MedlinePlus falam em várias), então uma semana, sozinha, não diz como o tratamento vai ser para você.",
+        "Uma semana sem esquecimento registrado. Para quem tem crises de pânico, a bula descreve que a ansiedade pode aumentar logo no início e costuma se normalizar nas 2 primeiras semanas. O efeito do escitalopram leva algumas semanas (a bula cita cerca de duas; NHS e MedlinePlus falam em várias), então uma semana, sozinha, não diz como o tratamento vai ser para você.",
       tituloSemRegistro: "7 dias de tratamento",
       textoSemRegistro:
         "Passou uma semana desde o início informado, com esquecimento marcado nesse período. A contagem sem esquecer recomeçou, mas o tratamento segue. Uma semana, sozinha, não diz como ele vai ser para você.",
       acoes: ["registrar-como-estou", "ver-historico"],
-      afirmacoes: ["tempo-de-efeito"],
+      afirmacoes: ["ansiedade-inicial", "tempo-de-efeito"],
     },
     {
       chave: "10d",
@@ -157,12 +184,12 @@ export const escitalopram: Tema = {
       limiar: 14,
       titulo: "14 dias seguidos sem esquecer",
       texto:
-        "Duas semanas sem esquecimento registrado. A bula cita cerca de duas semanas para começar a se sentir melhor, e outras fontes falam em várias; muda de pessoa para pessoa. Compare com o início usando as suas anotações. Se você se sente pior em vez de melhor, ou surgirem pensamentos de se machucar, procure o médico — não espere.",
+        "Duas semanas sem esquecimento registrado. Segundo a bula, pode demorar cerca de duas semanas para começar a se sentir melhor, e segundo o NHS a maioria dos efeitos colaterais alivia depois de algumas semanas; muda de pessoa para pessoa. Compare com o início usando as suas anotações. Se você se sente pior em vez de melhor, ou surgirem pensamentos de se machucar, procure o médico — não espere.",
       tituloSemRegistro: "14 dias de tratamento",
       textoSemRegistro:
         "Passaram duas semanas desde o início informado, com esquecimento marcado. Registrar como você está hoje já é útil, e o que você anotou ajuda na conversa com o médico.",
       acoes: ["registrar-como-estou", "preparar-consulta"],
-      afirmacoes: ["tempo-de-efeito", "piora-e-ajuda"],
+      afirmacoes: ["tempo-de-efeito", "efeitos-semanas", "piora-e-ajuda"],
       momentoDeConsulta: true,
     },
     {
@@ -170,11 +197,12 @@ export const escitalopram: Tema = {
       limiar: 21,
       titulo: "21 dias seguidos sem esquecer",
       texto:
-        "Três semanas sem esquecimento registrado. Vale olhar o histórico: esquecimentos marcados, efeitos que você anotou, sono e humor. Esse resumo pode ser levado ao profissional responsável.",
+        "Três semanas sem esquecimento registrado. Segundo a bula, na depressão costumam ser necessárias de 2 a 4 semanas para a resposta ao tratamento, e na ansiedade social um mínimo de 2 a 4 semanas. Vale olhar o histórico: esquecimentos marcados, efeitos anotados, sono e humor, e levar esse resumo ao profissional.",
       tituloSemRegistro: "21 dias de tratamento",
       textoSemRegistro:
         "Passaram três semanas desde o início informado, com esquecimento marcado. Mesmo assim, o resumo do que você registrou pode ajudar na conversa com o profissional.",
       acoes: ["preparar-consulta", "ver-historico"],
+      afirmacoes: ["resposta-semanas"],
       momentoDeConsulta: true,
     },
     {
@@ -182,12 +210,12 @@ export const escitalopram: Tema = {
       limiar: 30,
       titulo: "30 dias seguidos sem esquecer",
       texto:
-        "Um mês sem esquecimento registrado. Este marco organiza a conversa com o profissional: como foram humor, sono e efeitos? O que ele precisa saber? Ajustes de dose ou de tratamento são decisão dele; o app só ajuda a registrar.",
+        "Um mês sem esquecimento registrado. Já passou o intervalo de 2 a 4 semanas que a bula cita para a resposta na depressão. A bula também orienta procurar o médico se você não se sentir melhor ou se sentir pior. Este marco organiza a conversa: como foram humor, sono e efeitos? Ajustes de dose ou de tratamento são decisão do médico; o app só ajuda a registrar.",
       tituloSemRegistro: "30 dias de tratamento",
       textoSemRegistro:
         "Passou um mês desde o início informado, com esquecimento marcado. O que você registrou continua sendo uma boa base para a conversa com o profissional.",
       acoes: ["preparar-consulta"],
-      afirmacoes: ["dose-do-medico"],
+      afirmacoes: ["resposta-semanas", "dose-do-medico"],
       momentoDeConsulta: true,
     },
     {
@@ -195,11 +223,12 @@ export const escitalopram: Tema = {
       limiar: 42,
       titulo: "42 dias seguidos sem esquecer",
       texto:
-        "Seis semanas sem esquecimento registrado. Se houver uma consulta de retorno marcada, leve as suas anotações. Se não houver e você tem dúvidas sobre como as coisas estão indo, pode ser um bom momento para marcar uma.",
+        "Seis semanas sem esquecimento registrado. NHS e MedlinePlus dizem que pode levar várias semanas até o benefício completo. Se houver uma consulta de retorno marcada, leve as suas anotações; se não houver e você tem dúvidas sobre como as coisas estão indo, pode ser um bom momento para marcar uma.",
       tituloSemRegistro: "42 dias de tratamento",
       textoSemRegistro:
         "Passaram seis semanas desde o início informado, com esquecimento marcado. Se houver consulta, leve o que registrou e conte ao profissional quais dias você esqueceu.",
       acoes: ["preparar-consulta", "ver-historico"],
+      afirmacoes: ["tempo-de-efeito"],
       momentoDeConsulta: true,
     },
     {
@@ -207,12 +236,38 @@ export const escitalopram: Tema = {
       limiar: 60,
       titulo: "60 dias seguidos sem esquecer",
       texto:
-        "Dois meses sem esquecimento registrado. O app não avalia resposta ao tratamento: a comparação com o início é sua e do profissional. Não interrompa o tratamento por conta própria; qualquer decisão sobre parar ou mudar a dose é do médico.",
+        "Dois meses sem esquecimento registrado. O app não avalia resposta ao tratamento: a comparação com o início é sua e do profissional. Segundo a bula e o NHS, o tratamento não deve ser interrompido de repente; quando chegar a hora de parar, o médico costuma fazer a retirada aos poucos, ao longo de semanas.",
       tituloSemRegistro: "60 dias de tratamento",
       textoSemRegistro:
         "Passaram dois meses desde o início informado, com esquecimento marcado. Esquecer um dia acontece e não define o tratamento; qualquer decisão sobre parar ou mudar a dose é do médico.",
       acoes: ["registrar-como-estou", "preparar-consulta"],
       afirmacoes: ["nao-interromper"],
+      momentoDeConsulta: true,
+    },
+    {
+      chave: "90d",
+      limiar: 90,
+      titulo: "90 dias seguidos sem esquecer",
+      texto:
+        "Três meses sem esquecimento registrado. Segundo a bula, no transtorno do pânico a melhora total costuma ser atingida após cerca de 3 meses, e na ansiedade generalizada e na social recomenda-se pelo menos 3 meses para consolidar a resposta. O app não sabe a sua indicação: converse com o profissional sobre como você está.",
+      tituloSemRegistro: "90 dias de tratamento",
+      textoSemRegistro:
+        "Passaram três meses desde o início informado, com esquecimento marcado. O tratamento segue contando; o que você registrou ajuda na conversa com o profissional.",
+      acoes: ["registrar-como-estou", "preparar-consulta"],
+      afirmacoes: ["duracao"],
+      momentoDeConsulta: true,
+    },
+    {
+      chave: "180d",
+      limiar: 180,
+      titulo: "180 dias seguidos sem esquecer",
+      texto:
+        "Seis meses sem esquecimento registrado. Segundo a bula, o período mínimo usual de tratamento é de 6 meses, e para depressão o NHS diz que provavelmente serão 6 meses ou mais. Isso não quer dizer que é hora de parar: continuar, ajustar ou reduzir é decisão do médico, e a redução, quando houver, costuma ser gradual.",
+      tituloSemRegistro: "180 dias de tratamento",
+      textoSemRegistro:
+        "Passaram seis meses desde o início informado, com esquecimento marcado. Qualquer decisão sobre continuar ou parar é do médico, e parar de repente pode causar sintomas de descontinuação.",
+      acoes: ["preparar-consulta", "ver-historico"],
+      afirmacoes: ["duracao", "nao-interromper"],
       momentoDeConsulta: true,
     },
   ],
