@@ -56,8 +56,8 @@ export function decidirLembrete(e: EntradaLembrete): TextoLembrete | null {
   if (passou < 0 || passou >= JANELA_LEMBRETE_MIN) return null;
 
   if (!e.lembreteDetalhado) {
-    return { titulo: "ZXP Mark", corpo: "Seu lembrete de hoje. Quando puder, abra o app para registrar." };
+    return { titulo: "ZXP Mark", corpo: "Seu lembrete de hoje. Se esquecer, é só marcar no app." };
   }
   const dose = e.dose ? ` Dose informada: ${e.dose}.` : "";
-  return { titulo: `Lembrete: ${e.nome}`, corpo: `Quando puder, registre como foi hoje.${dose}` };
+  return { titulo: `Lembrete: ${e.nome}`, corpo: `Se esquecer, é só marcar no app.${dose}` };
 }

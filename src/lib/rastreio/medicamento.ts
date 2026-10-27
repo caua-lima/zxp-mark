@@ -6,11 +6,14 @@
  *
  *   1. dias desde o INÍCIO DO TRATAMENTO   — calendário, nunca zera
  *   2. dias desde o INÍCIO DA DOSE ATUAL   — muda quando a dose muda; o resto não
- *   3. dias CONSECUTIVOS com tomada confirmada — só conta dia com "tomou"
- *   4. TOTAL de dias registrados            — dias distintos com qualquer registro
+ *   3. dias SEGUIDOS SEM ESQUECER          — recomeça num dia marcado como esquecido
+ *   4. ESQUECIMENTOS marcados              — quantos dias a pessoa disse que esqueceu
  *
- * "Dia sem linha" significa SEM INFORMAÇÃO: não é "não tomou". A sequência
- * consecutiva é só uma organização do registro: nada no tratamento depende dela.
+ * MODELO "PRESUMIDO": a pessoa não precisa marcar que tomou. Dia sem marcação conta como
+ * tomado, conforme ela informou; só o "esqueci" (estado "nao_tomou") quebra a sequência. O app
+ * não tem como saber se alguém tomou: o número vale o que a pessoa informa, e os textos dizem
+ * isso ("conforme você informou"). A sequência é só uma organização do registro: nada no
+ * tratamento depende dela, e esquecer um dia não zera o tratamento nem as etapas vividas.
  *
  * Puro e sem alias.
  */
@@ -35,14 +38,14 @@ export type ResumoTratamento = {
   desdeInicio: ContagemDias;
   /** 2. desde o início da dose atual; null se nenhuma dose foi informada */
   doseAtual: { descricao: string; mg: number | null; desdeDia: string; contagem: ContagemDias } | null;
-  /** 3. dias consecutivos com tomada confirmada, terminando hoje ou ontem */
+  /** 3. dias seguidos sem esquecimento marcado, até ontem (+ hoje se a pessoa marcou "tomou") */
   sequenciaConfirmada: number;
   inicioDaSequencia: string | null;
-  /** 4. total de dias distintos com qualquer registro (tomou ou não tomou) */
+  /** dias distintos com marcação explícita (tomou ou esqueci) */
   totalRegistrados: number;
   totalTomou: number;
   totalNaoTomou: number;
-  /** dias entre o início e ontem sem nenhuma informação */
+  /** sempre 0: no modelo presumido não existe "dia sem informação" (mantido por compatibilidade) */
   diasSemInformacao: number;
   /** estado de hoje, ou null se ainda não há registro */
   hojeEstado: EstadoTomada | null;
@@ -71,18 +74,23 @@ export function resumirTratamento(
     if (t.estado === "tomou" || t.estado === "nao_tomou") porDia.set(t.dia, t.estado);
   }
 
-  // Sequência: de hoje (se já registrado como "tomou") ou de ontem para trás.
-  let cursor = porDia.get(hoje) === "tomou" ? hoje : somarDias(hoje, -1);
+  // Sequência sem esquecer: de ontem para trás, até o último dia marcado como esquecido (ou o início).
+  // Hoje só entra se a pessoa marcou "tomou"; marcado como esquecido, a sequência é zero.
+  let cursor = somarDias(hoje, -1);
   let sequencia = 0;
   let inicioDaSequencia: string | null = null;
-  while (cursor >= inicioDia && porDia.get(cursor) === "tomou") {
+  while (cursor >= inicioDia && porDia.get(cursor) !== "nao_tomou") {
     sequencia++;
     inicioDaSequencia = cursor;
     cursor = somarDias(cursor, -1);
   }
-
-  let semInformacao = 0;
-  for (let d = inicioDia; d < hoje; d = somarDias(d, 1)) if (!porDia.has(d)) semInformacao++;
+  if (porDia.get(hoje) === "nao_tomou") {
+    sequencia = 0;
+    inicioDaSequencia = null;
+  } else if (porDia.get(hoje) === "tomou") {
+    sequencia++;
+    inicioDaSequencia = inicioDaSequencia ?? hoje;
+  }
 
   const dose = doseVigente(doses, agora);
   return {
@@ -108,7 +116,7 @@ export function resumirTratamento(
     totalRegistrados: porDia.size,
     totalTomou: [...porDia.values()].filter((e) => e === "tomou").length,
     totalNaoTomou: [...porDia.values()].filter((e) => e === "nao_tomou").length,
-    diasSemInformacao: semInformacao,
+    diasSemInformacao: 0,
     hojeEstado: porDia.get(hoje) ?? null,
   };
 }
@@ -122,9 +130,9 @@ export type SituacaoCartao =
 
 /**
  * Cada cartão aparece em uma de três formas:
- *  - sustentado: há `limiar` dias CONSECUTIVOS com tomada confirmada → título forte;
- *  - so-tempo:   passaram `limiar` dias desde o início informado, mas a sequência
- *                não chega lá → título fraco, mostrando quantos dias estão sem informação;
+ *  - sustentado: há `limiar` dias SEGUIDOS sem esquecimento marcado → título forte;
+ *  - so-tempo:   passaram `limiar` dias desde o início informado, mas houve esquecimento
+ *                marcado e a sequência recomeçou → título fraco (o tratamento segue contando);
  *  - futuro:     ainda não chegou — o conteúdo pode ser lido mesmo assim, o app não o tranca.
  *
  * A dose NÃO entra nessa conta: mudar de dose não reinicia nem recalcula nada.
@@ -293,10 +301,16 @@ export function montarResumoParaConsulta(d: DadosConsulta): string {
   }
 
   linhas.push("");
-  linhas.push("Registro de tomadas:");
-  linhas.push(`- Dias com registro: ${r.totalRegistrados} (tomou: ${r.totalTomou}; não tomou: ${r.totalNaoTomou}).`);
-  linhas.push(`- Dias sem nenhuma informação desde o início: ${r.diasSemInformacao}. Dia sem registro não quer dizer que não tomei.`);
-  linhas.push(`- Dias seguidos com tomada registrada até agora: ${r.sequenciaConfirmada}.`);
+  linhas.push("Tomadas (o app presume que tomei nos dias em que não marquei esquecimento):");
+  linhas.push(`- Esquecimentos que marquei: ${r.totalNaoTomou}.`);
+  if (r.totalNaoTomou > 0) {
+    const dias = [...d.tomadas]
+      .filter((t) => t.estado === "nao_tomou" && t.dia >= r.inicioDia && t.dia <= r.hoje)
+      .map((t) => t.dia)
+      .sort();
+    linhas.push(`- Dias marcados como esquecidos: ${dias.map(fmt).join(", ")}.`);
+  }
+  linhas.push(`- Dias seguidos sem esquecimento marcado até agora: ${r.sequenciaConfirmada}.`);
 
   if (d.efeitos.length) {
     linhas.push("");

@@ -52,8 +52,7 @@ export async function carregarDadosSaude(uid: string, pergunta: string, tz: stri
         desdeInicio: r.desdeInicio,
         dose: r.doseAtual ? { descricao: r.doseAtual.descricao, contagem: r.doseAtual.contagem } : null,
         sequencia: r.sequenciaConfirmada,
-        totalRegistrados: r.totalRegistrados,
-        diasSemInformacao: r.diasSemInformacao,
+        totalNaoTomou: r.totalNaoTomou,
         // os 3 mais recentes bastam: o assistente não precisa do histórico inteiro
         efeitos: c.efeitos.slice(0, 3).map((e) => ({ dia: e.dia, descricao: e.descricao })),
       };

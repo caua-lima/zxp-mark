@@ -152,7 +152,7 @@ export function FormMarco() {
               {ehRemedio ? (
                 <>
                   Reconheci como <span className="font-medium text-brand">Remédio / tratamento</span> — vou contar os dias do
-                  tratamento e você marca “tomei” ou “esqueci”. Esquecer um dia não zera nada.
+                  tratamento sozinho, presumindo que você toma todo dia. Só marque quando esquecer: esquecer um dia não zera nada.
                 </>
               ) : forcado || detectado.reconhecido ? (
                 <>

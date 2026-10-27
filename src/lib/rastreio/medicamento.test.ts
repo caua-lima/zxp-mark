@@ -84,19 +84,34 @@ test("a dose vigente é a de maior 'desde' que JÁ começou; dose futura ainda n
 
 /* --------------------------- sequência e lacunas -------------------------- */
 
-test("'esqueci de registrar ontem': a sequência recomeça, mas o total e o tempo desde o início seguem", () => {
-  const completo = tomou(dias("2026-10-01", "2026-10-11"));
-  assert.equal(resumo(completo).sequenciaConfirmada, 11);
+test("esquecer um dia marcado: a sequência recomeça no dia seguinte, mas o tempo de tratamento segue", () => {
+  // Modelo presumido: sem marcar nada, o app considera que tomou todo dia.
+  const nada = resumo([]);
+  assert.equal(nada.sequenciaConfirmada, 30, "do início até ontem");
+  assert.equal(nada.totalNaoTomou, 0);
 
-  const semOntem = completo.filter((t) => t.dia !== "2026-10-10");
-  const r = resumo(semOntem);
-  assert.equal(r.sequenciaConfirmada, 1, "só hoje");
-  assert.equal(r.totalRegistrados, 10, "o total registrado não perde nada");
-  assert.equal(r.desdeInicio.completos, 30, "o tempo desde o início não depende de registro");
-  assert.equal(r.diasSemInformacao >= 1, true);
+  const esqueceuOntem = resumo([{ dia: "2026-10-10", estado: "nao_tomou" }]);
+  assert.equal(esqueceuOntem.sequenciaConfirmada, 0);
+  assert.equal(esqueceuOntem.totalNaoTomou, 1);
+  assert.equal(esqueceuOntem.desdeInicio.completos, 30, "o tratamento não depende de marcação");
 
-  // a pessoa lembra e registra ontem: a sequência volta
-  assert.equal(resumo([...semOntem, ...tomou(["2026-10-10"])]).sequenciaConfirmada, 11);
+  const esqueceuHa5 = resumo([{ dia: "2026-10-06", estado: "nao_tomou" }]);
+  assert.equal(esqueceuHa5.sequenciaConfirmada, 4, "07, 08, 09 e 10");
+
+  // marcar o esquecimento e depois desfazer (apagar a marcação): a sequência volta
+  assert.equal(resumo([]).sequenciaConfirmada, 30);
+});
+
+test("esquecer HOJE zera a sequência de hoje; 'tomou' marcado hoje conta mais um dia", () => {
+  assert.equal(resumo([{ dia: "2026-10-11", estado: "nao_tomou" }]).sequenciaConfirmada, 0);
+  assert.equal(resumo([{ dia: "2026-10-11", estado: "nao_tomou" }]).hojeEstado, "nao_tomou");
+  assert.equal(resumo([{ dia: "2026-10-11", estado: "tomou" }]).sequenciaConfirmada, 31);
+  assert.equal(resumo([]).hojeEstado, null);
+});
+
+test("no modelo presumido não existe 'dia sem informação'", () => {
+  assert.equal(resumo([]).diasSemInformacao, 0);
+  assert.equal(resumo([{ dia: "2026-10-03", estado: "nao_tomou" }]).diasSemInformacao, 0);
 });
 
 test("'não tomei' é informação: quebra a sequência mas conta como dia registrado, e não como sem informação", () => {
@@ -108,15 +123,15 @@ test("'não tomei' é informação: quebra a sequência mas conta como dia regis
   assert.equal(r.totalTomou, 6);
 });
 
-test("hoje ainda não registrado não quebra a sequência: conta até ontem", () => {
-  const r = resumo(tomou(dias("2026-10-04", "2026-10-10")));
-  assert.equal(r.sequenciaConfirmada, 7);
+test("sem marcar nada hoje, a sequência conta até ontem (hoje ainda não acabou)", () => {
+  const r = resumo([]);
+  assert.equal(r.sequenciaConfirmada, 30);
   assert.equal(r.hojeEstado, null);
 });
 
-test("registro duplicado do mesmo dia não infla nada (último vale)", () => {
+test("marcação duplicada do mesmo dia não infla nada (a última vale)", () => {
   const r = resumo([...tomou(["2026-10-10", "2026-10-11"]), ...tomou(["2026-10-11"]), { dia: "2026-10-10", estado: "tomou" }]);
-  assert.equal(r.sequenciaConfirmada, 2);
+  assert.equal(r.sequenciaConfirmada, 31);
   assert.equal(r.totalRegistrados, 2);
 });
 
@@ -125,19 +140,20 @@ test("registros fora do período (antes do início ou no futuro) não contam", (
   assert.equal(r.totalRegistrados, 1);
 });
 
-test("edição retroativa: trocar 'tomou' por 'não tomou' em um dia recalcula tudo, sem lixo", () => {
+test("edição retroativa: trocar 'tomou' por 'esqueci' em um dia recalcula tudo, sem lixo", () => {
   const base = tomou(dias("2026-10-02", "2026-10-11"));
-  assert.equal(resumo(base).sequenciaConfirmada, 10);
+  assert.equal(resumo(base).sequenciaConfirmada, 31);
   const editado = base.map((t) => (t.dia === "2026-10-06" ? { ...t, estado: "nao_tomou" } : t));
   const r = resumo(editado);
   assert.equal(r.sequenciaConfirmada, 5); // 07..11
   assert.equal(r.totalRegistrados, 10);
   assert.equal(r.totalNaoTomou, 1);
-  // apagar o registro de um dia o devolve a "sem informação" (não a "não tomou")
+  // apagar a marcação de um dia o devolve ao padrão (presumido tomado), nunca a "esqueci"
   const apagado = base.filter((t) => t.dia !== "2026-10-06");
   const a = resumo(apagado);
   assert.equal(a.totalRegistrados, 9);
   assert.equal(a.totalNaoTomou, 0);
+  assert.equal(a.sequenciaConfirmada, 31);
 });
 
 test("o dia de hoje e o dia dos registros seguem o fuso do usuário", () => {
@@ -150,32 +166,30 @@ test("o dia de hoje e o dia dos registros seguem o fuso do usuário", () => {
 
 /* ------------------------------- cartões --------------------------------- */
 
-test("10 dias consecutivos confirmados → título forte do briefing; senão, 'desde o início informado'", () => {
-  const dezDias = resumirTratamento(instanteLocal("2026-10-02T08:00", SP)!, [], tomou(dias("2026-10-02", "2026-10-11")), agora, SP);
-  const forte = situacaoDosCartoes(escitalopram.marcos, dezDias).find((s) => s.marco.limiar === 10)!;
-  assert.equal(forte.estado, "sustentado");
-  assert.equal(forte.titulo, "10 dias consecutivos com tomada registrada");
+test("10 dias seguidos sem esquecer → título forte; com esquecimento marcado, 'de tratamento'", () => {
+  const dezDias = resumirTratamento(instanteLocal("2026-10-02T08:00", SP)!, [], [], agora, SP);
+  assert.equal(dezDias.sequenciaConfirmada, 9, "até ontem; hoje ainda não acabou");
+  const quase = situacaoDosCartoes(escitalopram.marcos, dezDias).find((s) => s.marco.limiar === 10)!;
+  assert.notEqual(quase.estado, "sustentado");
 
-  // mesmos 10 dias de calendário, mas com um dia sem informação
-  const comLacuna = resumirTratamento(
-    instanteLocal("2026-10-01T08:00", SP)!,
-    [],
-    tomou(dias("2026-10-01", "2026-10-11").filter((d) => d !== "2026-10-05")),
-    agora,
-    SP
-  );
-  const fraco = situacaoDosCartoes(escitalopram.marcos, comLacuna).find((s) => s.marco.limiar === 10)!;
+  const comHoje = resumirTratamento(instanteLocal("2026-10-02T08:00", SP)!, [], tomou(["2026-10-11"]), agora, SP);
+  const forte = situacaoDosCartoes(escitalopram.marcos, comHoje).find((s) => s.marco.limiar === 10)!;
+  assert.equal(forte.estado, "sustentado");
+  assert.equal(forte.titulo, "10 dias seguidos sem esquecer");
+
+  // mesmos dias de calendário, mas com um esquecimento marcado no meio
+  const comEsquecimento = resumirTratamento(instanteLocal("2026-10-01T08:00", SP)!, [], [{ dia: "2026-10-05", estado: "nao_tomou" }], agora, SP);
+  const fraco = situacaoDosCartoes(escitalopram.marcos, comEsquecimento).find((s) => s.marco.limiar === 10)!;
   assert.equal(fraco.estado, "so-tempo");
-  assert.equal(fraco.titulo, "10 dias desde o início informado");
-  assert.equal(fraco.estado === "so-tempo" && fraco.diasSemInformacao, 1);
+  assert.equal(fraco.titulo, "10 dias de tratamento");
+  assert.doesNotMatch(`${fraco.titulo} ${fraco.texto}`, /perdeu|falhou|culpa|do zero/i);
 });
 
-test("sem nenhum registro, nenhum cartão vira título forte, mesmo com meses de tratamento", () => {
+test("sem marcar nada, as etapas já vividas aparecem fortes (presumido) e as futuras ficam legíveis", () => {
   const r = resumo([]);
   assert.equal(r.desdeInicio.completos, 30);
   const s = situacaoDosCartoes(escitalopram.marcos, r);
-  assert.ok(s.every((x) => x.estado !== "sustentado"));
-  assert.equal(s.find((x) => x.marco.limiar === 30)?.estado, "so-tempo");
+  assert.equal(s.find((x) => x.marco.limiar === 30)?.estado, "sustentado");
   assert.equal(s.find((x) => x.marco.limiar === 42)?.estado, "futuro");
   // futuro: o conteúdo continua legível (não fica trancado por pontuação)
   const futuro = s.find((x) => x.marco.limiar === 60)!;
@@ -289,8 +303,10 @@ test("o resumo para a consulta traz só o que foi registrado, sem interpretar ne
   assert.match(texto, /- 10 mg, desde 11\/09\/2026/);
   assert.match(texto, /- 15 mg, desde 08\/10\/2026/);
   assert.match(texto, /Dose atual informada: 15 mg, há 3 dias completos/);
-  assert.match(texto, /Dias com registro: 7 \(tomou: 6; não tomou: 1\)/);
-  assert.match(texto, /Dia sem registro não quer dizer que não tomei/);
+  assert.match(texto, /Esquecimentos que marquei: 1\./);
+  assert.match(texto, /Dias marcados como esquecidos: 05\/10\/2026\./);
+  assert.match(texto, /Dias seguidos sem esquecimento marcado até agora: 6\./);
+  assert.match(texto, /presume que tomei nos dias em que não marquei esquecimento/);
   assert.match(texto, /09\/10\/2026: enjoo ao acordar \(leve\)/);
   assert.match(texto, /o app não os interpreta/);
   // nada de interpretação

@@ -107,60 +107,60 @@ export const escitalopram: Tema = {
     {
       chave: "1d",
       limiar: 1,
-      titulo: "1 dia com tomada registrada",
+      titulo: "1 dia sem esquecer",
       texto:
-        "Você registrou a tomada de hoje. Náusea e dor de cabeça estão entre os efeitos mais frequentes segundo a bula, e muitos costumam ser leves. Anote o que notar; se algo incomodar muito ou não passar, fale com o médico ou o farmacêutico.",
-      tituloSemRegistro: "1 dia desde o início informado",
+        "Um dia de tratamento sem esquecimento registrado: conforme você informou, o app presume que você tomou. Náusea e dor de cabeça estão entre os efeitos mais frequentes segundo a bula, e muitos costumam ser leves. Anote o que notar; se algo incomodar muito ou não passar, fale com o médico ou o farmacêutico.",
+      tituloSemRegistro: "1 dia de tratamento",
       textoSemRegistro:
-        "Passou 1 dia desde o início informado do tratamento, sem registro de tomada. Sem registro, o app não sabe se houve ou não tomada — e não presume nada.",
+        "Passou 1 dia desde o início informado, e você marcou um esquecimento. O tratamento segue contando e nada se perde: esquecer acontece.",
       acoes: ["registrar-efeito"],
       afirmacoes: ["efeitos-frequentes"],
     },
     {
       chave: "3d",
       limiar: 3,
-      titulo: "3 dias consecutivos com tomada registrada",
+      titulo: "3 dias seguidos sem esquecer",
       texto:
-        "Você registrou a tomada por 3 dias seguidos. Sono, apetite e energia podem mudar por causa do tratamento ou da própria condição, e o app não distingue uma coisa da outra. Que tal anotar como eles estão?",
-      tituloSemRegistro: "3 dias desde o início informado",
+        "Você não registrou esquecimento em 3 dias seguidos: conforme você informou, o tratamento seguiu todos os dias. Sono, apetite e energia podem mudar por causa do tratamento ou da própria condição, e o app não distingue uma coisa da outra. Que tal anotar como eles estão?",
+      tituloSemRegistro: "3 dias de tratamento",
       textoSemRegistro:
-        "Passaram 3 dias desde o início informado, mas há dias sem informação. Dia sem registro não quer dizer que a tomada não aconteceu; só que o app não sabe.",
+        "Passaram 3 dias desde o início informado, com um esquecimento marcado nesse período. A contagem sem esquecer recomeçou; o tratamento e o seu histórico continuam.",
       acoes: ["registrar-como-estou"],
       afirmacoes: ["sono-e-medicamento"],
     },
     {
       chave: "7d",
       limiar: 7,
-      titulo: "7 dias consecutivos com tomada registrada",
+      titulo: "7 dias seguidos sem esquecer",
       texto:
-        "Uma semana de registros seguidos. Você já tem material para observar o seu padrão. O efeito do escitalopram leva algumas semanas (a bula cita cerca de duas; NHS e MedlinePlus falam em várias), então uma semana, sozinha, não diz como o tratamento vai ser para você.",
-      tituloSemRegistro: "7 dias desde o início informado",
+        "Uma semana sem esquecimento registrado. Você já tem material para observar o seu padrão. O efeito do escitalopram leva algumas semanas (a bula cita cerca de duas; NHS e MedlinePlus falam em várias), então uma semana, sozinha, não diz como o tratamento vai ser para você.",
+      tituloSemRegistro: "7 dias de tratamento",
       textoSemRegistro:
-        "Passou uma semana desde o início informado, com dias sem informação. Completar o que você lembrar deixa o histórico fiel; o que não lembrar fica como “sem informação”.",
+        "Passou uma semana desde o início informado, com esquecimento marcado nesse período. A contagem sem esquecer recomeçou, mas o tratamento segue. Uma semana, sozinha, não diz como ele vai ser para você.",
       acoes: ["registrar-como-estou", "ver-historico"],
       afirmacoes: ["tempo-de-efeito"],
     },
     {
       chave: "10d",
       limiar: 10,
-      titulo: "10 dias consecutivos com tomada registrada",
+      titulo: "10 dias seguidos sem esquecer",
       texto:
-        "Você registrou a tomada por 10 dias seguidos. O efeito do escitalopram pode levar várias semanas; este marco, sozinho, não determina sua resposta ao tratamento. Como ficaram seu humor, sono e bem-estar nesse período?",
-      tituloSemRegistro: "10 dias desde o início informado",
+        "Você não registrou esquecimento em 10 dias seguidos: conforme você informou, tomou todos os dias. O efeito do escitalopram pode levar várias semanas; este marco, sozinho, não determina sua resposta ao tratamento. Como ficaram seu humor, sono e bem-estar nesse período?",
+      tituloSemRegistro: "10 dias de tratamento",
       textoSemRegistro:
-        "Passaram 10 dias desde o início informado, mas há dias sem informação. O contador só afirma o que os seus registros sustentam.",
+        "Passaram 10 dias desde o início informado, com esquecimento marcado nesse período. A contagem sem esquecer recomeçou; o tratamento segue. O contador só afirma o que você informou.",
       acoes: ["registrar-como-estou", "ver-historico"],
       afirmacoes: ["tempo-de-efeito"],
     },
     {
       chave: "14d",
       limiar: 14,
-      titulo: "14 dias consecutivos com tomada registrada",
+      titulo: "14 dias seguidos sem esquecer",
       texto:
-        "Duas semanas de registros seguidos. A bula cita cerca de duas semanas para começar a se sentir melhor, e outras fontes falam em várias; muda de pessoa para pessoa. Compare com o início usando as suas anotações. Se você se sente pior em vez de melhor, ou surgirem pensamentos de se machucar, procure o médico — não espere.",
-      tituloSemRegistro: "14 dias desde o início informado",
+        "Duas semanas sem esquecimento registrado. A bula cita cerca de duas semanas para começar a se sentir melhor, e outras fontes falam em várias; muda de pessoa para pessoa. Compare com o início usando as suas anotações. Se você se sente pior em vez de melhor, ou surgirem pensamentos de se machucar, procure o médico — não espere.",
+      tituloSemRegistro: "14 dias de tratamento",
       textoSemRegistro:
-        "Passaram duas semanas desde o início informado, com dias sem informação. Registrar como você está hoje já é útil, mesmo sem completar os dias anteriores.",
+        "Passaram duas semanas desde o início informado, com esquecimento marcado. Registrar como você está hoje já é útil, e o que você anotou ajuda na conversa com o médico.",
       acoes: ["registrar-como-estou", "preparar-consulta"],
       afirmacoes: ["tempo-de-efeito", "piora-e-ajuda"],
       momentoDeConsulta: true,
@@ -168,24 +168,24 @@ export const escitalopram: Tema = {
     {
       chave: "21d",
       limiar: 21,
-      titulo: "21 dias consecutivos com tomada registrada",
+      titulo: "21 dias seguidos sem esquecer",
       texto:
-        "Três semanas de registros seguidos. Vale olhar o histórico: dias com e sem informação, efeitos que você anotou, sono e humor. Esse resumo pode ser levado ao profissional responsável.",
-      tituloSemRegistro: "21 dias desde o início informado",
+        "Três semanas sem esquecimento registrado. Vale olhar o histórico: esquecimentos marcados, efeitos que você anotou, sono e humor. Esse resumo pode ser levado ao profissional responsável.",
+      tituloSemRegistro: "21 dias de tratamento",
       textoSemRegistro:
-        "Passaram três semanas desde o início informado, com dias sem informação. Mesmo assim, o resumo do que você registrou pode ajudar na conversa com o profissional.",
+        "Passaram três semanas desde o início informado, com esquecimento marcado. Mesmo assim, o resumo do que você registrou pode ajudar na conversa com o profissional.",
       acoes: ["preparar-consulta", "ver-historico"],
       momentoDeConsulta: true,
     },
     {
       chave: "30d",
       limiar: 30,
-      titulo: "30 dias consecutivos com tomada registrada",
+      titulo: "30 dias seguidos sem esquecer",
       texto:
-        "Um mês de registros seguidos. Este marco organiza a conversa com o profissional: como foram humor, sono e efeitos? O que ele precisa saber? Ajustes de dose ou de tratamento são decisão dele; o app só ajuda a registrar.",
-      tituloSemRegistro: "30 dias desde o início informado",
+        "Um mês sem esquecimento registrado. Este marco organiza a conversa com o profissional: como foram humor, sono e efeitos? O que ele precisa saber? Ajustes de dose ou de tratamento são decisão dele; o app só ajuda a registrar.",
+      tituloSemRegistro: "30 dias de tratamento",
       textoSemRegistro:
-        "Passou um mês desde o início informado, com dias sem informação. O que você registrou continua sendo uma boa base para a conversa com o profissional.",
+        "Passou um mês desde o início informado, com esquecimento marcado. O que você registrou continua sendo uma boa base para a conversa com o profissional.",
       acoes: ["preparar-consulta"],
       afirmacoes: ["dose-do-medico"],
       momentoDeConsulta: true,
@@ -193,24 +193,24 @@ export const escitalopram: Tema = {
     {
       chave: "42d",
       limiar: 42,
-      titulo: "42 dias consecutivos com tomada registrada",
+      titulo: "42 dias seguidos sem esquecer",
       texto:
-        "Seis semanas de registros seguidos. Se houver uma consulta de retorno marcada, leve as suas anotações. Se não houver e você tem dúvidas sobre como as coisas estão indo, pode ser um bom momento para marcar uma.",
-      tituloSemRegistro: "42 dias desde o início informado",
+        "Seis semanas sem esquecimento registrado. Se houver uma consulta de retorno marcada, leve as suas anotações. Se não houver e você tem dúvidas sobre como as coisas estão indo, pode ser um bom momento para marcar uma.",
+      tituloSemRegistro: "42 dias de tratamento",
       textoSemRegistro:
-        "Passaram seis semanas desde o início informado, com dias sem informação. Se houver consulta, leve o que registrou — e diga ao profissional quais dias ficaram sem registro.",
+        "Passaram seis semanas desde o início informado, com esquecimento marcado. Se houver consulta, leve o que registrou e conte ao profissional quais dias você esqueceu.",
       acoes: ["preparar-consulta", "ver-historico"],
       momentoDeConsulta: true,
     },
     {
       chave: "60d",
       limiar: 60,
-      titulo: "60 dias consecutivos com tomada registrada",
+      titulo: "60 dias seguidos sem esquecer",
       texto:
-        "Dois meses de registros seguidos. O app não avalia resposta ao tratamento: a comparação com o início é sua e do profissional. Não interrompa o tratamento por conta própria; qualquer decisão sobre parar ou mudar a dose é do médico.",
-      tituloSemRegistro: "60 dias desde o início informado",
+        "Dois meses sem esquecimento registrado. O app não avalia resposta ao tratamento: a comparação com o início é sua e do profissional. Não interrompa o tratamento por conta própria; qualquer decisão sobre parar ou mudar a dose é do médico.",
+      tituloSemRegistro: "60 dias de tratamento",
       textoSemRegistro:
-        "Passaram dois meses desde o início informado, com dias sem informação. Dias sem registro não significam que o medicamento não foi tomado; significam que o app não sabe.",
+        "Passaram dois meses desde o início informado, com esquecimento marcado. Esquecer um dia acontece e não define o tratamento; qualquer decisão sobre parar ou mudar a dose é do médico.",
       acoes: ["registrar-como-estou", "preparar-consulta"],
       afirmacoes: ["nao-interromper"],
       momentoDeConsulta: true,
@@ -248,7 +248,7 @@ export const escitalopram: Tema = {
       id: "resumo-consulta",
       titulo: "Leve um resumo para a consulta",
       texto:
-        "Um resumo com início do tratamento, doses informadas, dias com e sem registro, efeitos anotados e o que você percebeu de humor e sono ajuda o profissional a ter um retrato mais completo.",
+        "Um resumo com início do tratamento, doses informadas, esquecimentos marcados, efeitos anotados e o que você percebeu de humor e sono ajuda o profissional a ter um retrato mais completo.",
       quando: ["consulta", "medico", "psiquiatra", "retorno", "conversar", "levar"],
     },
     {
@@ -286,10 +286,10 @@ export const escitalopram: Tema = {
     },
     {
       id: "esqueci-de-registrar",
-      pergunta: "Esqueci de registrar ontem. Perdi minha sequência?",
+      pergunta: "Esqueci de tomar um dia e não marquei. E agora? Perdi minha sequência?",
       resposta:
-        "Você não perdeu o tratamento nem o histórico. O que muda é só a contagem de “dias consecutivos com tomada registrada”: um dia sem informação interrompe essa sequência porque o app não sabe se você tomou — não porque você falhou. Se lembrar, registre ontem agora e a sequência é recalculada. O total de dias registrados e o tempo desde o início continuam como estavam. Esquecer de registrar não é esquecer de tomar, e nada no tratamento depende dessa sequência.",
-      termos: ["esqueci de registrar", "perdi", "sequencia", "registrar ontem", "streak", "perdi a sequencia", "quebrou"],
+        "Você não perdeu o tratamento nem o histórico. No app, o tratamento conta todos os dias e presume que você tomou, a não ser que você marque “esqueci”. Se esqueceu um dia, use “Esqueci um dia” e escolha a data: só a contagem de “dias seguidos sem esquecer” recomeça, e isso não é falha. O tempo desde o início, as etapas já vividas e o seu histórico continuam. Se você não marcar, o app segue presumindo que tomou, então a contagem só vale o que você informa.",
+      termos: ["esqueci de registrar", "esqueci um dia", "nao marquei", "perdi", "sequencia", "registrar ontem", "streak", "perdi a sequencia", "quebrou"],
     },
     {
       id: "esqueci-de-tomar",
@@ -442,7 +442,7 @@ export const escitalopram: Tema = {
   limites: [
     "A dose que você informa, qualquer que seja, é um dado do seu acompanhamento: o app não a recomenda, não a avalia e não a compara com outras.",
     "O app não recomenda começar, aumentar, reduzir ou suspender o medicamento, nem mudar o horário por conta própria.",
-    "Dias de tomada registrados mostram regularidade de REGISTRO, não resposta ao tratamento.",
+    "Dias seguidos sem esquecer mostram regularidade conforme o que você informou, não resposta ao tratamento. Dia sem esquecimento marcado é presumido como tomado: o app não tem como saber.",
     "O app não sabe se um sintoma vem do medicamento, da condição ou de outra coisa, e não afirma causa a partir de coincidência no tempo.",
     "O app não calcula compensação de dose esquecida nem previsão de quando o efeito vai começar.",
     "O app não presume o seu diagnóstico: o escitalopram tem várias indicações.",
@@ -454,7 +454,7 @@ export const escitalopram: Tema = {
     "Como estão humor, ansiedade e energia ao longo da semana, nas suas próprias palavras.",
     "Como está o sono: hora de dormir, de acordar e a qualidade percebida.",
     "Apetite e quaisquer efeitos indesejados: quando começaram, quanto incomodam, se passam.",
-    "Dias sem informação — para saber o que o registro realmente cobre.",
+    "Os dias em que você marcou que esqueceu, para o profissional saber o que o registro realmente cobre.",
     "Mudanças de dose e o que você percebeu depois, sem concluir a causa.",
   ],
 

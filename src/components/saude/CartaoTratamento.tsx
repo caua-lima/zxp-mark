@@ -11,9 +11,9 @@ import { FormDia, type TratamentoUI } from "./RastreioTratamento";
 const pl = (n: number, s: string, p: string) => `${n} ${n === 1 ? s : p}`;
 
 /**
- * O tratamento na aba Marcos. O que importa aqui é que ESQUECER UM DIA não derruba nada:
- * o "dia do tratamento" segue contando, as etapas já vividas continuam, e só a sequência
- * de tomadas confirmadas recomeça — o dia fica registrado como “não tomei”, sem culpa.
+ * O tratamento na aba Marcos. O contador roda sozinho desde o início, presumindo que você tomou todo dia;
+ * só quando esquece é que você marca o dia. Esquecer não derruba nada: o "dia do tratamento" segue, as
+ * etapas já vividas continuam, e só a contagem de "dias seguidos sem esquecer" recomeça. Sem culpa.
  */
 export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string }) {
   const router = useRouter();
@@ -22,20 +22,23 @@ export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string })
   const [erro, setErro] = useState("");
   const r = t.resumo;
 
-  async function marcar(estado: "tomou" | "nao_tomou") {
+  async function acao(fn: () => ReturnType<typeof chamar>) {
     setOcupado(true);
     setErro("");
-    const res = await chamar(`/api/tratamentos/${t.id}/tomadas`, "POST", { estado });
+    const res = await fn();
     setOcupado(false);
     if (!res.ok) return setErro(res.erro);
     router.refresh();
   }
+  const esqueciHoje = () => acao(() => chamar(`/api/tratamentos/${t.id}/tomadas`, "POST", { estado: "nao_tomou" }));
+  const desfazerHoje = () => acao(() => chamar(`/api/tratamentos/${t.id}/tomadas?dia=${hoje}`, "DELETE"));
 
   const sustentados = t.cartoes.filter((c) => c.estado === "sustentado");
   const destaque = sustentados[sustentados.length - 1];
   const proximo = t.cartoes.find((c) => c.estado !== "sustentado");
   const href = `/temas/${t.medicamentoId}`;
   const ontem = somarDias(hoje, -1);
+  const esqueceuHoje = r.hojeEstado === "nao_tomou";
 
   return (
     <section className="cartao p-5" aria-label={`Tratamento: ${t.nome}`}>
@@ -55,9 +58,10 @@ export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string })
       </Link>
 
       <p className="mt-3 text-[13px] leading-relaxed text-suave">
-        {pl(r.sequenciaConfirmada, "dia seguido", "dias seguidos")} com tomada confirmada · {pl(r.totalRegistrados, "dia", "dias")} com registro
-        {r.diasSemInformacao > 0 && ` · ${pl(r.diasSemInformacao, "dia", "dias")} sem informação`}
+        {pl(r.sequenciaConfirmada, "dia seguido", "dias seguidos")} sem esquecer ·{" "}
+        {r.totalNaoTomou === 0 ? "nenhum esquecimento marcado" : pl(r.totalNaoTomou, "esquecimento marcado", "esquecimentos marcados")}
       </p>
+      <p className="mt-1 text-[12px] leading-relaxed text-apagado">Nos dias sem marcação, o app presume que você tomou.</p>
 
       {destaque && destaque.estado === "sustentado" && (
         <div className="mt-3 rounded-2xl border border-brand/30 bg-brand/[0.07] p-3.5">
@@ -71,7 +75,7 @@ export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string })
         </p>
       )}
 
-      {r.hojeEstado === "nao_tomou" && (
+      {esqueceuHoje && (
         <p className="mt-3 text-[12.5px] leading-relaxed text-apagado">
           Esquecer acontece, e o tratamento segue contando. Não tome dose dobrada para compensar: veja a bula e, na dúvida, fale com seu
           médico ou farmacêutico.
@@ -80,16 +84,17 @@ export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string })
 
       {!aberto ? (
         <div className="mt-4 space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <Botao type="button" variante={r.hojeEstado === "tomou" ? "cheio" : "vazio"} carregando={ocupado} aria-pressed={r.hojeEstado === "tomou"} onClick={() => marcar("tomou")}>
-              Tomei hoje
+          {esqueceuHoje ? (
+            <Botao type="button" variante="vazio" carregando={ocupado} onClick={desfazerHoje} className="w-full">
+              Desfazer: eu tomei hoje
             </Botao>
-            <Botao type="button" variante={r.hojeEstado === "nao_tomou" ? "cheio" : "vazio"} carregando={ocupado} aria-pressed={r.hojeEstado === "nao_tomou"} onClick={() => marcar("nao_tomou")}>
+          ) : (
+            <Botao type="button" variante="vazio" carregando={ocupado} onClick={esqueciHoje} className="w-full">
               Esqueci hoje
             </Botao>
-          </div>
+          )}
           <button type="button" onClick={() => setAberto(true)} className="text-[13.5px] text-suave underline underline-offset-2 active:text-tinta">
-            Esqueci um dia (ou esqueci de registrar)
+            Esqueci outro dia
           </button>
         </div>
       ) : (

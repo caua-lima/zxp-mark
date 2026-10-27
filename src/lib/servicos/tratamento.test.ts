@@ -130,15 +130,19 @@ test("retroativo dentro do período vale; antes do início e no futuro, não", a
   assert.equal((await registrarTomada(db, "ana", t.id, { estado: "tomou", dia: "2026-10-12" }, SP, agora)).ok, false);
 });
 
-test("apagar o registro de um dia o devolve a 'sem informação'; a sequência é recalculada", async () => {
+test("marcar 'esqueci' recomeça a sequência; apagar a marcação a devolve, sem virar 'esqueci'", async () => {
   const { db } = cenario();
   const t = await comTratamento(db);
-  for (const dia of ["2026-10-09", "2026-10-10", "2026-10-11"]) await registrarTomada(db, "ana", t.id, { estado: "tomou", dia }, SP, agora);
-  assert.equal((await carregarTratamento(db, "ana", t.id, SP, agora))?.resumo.sequenciaConfirmada, 3);
+  assert.equal((await carregarTratamento(db, "ana", t.id, SP, agora))?.resumo.sequenciaConfirmada, 30, "presumido: do início até ontem");
+  await registrarTomada(db, "ana", t.id, { estado: "nao_tomou", dia: "2026-10-10" }, SP, agora);
+  const esqueceu = (await carregarTratamento(db, "ana", t.id, SP, agora))!;
+  assert.equal(esqueceu.resumo.sequenciaConfirmada, 0);
+  assert.equal(esqueceu.resumo.totalNaoTomou, 1);
+  assert.equal(esqueceu.resumo.desdeInicio.completos, 30, "o tratamento segue contando");
   assert.ok((await removerTomada(db, "ana", t.id, "2026-10-10")).ok);
   const r = (await carregarTratamento(db, "ana", t.id, SP, agora))!;
-  assert.equal(r.resumo.sequenciaConfirmada, 1);
-  assert.equal(r.resumo.totalNaoTomou, 0, "apagar não vira 'não tomou'");
+  assert.equal(r.resumo.sequenciaConfirmada, 30);
+  assert.equal(r.resumo.totalNaoTomou, 0, "apagar a marcação não vira 'esqueci'");
   assert.equal((await removerTomada(db, "ana", t.id, "2026-10-10")).ok, false, "apagar de novo: não existe");
 });
 
@@ -304,12 +308,12 @@ test("carregar devolve os quatro números, os cartões do tema e o resumo para a
 
   assert.equal(r.resumo.desdeInicio.completos, 30);
   assert.equal(r.resumo.doseAtual?.contagem.completos, 3);
-  assert.equal(r.resumo.sequenciaConfirmada, 10);
+  assert.equal(r.resumo.sequenciaConfirmada, 31, "do início até ontem, mais hoje marcado");
   assert.equal(r.resumo.totalRegistrados, 10);
   assert.equal(r.tema?.id, "escitalopram");
   const dez = r.cartoes.find((c) => c.marco.limiar === 10);
   assert.equal(dez?.estado, "sustentado");
-  assert.equal(dez?.estado === "sustentado" && dez.titulo, "10 dias consecutivos com tomada registrada");
+  assert.equal(dez?.estado === "sustentado" && dez.titulo, "10 dias seguidos sem esquecer");
   assert.match(r.resumoParaConsulta, /Dose atual informada: 15 mg/);
   assert.match(r.resumoParaConsulta, /Horário previsto informado: 08:00/);
 });

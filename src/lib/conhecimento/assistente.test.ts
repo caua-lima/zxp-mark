@@ -18,8 +18,7 @@ const trat = (extra: Partial<DadosTratamento> = {}): DadosTratamento => ({
   desdeInicio: { completos: 30, diaN: 31 },
   dose: { descricao: "15 mg", contagem: { completos: 3, diaN: 4 } },
   sequencia: 10,
-  totalRegistrados: 25,
-  diasSemInformacao: 5,
+  totalNaoTomou: 2,
   efeitos: [{ dia: "2026-10-09", descricao: "enjoo ao acordar" }],
   ...extra,
 });
@@ -58,8 +57,8 @@ test("1) '10 dias tomando escitalopram 15 mg. O que já melhorou?' — não afir
   assert.match(r.texto, /O app não sabe o que melhorou/);
   assert.match(r.texto, /Pelos seus registros: o tratamento \(Escitalopram\) começou há 30 dias completos/);
   assert.match(r.texto, /dose informada atual é 15 mg, há 3 dias completos/);
-  assert.match(r.texto, /10 dias consecutivos com tomada registrada/);
-  assert.match(r.texto, /5 dias sem nenhuma informação/);
+  assert.match(r.texto, /10 dias seguidos sem esquecimento marcado/);
+  assert.match(r.texto, /2 esquecimentos marcados/);
   assert.match(r.texto, /Efeitos que você anotou: enjoo ao acordar \(09\/10\/2026\)/);
   assert.match(r.texto, /Fontes: .*Novartis.*NHS.*MedlinePlus/);
   assert.match(r.texto, /Se algo piorou ou preocupa, fale com o seu médico/);
@@ -79,14 +78,14 @@ test("2) 'Esqueci de registrar ontem. Perdi minha sequência?' — separa regist
   const r = responder("Esqueci de registrar ontem. Perdi minha sequência?", COM)!;
   assert.ok(r);
   assert.match(r.texto, /Você não perdeu o tratamento nem o histórico/);
-  assert.match(r.texto, /Esquecer de registrar não é esquecer de tomar/);
+  assert.match(r.texto, /presume que você tomou/);
   assert.match(r.texto, /Pelos seus registros:/);
   assert.doesNotMatch(r.texto, /perdeu sua sequência|volte a zero|recomece do zero/i);
   regrasGerais(r.texto, "2 com registros");
 
   const sem = responder("Esqueci de registrar ontem. Perdi minha sequência?", SEM)!;
   assert.ok(sem, "mesmo sem permissão a pessoa recebe a resposta geral");
-  assert.match(sem.texto, /Esquecer de registrar não é esquecer de tomar/);
+  assert.match(sem.texto, /presume que você tomou/);
   assert.equal(sem.usouRegistros, false);
   regrasGerais(sem.texto, "2 sem permissão");
 });

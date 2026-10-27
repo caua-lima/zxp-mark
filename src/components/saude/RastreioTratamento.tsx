@@ -114,7 +114,7 @@ function Novo({ tituloTema, hoje }: { tituloTema: string; hoje: string }) {
     return (
       <div className="space-y-3">
         <p className="text-[14px] leading-relaxed text-suave">
-          Se você usa {tituloTema} por prescrição, pode registrar quando começou e se tomou a cada dia. O app guarda o que
+          Se você usa {tituloTema} por prescrição, informe quando começou: o app conta os dias do tratamento e presume que você toma todo dia, e você só marca quando esquecer. O app guarda o que
           você informa; <strong className="font-medium text-tinta">não indica, não ajusta e não avalia dose</strong>.
         </p>
         <Botao type="button" onClick={() => setAberto(true)}>
@@ -253,15 +253,11 @@ function Ativo({ t, hoje }: { t: TratamentoUI; hoje: string }) {
           rotulo="Dia na dose informada"
           detalhe={r.doseAtual ? `${r.doseAtual.descricao}, desde ${diaCurto(r.doseAtual.desdeDia)}` : "nenhuma dose informada"}
         />
-        <Contador valor={String(r.sequenciaConfirmada)} rotulo="Dias seguidos com tomada confirmada" />
-        <Contador
-          valor={String(r.totalRegistrados)}
-          rotulo="Dias com registro"
-          detalhe={r.diasSemInformacao > 0 ? `${pl(r.diasSemInformacao, "dia", "dias")} sem informação` : undefined}
-        />
+        <Contador valor={String(r.sequenciaConfirmada)} rotulo="Dias seguidos sem esquecer" />
+        <Contador valor={String(r.totalNaoTomou)} rotulo="Esquecimentos marcados" />
       </div>
       <p className="text-[12.5px] leading-relaxed text-apagado">
-        São contagens separadas. Mudar de dose não reinicia nenhuma delas, e dias sem informação não contam como tomada.
+        São contagens separadas. Mudar de dose não reinicia nenhuma delas. Nos dias em que você não marcou nada, o app presume que você tomou: o número vale o que você informa.
       </p>
 
       {destaque && destaque.estado === "sustentado" && (
@@ -295,27 +291,18 @@ function Ativo({ t, hoje }: { t: TratamentoUI; hoje: string }) {
 
       <div>
         <p className="text-[13.5px] font-medium">Hoje</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <Botao
-            type="button"
-            variante={r.hojeEstado === "tomou" ? "cheio" : "vazio"}
-            carregando={ocupado}
-            onClick={() => tomada("tomou")}
-            aria-pressed={r.hojeEstado === "tomou"}
-          >
-            Tomei
-          </Botao>
-          <Botao
-            type="button"
-            variante={r.hojeEstado === "nao_tomou" ? "cheio" : "vazio"}
-            carregando={ocupado}
-            onClick={() => tomada("nao_tomou")}
-            aria-pressed={r.hojeEstado === "nao_tomou"}
-          >
-            Não tomei
-          </Botao>
+        <div className="mt-2">
+          {r.hojeEstado === "nao_tomou" ? (
+            <Botao type="button" variante="vazio" carregando={ocupado} className="w-full" onClick={() => acao(() => chamar(`/api/tratamentos/${t.id}/tomadas?dia=${hoje}`, "DELETE"))}>
+              Desfazer: eu tomei hoje
+            </Botao>
+          ) : (
+            <Botao type="button" variante="vazio" carregando={ocupado} className="w-full" onClick={() => tomada("nao_tomou")}>
+              Esqueci hoje
+            </Botao>
+          )}
         </div>
-        {r.hojeEstado === null && <p className="mt-1.5 text-[12.5px] text-apagado">Sem informação para hoje.</p>}
+        <p className="mt-1.5 text-[12.5px] text-apagado">Sem marcação, o app presume que você tomou.</p>
         {r.hojeEstado === "nao_tomou" && (
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-apagado">
             Esquecer acontece. Não tome dose dobrada para compensar; veja a bula e, na dúvida, fale com seu médico ou
@@ -352,15 +339,15 @@ function Ativo({ t, hoje }: { t: TratamentoUI; hoje: string }) {
 
       <div id={`historico-${t.id}`} className="space-y-4">
         <div>
-          <h3 className="text-[13px] font-medium text-tinta">Últimos registros</h3>
+          <h3 className="text-[13px] font-medium text-tinta">Dias que você marcou</h3>
           {t.tomadasRecentes.length === 0 ? (
-            <p className="mt-2 text-[13.5px] text-apagado">Nada registrado ainda.</p>
+            <p className="mt-2 text-[13.5px] text-apagado">Nenhum esquecimento marcado.</p>
           ) : (
             <ul className="mt-2 divide-y divide-borda">
               {t.tomadasRecentes.map((d) => (
                 <li key={d.dia} className="flex items-center justify-between gap-3 py-2 text-[13.5px]">
                   <span className="text-suave">
-                    <span className="numeros text-apagado">{diaCurto(d.dia)}</span> · {d.estado === "tomou" ? "Tomei" : "Não tomei"}
+                    <span className="numeros text-apagado">{diaCurto(d.dia)}</span> · {d.estado === "tomou" ? "Tomei (marcado)" : "Esqueci"}
                   </span>
                   <button
                     type="button"
@@ -640,7 +627,7 @@ export function FormDia({
   const [ocupado, setOcupado] = useState(false);
 
   async function salvar() {
-    if (!estado) return setErro("Escolha “tomei” ou “não tomei”.");
+    if (!estado) return setErro("Escolha o que aconteceu nesse dia.");
     setOcupado(true);
     const r = await chamar(`/api/tratamentos/${id}/tomadas`, "POST", { dia, estado });
     setOcupado(false);
@@ -651,7 +638,7 @@ export function FormDia({
   return (
     <div className="space-y-4 rounded-2xl border border-borda bg-white/[0.03] p-4">
       <p className="text-[13.5px] leading-relaxed text-suave">
-        Esqueceu de registrar? Informe um dia que passou. Registrar o mesmo dia de novo atualiza, não duplica.
+        Esqueceu de tomar em algum dia? Escolha a data. Marcar o mesmo dia de novo atualiza, não duplica; o tratamento e o resto do histórico não mudam.
       </p>
       <CampoDia valor={dia} aoMudar={setDia} min={inicio} max={hoje} rotulo="Dia" />
       <Opcoes
@@ -659,8 +646,8 @@ export function FormDia({
         aoMudar={setEstado}
         rotulo="O que aconteceu"
         opcoes={[
-          { id: "tomou", rotulo: "Tomei" },
-          { id: "nao_tomou", rotulo: "Não tomei" },
+          { id: "tomou", rotulo: "Na verdade tomei" },
+          { id: "nao_tomou", rotulo: "Esqueci" },
         ]}
       />
       <Erro>{erro}</Erro>

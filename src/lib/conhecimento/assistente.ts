@@ -26,9 +26,10 @@ export type DadosTratamento = {
   medicamentoId: string;
   desdeInicio: ContagemDias;
   dose: { descricao: string; contagem: ContagemDias } | null;
+  /** dias seguidos sem esquecimento marcado (o app presume tomada nos dias sem marcação) */
   sequencia: number;
-  totalRegistrados: number;
-  diasSemInformacao: number;
+  /** dias que a pessoa marcou como esquecidos */
+  totalNaoTomou: number;
   efeitos: { dia: string; descricao: string }[];
 };
 
@@ -86,9 +87,8 @@ function registrosDoTratamento(t: DadosTratamento): string {
     t.dose
       ? `a dose informada atual é ${t.dose.descricao}, há ${dias(t.dose.contagem.completos)} completos`
       : "você não informou dose",
-    `${dias(t.sequencia)} consecutivos com tomada registrada`,
-    `${dias(t.totalRegistrados)} registrados no total`,
-    `${dias(t.diasSemInformacao)} sem nenhuma informação`,
+    `${dias(t.sequencia)} seguidos sem esquecimento marcado (o app presume que você tomou nos dias sem marcação)`,
+    `${t.totalNaoTomou} ${t.totalNaoTomou === 1 ? "esquecimento marcado" : "esquecimentos marcados"}`,
   ];
   return `Pelos seus registros: ${partes.join("; ")}.`;
 }

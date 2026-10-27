@@ -164,20 +164,20 @@ test("escitalopram: citalopram é OUTRO medicamento e nunca cai neste tema", () 
 test("escitalopram: os marcos são dias 1, 3, 7, 10, 14, 21, 30, 42 e 60", () => {
   assert.deepEqual(esc.marcos.map((m) => m.limiar), [1, 3, 7, 10, 14, 21, 30, 42, 60]);
   for (const m of esc.marcos) {
-    assert.match(m.tituloSemRegistro, /desde o início informado/);
+    assert.match(m.tituloSemRegistro, /de tratamento$/);
     assert.ok(m.acoes.length > 0 && !m.acoes.includes("nenhuma"), m.chave);
   }
 });
 
-test("escitalopram: o marco de 10 dias é exatamente o do briefing, com as duas ações", () => {
+test("escitalopram: o marco de 10 dias (modelo presumido) diz 'conforme você informou' e não promete resposta", () => {
   const m = esc.marcos.find((x) => x.chave === "10d")!;
-  assert.equal(m.titulo, "10 dias consecutivos com tomada registrada");
+  assert.equal(m.titulo, "10 dias seguidos sem esquecer");
   assert.equal(
     m.texto,
-    "Você registrou a tomada por 10 dias seguidos. O efeito do escitalopram pode levar várias semanas; este marco, sozinho, não determina sua resposta ao tratamento. Como ficaram seu humor, sono e bem-estar nesse período?"
+    "Você não registrou esquecimento em 10 dias seguidos: conforme você informou, tomou todos os dias. O efeito do escitalopram pode levar várias semanas; este marco, sozinho, não determina sua resposta ao tratamento. Como ficaram seu humor, sono e bem-estar nesse período?"
   );
   assert.deepEqual(m.acoes, ["registrar-como-estou", "ver-historico"]);
-  assert.equal(m.tituloSemRegistro, "10 dias desde o início informado");
+  assert.equal(m.tituloSemRegistro, "10 dias de tratamento");
 });
 
 test("escitalopram: nenhuma das afirmações proibidas aparece em lugar nenhum", () => {
@@ -215,11 +215,12 @@ test("escitalopram: esquecimento de dose segue a bula brasileira e não calcula 
   assert.deepEqual(f.fontes, ["bula-escitalopram-br"]);
 });
 
-test("escitalopram: 'esqueci de registrar' separa registro de tratamento e não ameaça a sequência", () => {
+test("escitalopram: 'esqueci um dia' separa o esquecimento do tratamento e não ameaça a sequência", () => {
   const f = esc.faq.find((x) => x.id === "esqueci-de-registrar")!;
   assert.match(f.resposta, /não perdeu o tratamento nem o histórico/i);
-  assert.match(f.resposta, /Esquecer de registrar não é esquecer de tomar/);
-  assert.match(f.resposta, /recalculada/);
+  assert.match(f.resposta, /presume que você tomou/);
+  assert.match(f.resposta, /Esqueci um dia/);
+  assert.match(f.resposta, /não é falha/);
 });
 
 test("escitalopram: 'mudei a dose' mantém as duas datas separadas e não recalcula previsão", () => {
