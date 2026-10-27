@@ -48,13 +48,6 @@ export default async function PaginaMarcos() {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            href="/temas"
-            className="flex size-11 items-center justify-center rounded-full border border-borda bg-white/[0.04] text-lg active:bg-white/[0.08]"
-            aria-label="Temas e acompanhamentos"
-          >
-            📚
-          </Link>
-          <Link
             href="/conquistas"
             className="flex size-11 items-center justify-center rounded-full border border-borda bg-white/[0.04] text-lg active:bg-white/[0.08]"
             aria-label="Conquistas"

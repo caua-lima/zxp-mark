@@ -258,14 +258,14 @@ export function responderComConhecimento(
           if (dados.cruzamentoHumorSono && faq?.id === "dez-dias-o-que-melhorou") blocos.push(dados.cruzamentoHumorSono);
         }
       } else if (SOBRE_TRATAMENTO.test(t)) {
-        blocos.push(`Você ainda não registrou nenhum acompanhamento de ${tema.titulo} no app, então eu não tenho números seus para citar. Se quiser, comece o registro na aba Marcos → Temas.`);
+        blocos.push(`Você ainda não registrou nenhum acompanhamento de ${tema.titulo} no app, então eu não tenho números seus para citar. Se quiser, crie um marco de remédio na aba Marcos.`);
       }
     } else if (tema.rastreio.tipo === "episodios") {
       if (dados.unhas) {
         blocos.push(registrosDeUnhas(dados.unhas));
         usouRegistros = true;
       } else if (/\b(meu|minha|estou|roi|perdi|progresso)\b/.test(t)) {
-        blocos.push("Você ainda não começou o acompanhamento de unhas no app, então eu não tenho números seus. Dá para começar em Marcos → Temas.");
+        blocos.push("Você ainda não começou o acompanhamento de unhas no app, então eu não tenho números seus. Dá para começar criando um marco de “Parar de roer unhas” na aba Marcos.");
       }
     }
   }

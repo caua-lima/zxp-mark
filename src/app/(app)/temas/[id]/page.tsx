@@ -64,11 +64,26 @@ function Atalho({ texto, href, rotulo }: { texto: string; href: string; rotulo: 
 
 export default async function PaginaTema({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tema = temaPorId(id);
-  if (!tema) notFound();
-
   const uid = (await sessaoValida())!;
   const tz = await fusoDoUsuario(uid);
+
+  // Remédio que não está no catálogo: só o acompanhamento, sem conteúdo educativo.
+  if (id === "outro") {
+    return (
+      <main className="pb-6">
+        <Link href="/marcos" className="mb-3 inline-block text-[13px] text-apagado active:text-suave">
+          ← Marcos
+        </Link>
+        <h1 className="mb-4 text-[26px] font-semibold tracking-tight">Remédios</h1>
+        <div className="cartao p-5">
+          <RastreioTratamento tituloTema="o remédio" dados={await dadosTratamento(uid, "outro", tz)} />
+        </div>
+      </main>
+    );
+  }
+
+  const tema = temaPorId(id);
+  if (!tema) notFound();
 
   let progresso: React.ReactNode;
   if (tema.rastreio.tipo === "episodios") {
@@ -89,8 +104,8 @@ export default async function PaginaTema({ params }: { params: Promise<{ id: str
 
   return (
     <main className="pb-6">
-      <Link href="/temas" className="mb-3 inline-block text-[13px] text-apagado active:text-suave">
-        ← Temas
+      <Link href="/marcos" className="mb-3 inline-block text-[13px] text-apagado active:text-suave">
+        ← Marcos
       </Link>
       <TemaConteudo tema={tema} progresso={progresso} />
     </main>

@@ -34,7 +34,7 @@ export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string })
   const sustentados = t.cartoes.filter((c) => c.estado === "sustentado");
   const destaque = sustentados[sustentados.length - 1];
   const proximo = t.cartoes.find((c) => c.estado !== "sustentado");
-  const href = t.medicamentoId === "outro" ? "/temas" : `/temas/${t.medicamentoId}`;
+  const href = `/temas/${t.medicamentoId}`;
   const ontem = somarDias(hoje, -1);
 
   return (
@@ -98,6 +98,10 @@ export function CartaoTratamento({ t, hoje }: { t: TratamentoUI; hoje: string })
         </div>
       )}
       <Erro>{erro}</Erro>
+
+      <Link href={href} className="mt-3 block text-[13px] text-apagado active:text-suave">
+        Dose, efeitos, lembrete e resumo para a consulta ›
+      </Link>
     </section>
   );
 }

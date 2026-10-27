@@ -245,7 +245,7 @@ src/lib/senha.ts          scrypt puro, compartilhado com os scripts de CLI
 src/lib/auth.ts           JWT e sessão
 src/lib/admin.ts          guarda de rota para as ações de admin
 scripts/criar-acesso.mjs  cria o primeiro admin direto no banco
-src/app/(app)/            as abas (marcos, contagem, ajuda, acesso, perfil) + conquistas, sono e temas
+src/app/(app)/            as abas (marcos, contagem, ajuda, acesso, perfil) + conquistas e sono; `temas/[id]` é a página “saiba mais” de um marco (benefícios, fontes) e o acompanhamento de remédio
 src/app/offline/          tela util quando nao ha conexao
 src/app/api/              rotas
 ```

@@ -395,7 +395,7 @@ export async function processarUsuario(userId: string, agora = new Date()): Prom
         refId: t.id,
         chave: `med-${hoje}`,
         ciclo: EPOCH,
-        payload: { ...texto, url: t.medicamentoId === "outro" ? "/temas" : `/temas/${t.medicamentoId}`, tag: `med-${t.id}`, acoes: [{ acao: "abrir", titulo: "Abrir o app" }] },
+        payload: { ...texto, url: `/temas/${t.medicamentoId}`, tag: `med-${t.id}`, acoes: [{ acao: "abrir", titulo: "Abrir o app" }] },
         registro: neutro,
       });
       if (ok) {
