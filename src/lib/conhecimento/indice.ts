@@ -113,13 +113,16 @@ export function reconhecer(texto: string, temas: Tema[]): Reconhecimento {
 
 /* --------------------------------- busca ---------------------------------- */
 
-export type ResultadoBusca = { tema: Tema; pontos: number };
+/** O que a busca lê de um tema: permite buscar em resumos sem carregar o conteúdo todo. */
+export type TemaBuscavel = Pick<Tema, "titulo" | "nomesAlternativos" | "termos" | "padroes">;
 
-export function buscar(consulta: string, temas: Tema[]): ResultadoBusca[] {
+export type ResultadoBusca<T extends TemaBuscavel = Tema> = { tema: T; pontos: number };
+
+export function buscar<T extends TemaBuscavel>(consulta: string, temas: T[]): ResultadoBusca<T>[] {
   const q = normalizar(consulta);
   if (!q) return [];
   const qs = tokens(consulta);
-  const resultados: ResultadoBusca[] = [];
+  const resultados: ResultadoBusca<T>[] = [];
 
   for (const tema of temas) {
     let pontos = 0;
