@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Botao, Brilho, Chave, Icone, Secao, SeletorHora } from "@/components/ui";
 import { CartaoNotificacoes } from "@/components/Push";
 import { MarcaZ } from "@/components/Marca";
+import { CartaoAssistenteSaude } from "@/components/CartaoAssistenteSaude";
 
 export type Preferencias = {
   nome: string;
@@ -21,7 +22,15 @@ export type Preferencias = {
 
 export type Motor = { id: string; rotulo: string; modelo: string; gratuito: boolean };
 
-export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor }) {
+export function Perfil({
+  inicial,
+  motor,
+  assistenteUsaSaude,
+}: {
+  inicial: Preferencias;
+  motor: Motor;
+  assistenteUsaSaude: boolean;
+}) {
   const router = useRouter();
   const [prefs, setPrefs] = useState(inicial);
   const [salvo, setSalvo] = useState(false);
@@ -130,6 +139,12 @@ export function Perfil({ inicial, motor }: { inicial: Preferencias; motor: Motor
       <Secao titulo="Ajustes" className="pt-3" />
 
       <CartaoMotor motor={motor} />
+
+      <CartaoAssistenteSaude
+        inicial={assistenteUsaSaude}
+        provedorExterno={motor.id !== "local"}
+        rotuloProvedor={motor.rotulo}
+      />
 
       <section className="cartao p-5">
         <h2 className="text-[15px] font-semibold">Fuso horário</h2>
