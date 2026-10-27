@@ -329,3 +329,21 @@ export function secaoParaModelo(pergunta: string, dados: DadosSaude): string {
   return partes.join("\n\n");
 }
 
+
+/**
+ * Que registros a pergunta PRECISA? O carregador só busca o que aparece aqui:
+ * minimização de dados — uma pergunta sobre unhas não puxa medicamento, e uma sobre
+ * medicamento não puxa unhas.
+ */
+export function intencoes(pergunta: string): { tratamento: boolean; unhas: boolean; sonoHumor: boolean } {
+  const t = normalizar(pergunta);
+  const r = reconhecer(pergunta, TEMAS);
+  const id = r?.tipo === "exato" ? r.tema.id : null;
+  return {
+    tratamento: id === "escitalopram" || SOBRE_TRATAMENTO.test(t),
+    unhas: id === "unhas" || SOBRE_UNHAS.test(t),
+    // sono e humor entram quando a pergunta fala deles, ou quando pergunta "o que melhorou"
+    // de um tratamento (a resposta sobre sono/humor é só descritiva).
+    sonoHumor: SOBRE_SONO_HUMOR.test(t) || (id === "escitalopram" && /\b(melhor\w*|pior\w*)\b/.test(t)),
+  };
+}

@@ -5,6 +5,8 @@ import { usuarioId } from "@/lib/auth";
 import { emTexto, retratoDoUsuario } from "@/lib/ia/contexto";
 import { sistemaCompleto } from "@/lib/ia/instrucoes";
 import { alertaDeCrise, responderLocal } from "@/lib/ia/local";
+import { carregarDadosSaude } from "@/lib/ia/dados-saude";
+import { responderComConhecimento, secaoParaModelo, type DadosSaude } from "@/lib/conhecimento/assistente";
 import { provedorAtivo, transmitir, type Turno } from "@/lib/ia/provedores";
 
 export const runtime = "nodejs";
@@ -47,6 +49,13 @@ export async function POST(req: Request) {
 
   await prisma.mensagem.create({ data: { userId: uid, papel: "user", conteudo: pergunta } });
 
+  // Registros de saúde: só os que a pergunta precisa, e só se a pessoa ligou "Assistente e
+  // saúde". Qualquer falha aqui vira "sem registros" — a conversa nunca cai por causa disso.
+  const dadosSaude: DadosSaude = await carregarDadosSaude(uid, pergunta, retrato.timezone).catch((e) => {
+    console.warn("[chat] dados de saúde indisponíveis:", (e as Error).message);
+    return { autorizado: false };
+  });
+
   const turnos: Turno[] = historico
     .reverse()
     .map((m) => ({ papel: m.papel === "user" ? ("user" as const) : ("assistant" as const), conteudo: m.conteudo }))
@@ -65,7 +74,10 @@ export async function POST(req: Request) {
 
       /** Motor local: sai em pedaços para dar a sensação de digitação. */
       const local = async () => {
-        const texto = responderLocal(retrato, pergunta, { turno: historico.length });
+        // O conhecimento verificado (unhas, medicamento...) responde primeiro; o motor de
+        // hábitos de sempre cobre o resto. As duas saídas obedecem às mesmas regras.
+        const conhecimento = responderComConhecimento(pergunta, dadosSaude, { turno: historico.length });
+        const texto = conhecimento?.texto ?? responderLocal(retrato, pergunta, { turno: historico.length });
         const pedacos = texto.match(/\S+\s*|\n/g) ?? [texto];
         for (let i = 0; i < pedacos.length; i += 3) {
           emitir(pedacos.slice(i, i + 3).join(""));
@@ -83,7 +95,11 @@ export async function POST(req: Request) {
         } else if (provedor.id === "local") {
           await local();
         } else {
-          const sistema = sistemaCompleto(emTexto(retrato));
+          // Além do retrato de sempre, vão ao modelo as regras de saúde e SÓ o conhecimento e os
+          // registros da pergunta — nunca o histórico de saúde inteiro.
+          const sistema = sistemaCompleto(`${emTexto(retrato)}
+
+${secaoParaModelo(pergunta, dadosSaude)}`);
           try {
             for await (const pedaco of transmitir(provedor, sistema, turnos)) emitir(pedaco);
             // Provedor respondeu vazio (limite diário, filtro, modelo errado).
