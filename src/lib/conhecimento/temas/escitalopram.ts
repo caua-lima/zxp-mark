@@ -440,7 +440,7 @@ export const escitalopram: Tema = {
   ],
 
   limites: [
-    "A dose que você informa (20 mg ou qualquer outra) é um dado do seu acompanhamento: o app não a recomenda, não a avalia e não a compara com outras.",
+    "A dose que você informa, qualquer que seja, é um dado do seu acompanhamento: o app não a recomenda, não a avalia e não a compara com outras.",
     "O app não recomenda começar, aumentar, reduzir ou suspender o medicamento, nem mudar o horário por conta própria.",
     "Dias de tomada registrados mostram regularidade de REGISTRO, não resposta ao tratamento.",
     "O app não sabe se um sintoma vem do medicamento, da condição ou de outra coisa, e não afirma causa a partir de coincidência no tempo.",

@@ -199,9 +199,9 @@ test("escitalopram: nenhuma das afirmações proibidas aparece em lugar nenhum",
 
 test("escitalopram: nenhuma dose nem dado pessoal mora no catálogo", () => {
   const tudo = JSON.stringify(esc);
-  // as únicas menções a miligramas são exemplos de limite ("20 mg ou qualquer outra") e comprimidos de bula
+  // A dose é DADO DO USUÁRIO: o catálogo não cita nenhum valor, nem como exemplo.
   const mencoes = tudo.match(/\d+ ?mg/gi) ?? [];
-  assert.ok(mencoes.length <= 1, `menções a dose: ${mencoes.join(", ")}`);
+  assert.deepEqual(mencoes, [], `menções a dose no catálogo: ${mencoes.join(", ")}`);
   assert.doesNotMatch(tudo, /@|senha|cpf/i);
   assert.match(esc.limites.join(" "), /dado do seu acompanhamento/);
 });

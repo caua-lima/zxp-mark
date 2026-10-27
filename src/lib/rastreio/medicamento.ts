@@ -223,7 +223,7 @@ export type DoseValida = { descricao: string; mg: number | null; desde: Date; no
  */
 export function validarDose(e: EntradaDose, inicio: Date | string, agora: number, tz: string): Resultado<DoseValida> {
   const descricao = (e.descricao ?? "").trim();
-  if (descricao.length < 1) return { ok: false, erro: "Informe a dose como está na sua prescrição (ex.: 20 mg)." };
+  if (descricao.length < 1) return { ok: false, erro: "Informe a dose como está na sua prescrição (ex.: 10 mg)." };
   if (descricao.length > 40) return { ok: false, erro: "A dose aceita até 40 caracteres." };
   const mg = e.mg ?? null;
   if (mg !== null && (!Number.isFinite(mg) || mg <= 0 || mg > 1000)) return { ok: false, erro: "Informe a quantidade em mg, se quiser." };

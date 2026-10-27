@@ -239,7 +239,7 @@ test("citalopram NUNCA é tratado como escitalopram, nem como erro de digitaçã
 });
 
 test("o nome certo é reconhecido como exato, inclusive o composto e a marca", () => {
-  for (const f of ["escitalopram", "oxalato de escitalopram 20mg", "Lexapro"]) {
+  for (const f of ["escitalopram", "oxalato de escitalopram 10mg", "Lexapro"]) {
     const r = reconhecer(f, catalogo);
     assert.equal(r?.tipo, "exato", f);
   }

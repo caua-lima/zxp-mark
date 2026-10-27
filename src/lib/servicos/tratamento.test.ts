@@ -67,7 +67,7 @@ test("citalopram NUNCA vira escitalopram, nem confirmando: fica como 'outro', co
 
 test("início do tratamento e início da dose atual são coisas diferentes, e a dose é opcional", async () => {
   const { mem, db } = cenario();
-  const t = await comTratamento(db, "ana", { dose: { descricao: "20 mg", mg: 20, desde: "2026-10-08" } });
+  const t = await comTratamento(db, "ana", { dose: { descricao: "15 mg", mg: 15, desde: "2026-10-08" } });
   assert.equal(t.inicio.toISOString(), "2026-09-11T03:00:00.000Z");
   assert.equal((mem.doseTratamento.linhas[0].desde as Date).toISOString(), "2026-10-08T03:00:00.000Z");
   assert.notEqual(
@@ -150,12 +150,12 @@ test("mudar a dose ACRESCENTA ao histórico e não mexe em mais nada", async () 
   for (let d = 1; d <= 10; d++) await registrarTomada(db, "ana", t.id, { estado: "tomou", dia: `2026-10-${String(d + 1).padStart(2, "0")}` }, SP, agora);
   const antes = (await carregarTratamento(db, "ana", t.id, SP, agora))!;
 
-  const nova = await registrarDose(db, "ana", t.id, { descricao: "20 mg", mg: 20, desde: "2026-10-08" }, SP, agora);
+  const nova = await registrarDose(db, "ana", t.id, { descricao: "15 mg", mg: 15, desde: "2026-10-08" }, SP, agora);
   assert.ok(nova.ok && !nova.valor.repetida);
   const depois = (await carregarTratamento(db, "ana", t.id, SP, agora))!;
 
   assert.equal(depois.doses.length, 2, "as duas doses ficam no histórico");
-  assert.equal(depois.resumo.doseAtual?.descricao, "20 mg");
+  assert.equal(depois.resumo.doseAtual?.descricao, "15 mg");
   assert.equal(depois.resumo.doseAtual?.contagem.completos, 3);
   // nada mais mudou:
   assert.equal(depois.resumo.desdeInicio.completos, antes.resumo.desdeInicio.completos);
@@ -169,8 +169,8 @@ test("mudar a dose ACRESCENTA ao histórico e não mexe em mais nada", async () 
 test("informar a mesma dose duas vezes não duplica; dose antes do início é recusada", async () => {
   const { mem, db } = cenario();
   const t = await comTratamento(db);
-  const a = await registrarDose(db, "ana", t.id, { descricao: "20 mg", desde: "2026-10-08" }, SP, agora);
-  const b = await registrarDose(db, "ana", t.id, { descricao: "20 mg", desde: "2026-10-08" }, SP, agora);
+  const a = await registrarDose(db, "ana", t.id, { descricao: "15 mg", desde: "2026-10-08" }, SP, agora);
+  const b = await registrarDose(db, "ana", t.id, { descricao: "15 mg", desde: "2026-10-08" }, SP, agora);
   assert.ok(a.ok && b.ok);
   assert.equal(b.ok && b.valor.repetida, true);
   assert.equal(mem.doseTratamento.linhas.length, 1);
@@ -180,7 +180,7 @@ test("informar a mesma dose duas vezes não duplica; dose antes do início é re
 test("o app não julga a dose: qualquer valor plausível informado é guardado como informado", async () => {
   const { mem, db } = cenario();
   const t = await comTratamento(db);
-  for (const [i, d] of ["5 mg", "10 mg", "20 mg", "40 mg"].entries()) {
+  for (const [i, d] of ["5 mg", "10 mg", "15 mg", "40 mg"].entries()) {
     assert.ok((await registrarDose(db, "ana", t.id, { descricao: d, desde: `2026-10-0${i + 1}` }, SP, agora)).ok, d);
   }
   assert.equal(mem.doseTratamento.linhas.length, 4);
@@ -189,7 +189,7 @@ test("o app não julga a dose: qualquer valor plausível informado é guardado c
 test("corrigir uma dose digitada errada: apagar só aquela linha do histórico", async () => {
   const { mem, db } = cenario();
   const t = await comTratamento(db);
-  const a = await registrarDose(db, "ana", t.id, { descricao: "20 mg", desde: "2026-10-01" }, SP, agora);
+  const a = await registrarDose(db, "ana", t.id, { descricao: "15 mg", desde: "2026-10-01" }, SP, agora);
   await registrarDose(db, "ana", t.id, { descricao: "10 mg", desde: "2026-10-05" }, SP, agora);
   assert.ok((await removerDose(db, "ana", a.ok ? a.valor.dose.id : "")).ok);
   assert.deepEqual(mem.doseTratamento.linhas.map((l) => l.descricao), ["10 mg"]);
@@ -212,7 +212,7 @@ test("registrar e apagar efeitos indesejados; o app guarda e não interpreta", a
 
 test("outra pessoa não vê, não registra, não edita, não apaga e não lê o resumo do tratamento alheio", async () => {
   const { mem, db } = cenario();
-  const t = await comTratamento(db, "dona", { dose: { descricao: "20 mg", mg: 20, desde: "2026-10-08" } });
+  const t = await comTratamento(db, "dona", { dose: { descricao: "15 mg", mg: 15, desde: "2026-10-08" } });
   await registrarTomada(db, "dona", t.id, { estado: "tomou", nota: "privado" }, SP, agora);
   const e = await registrarEfeito(db, "dona", t.id, { descricao: "dor de cabeça" }, SP, agora);
   const antes = JSON.stringify([mem.tratamento.linhas, mem.doseTratamento.linhas, mem.tomadaDia.linhas, mem.efeitoRegistrado.linhas]);
@@ -285,7 +285,7 @@ test("arquivar para o lembrete e bloqueia novos registros, mas preserva o histó
 
 test("apagar o tratamento apaga TUDO que pende dele — e só dele", async () => {
   const { mem, db } = cenario();
-  const a = await comTratamento(db, "ana", { dose: { descricao: "20 mg" } });
+  const a = await comTratamento(db, "ana", { dose: { descricao: "15 mg" } });
   const b = await comTratamento(db, "bia", { dose: { descricao: "10 mg" } });
   await registrarTomada(db, "ana", a.id, { estado: "tomou" }, SP, agora);
   await registrarEfeito(db, "ana", a.id, { descricao: "enjoo" }, SP, agora);
@@ -298,7 +298,7 @@ test("apagar o tratamento apaga TUDO que pende dele — e só dele", async () =>
 
 test("carregar devolve os quatro números, os cartões do tema e o resumo para a consulta", async () => {
   const { db } = cenario();
-  const t = await comTratamento(db, "ana", { dose: { descricao: "20 mg", mg: 20, desde: "2026-10-08" }, horario: "08:00" });
+  const t = await comTratamento(db, "ana", { dose: { descricao: "15 mg", mg: 15, desde: "2026-10-08" }, horario: "08:00" });
   for (let d = 2; d <= 11; d++) await registrarTomada(db, "ana", t.id, { estado: "tomou", dia: `2026-10-${String(d).padStart(2, "0")}` }, SP, agora);
   const r = (await carregarTratamento(db, "ana", t.id, SP, agora))!;
 
@@ -310,7 +310,7 @@ test("carregar devolve os quatro números, os cartões do tema e o resumo para a
   const dez = r.cartoes.find((c) => c.marco.limiar === 10);
   assert.equal(dez?.estado, "sustentado");
   assert.equal(dez?.estado === "sustentado" && dez.titulo, "10 dias consecutivos com tomada registrada");
-  assert.match(r.resumoParaConsulta, /Dose atual informada: 20 mg/);
+  assert.match(r.resumoParaConsulta, /Dose atual informada: 15 mg/);
   assert.match(r.resumoParaConsulta, /Horário previsto informado: 08:00/);
 });
 

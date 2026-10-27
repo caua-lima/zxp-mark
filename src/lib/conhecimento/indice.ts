@@ -6,7 +6,7 @@
 import type { Afirmacao, Estrategia, Faq, SinalDeAjuda, Tema } from "./tipos.ts";
 
 const STOPWORDS = new Set(
-  "a o as os um uma uns umas de do da dos das em no na nos nas por para pra com sem e ou mas que se eu me meu minha meus minhas voce vc tu ele ela isso isto esse essa esta este ja mais muito pouco como qual quais quando onde porque ser estou esta estao foi vai vou tem tenho ter ha mesmo so tambem ainda".split(
+  "a o as os um uma uns umas de do da dos das em no na nos nas por para pra com sem e ou mas que se eu me meu minha meus minhas voce vc tu ele ela isso isto esse essa esta este ja mais muito pouco como qual quais quando onde porque ser estou esta estao foi vai vou tem tenho ter ha mesmo so tambem ainda quanto quantos quanta quantas media".split(
     " "
   )
 );
@@ -158,17 +158,28 @@ export type Selecao = {
   alerta: boolean;
 };
 
-function pontuar(pergunta: string, frases: string[], extra = ""): number {
+/**
+ * Raiz aproximada para casar flexões do português ("recuperar" / "recuperaram",
+ * "esquecer" / "esqueci"): palavras de 7+ letras comparam pelas 6 primeiras.
+ */
+const raiz = (w: string) => (w.length >= 7 ? w.slice(0, 6) : w);
+
+/** Abaixo disto, a coincidência é acaso (uma palavra solta) e o item não é devolvido. */
+const RELEVANCIA_MINIMA = 2;
+
+function pontuar(pergunta: string, frases: string[], extra = "", ignorar: Set<string> = new Set()): number {
   const qn = normalizar(pergunta);
-  const qs = new Set(tokens(pergunta));
+  // O nome do próprio tema não diz QUAL pergunta é: ignorá-lo evita que
+  // "escitalopram engorda?" seja respondido com outra pergunta que também tem "escitalopram".
+  const qs = new Set(tokens(pergunta).filter((w) => !ignorar.has(w)).map(raiz));
   let p = 0;
   for (const f of frases) {
     const fn = normalizar(f);
     if (!fn) continue;
     if (contemFrase(qn, fn)) p += 4;
-    else for (const w of tokens(f)) if (qs.has(w)) p += 1;
+    else for (const w of tokens(f)) if (qs.has(raiz(w))) p += 1;
   }
-  for (const w of tokens(extra)) if (qs.has(w)) p += 0.5;
+  for (const w of tokens(extra)) if (qs.has(raiz(w))) p += 0.5;
   return p;
 }
 
@@ -178,24 +189,25 @@ function pontuar(pergunta: string, frases: string[], extra = ""): number {
  */
 export function selecionar(tema: Tema, pergunta: string, max = 3): Selecao {
   const alerta = PALAVRAS_DE_ALERTA.test(normalizar(pergunta));
+  const nomeDoTema = new Set([...tokens(tema.titulo), ...tema.nomesAlternativos.flatMap(tokens)]);
 
   const faq = tema.faq
-    .map((f) => ({ f, p: pontuar(pergunta, f.termos, f.pergunta) }))
-    .filter((x) => x.p > 0)
+    .map((f) => ({ f, p: pontuar(pergunta, f.termos, f.pergunta, nomeDoTema) }))
+    .filter((x) => x.p >= RELEVANCIA_MINIMA)
     .sort((a, b) => b.p - a.p)
     .slice(0, max)
     .map((x) => x.f);
 
   const estrategias = tema.estrategias
-    .map((e) => ({ e, p: pontuar(pergunta, e.quando ?? [], `${e.titulo} ${e.texto}`) }))
-    .filter((x) => x.p > 0)
+    .map((e) => ({ e, p: pontuar(pergunta, e.quando ?? [], `${e.titulo} ${e.texto}`, nomeDoTema) }))
+    .filter((x) => x.p >= RELEVANCIA_MINIMA)
     .sort((a, b) => b.p - a.p)
     .slice(0, max)
     .map((x) => x.e);
 
   const beneficios = tema.beneficios
-    .map((b) => ({ b, p: pontuar(pergunta, [], b.texto) }))
-    .filter((x) => x.p > 0)
+    .map((b) => ({ b, p: pontuar(pergunta, [], b.texto, nomeDoTema) }))
+    .filter((x) => x.p >= RELEVANCIA_MINIMA)
     .sort((a, b) => b.p - a.p)
     .slice(0, max)
     .map((x) => x.b);

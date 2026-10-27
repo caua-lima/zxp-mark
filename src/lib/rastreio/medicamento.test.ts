@@ -37,12 +37,12 @@ const resumo = (t: TomadaRegistro[], d: DoseRegistro[] = [], inicio: Date = INIC
 test("tratamento há um mês e dose há 3 dias: são DUAS contagens, e a mudança de dose não reinicia nada", () => {
   const doses: DoseRegistro[] = [
     { descricao: "10 mg", mg: 10, desde: INICIO },
-    { descricao: "20 mg", mg: 20, desde: DOSE_NOVA },
+    { descricao: "15 mg", mg: 15, desde: DOSE_NOVA },
   ];
   const r = resumo(tomou(dias("2026-09-11", "2026-10-11")), doses);
 
   assert.equal(r.desdeInicio.completos, 30);
-  assert.equal(r.doseAtual?.descricao, "20 mg");
+  assert.equal(r.doseAtual?.descricao, "15 mg");
   assert.equal(r.doseAtual?.contagem.completos, 3);
   assert.equal(r.doseAtual?.desdeDia, "2026-10-08");
   // a sequência e o total vêm dos REGISTROS, e continuam intactos:
@@ -55,7 +55,7 @@ test("mudar de dose não altera sequência, total, dias sem informação nem os 
   const semDose = resumo(t, []);
   const comMudanca = resumo(t, [
     { descricao: "10 mg", desde: INICIO },
-    { descricao: "20 mg", desde: DOSE_NOVA },
+    { descricao: "15 mg", desde: DOSE_NOVA },
   ]);
   for (const k of ["sequenciaConfirmada", "totalRegistrados", "totalTomou", "diasSemInformacao"] as const) {
     assert.equal(comMudanca[k], semDose[k], k);
@@ -74,10 +74,10 @@ test("sem nenhuma dose informada, não se presume dose nenhuma", () => {
 test("a dose vigente é a de maior 'desde' que JÁ começou; dose futura ainda não vale", () => {
   const doses: DoseRegistro[] = [
     { descricao: "10 mg", desde: INICIO },
-    { descricao: "20 mg", desde: DOSE_NOVA },
+    { descricao: "15 mg", desde: DOSE_NOVA },
     { descricao: "5 mg", desde: instanteLocal("2026-10-20", SP)! }, // futura
   ];
-  assert.equal(doseVigente(doses, agora)?.descricao, "20 mg");
+  assert.equal(doseVigente(doses, agora)?.descricao, "15 mg");
   assert.equal(doseVigente([], agora), null);
   assert.equal(doseVigente([{ descricao: "5 mg", desde: instanteLocal("2026-10-20", SP)! }], agora), null);
 });
@@ -221,20 +221,20 @@ test("tomada: estado inválido, horário inválido e nota longa são recusados; 
 
 test("dose: informada, nunca avaliada; não pode começar antes do tratamento, nem no futuro", () => {
   const v = (e: Parameters<typeof validarDose>[0]) => validarDose(e, INICIO, agora, SP);
-  const ok = v({ descricao: " 20 mg ", mg: 20, desde: "2026-10-08" });
+  const ok = v({ descricao: " 15 mg ", mg: 15, desde: "2026-10-08" });
   assert.ok(ok.ok);
-  assert.equal(ok.ok && ok.valor.descricao, "20 mg");
+  assert.equal(ok.ok && ok.valor.descricao, "15 mg");
   assert.equal(ok.ok && ok.valor.desde.toISOString(), "2026-10-08T03:00:00.000Z");
   // o app não julga a dose: aceita qualquer número positivo plausível, inclusive "menor" ou "maior"
   assert.ok(v({ descricao: "5 mg", mg: 5, desde: "2026-10-08" }).ok);
   assert.ok(v({ descricao: "40 mg", mg: 40, desde: "2026-10-08" }).ok);
   assert.ok(v({ descricao: "meio comprimido", desde: "2026-10-08" }).ok);
   assert.equal(v({ descricao: "", desde: "2026-10-08" }).ok, false);
-  assert.equal(v({ descricao: "20 mg", mg: -5, desde: "2026-10-08" }).ok, false);
+  assert.equal(v({ descricao: "15 mg", mg: -5, desde: "2026-10-08" }).ok, false);
   const antes = v({ descricao: "10 mg", desde: "2026-09-01" });
   assert.equal(antes.ok, false);
   assert.match(antes.ok ? "" : antes.erro, /não pode começar antes do início informado do tratamento/);
-  assert.equal(v({ descricao: "20 mg", desde: "2026-10-30" }).ok, false);
+  assert.equal(v({ descricao: "15 mg", desde: "2026-10-30" }).ok, false);
 });
 
 test("efeito: descrição curta recusada, intensidade só 1 a 3, dia dentro do período", () => {
@@ -277,7 +277,7 @@ test("o resumo para a consulta traz só o que foi registrado, sem interpretar ne
     horario: "08:00",
     doses: [
       { descricao: "10 mg", desde: INICIO },
-      { descricao: "20 mg", desde: DOSE_NOVA },
+      { descricao: "15 mg", desde: DOSE_NOVA },
     ],
     tomadas: [...tomou(dias("2026-10-06", "2026-10-11")), { dia: "2026-10-05", estado: "nao_tomou" }],
     efeitos: [{ dia: "2026-10-09", descricao: "enjoo ao acordar", intensidade: 1 }],
@@ -287,8 +287,8 @@ test("o resumo para a consulta traz só o que foi registrado, sem interpretar ne
   assert.match(texto, /Resumo do que eu registrei — Escitalopram/);
   assert.match(texto, /Início do tratamento \(informado por mim\): 11\/09\/2026 — 30 dias completos/);
   assert.match(texto, /- 10 mg, desde 11\/09\/2026/);
-  assert.match(texto, /- 20 mg, desde 08\/10\/2026/);
-  assert.match(texto, /Dose atual informada: 20 mg, há 3 dias completos/);
+  assert.match(texto, /- 15 mg, desde 08\/10\/2026/);
+  assert.match(texto, /Dose atual informada: 15 mg, há 3 dias completos/);
   assert.match(texto, /Dias com registro: 7 \(tomou: 6; não tomou: 1\)/);
   assert.match(texto, /Dia sem registro não quer dizer que não tomei/);
   assert.match(texto, /09\/10\/2026: enjoo ao acordar \(leve\)/);
