@@ -232,6 +232,9 @@ src/lib/progressao.ts     trilha de etapas e escolha da celebração (puro, test
 src/lib/acompanhamento.ts regras da contagem crescente (puro, testado)
 src/lib/sono.ts           validação, sobreposição e resumo de 7 dias (puro, testado)
 src/lib/servicos/         persistência com autorização por dono + testes de integração
+src/lib/conhecimento/    catálogo de temas com fontes, validador editorial, busca e assistente
+src/lib/rastreio/         regras de acompanhamento: episódios, medicamento, humor, lembrete (puro, testado)
+src/lib/api-saude.ts      sessão, fuso e erros comuns das rotas de saúde
 src/lib/painel-progresso.ts monta, no servidor, tudo que a trilha mostra
 src/lib/motor.ts          decide o que está vencido e dispara — com dedupe
 src/lib/ia/contexto.ts    retrato ao vivo do usuário (fonte única de verdade)
@@ -242,7 +245,7 @@ src/lib/senha.ts          scrypt puro, compartilhado com os scripts de CLI
 src/lib/auth.ts           JWT e sessão
 src/lib/admin.ts          guarda de rota para as ações de admin
 scripts/criar-acesso.mjs  cria o primeiro admin direto no banco
-src/app/(app)/            as abas (marcos, contagem, ajuda, acesso, perfil) + conquistas e sono
+src/app/(app)/            as abas (marcos, contagem, ajuda, acesso, perfil) + conquistas, sono e temas
 src/app/offline/          tela util quando nao ha conexao
 src/app/api/              rotas
 ```
@@ -251,6 +254,7 @@ src/app/api/              rotas
 
 - **Textos das notificações e marcos de cada hábito** → `src/lib/habitos.ts`. Cada entrada tem `chave`, `ms`, `titulo` e `corpo`. Adicionar um marco novo é adicionar um objeto ao array. **Não mude `chave`, `ms` nem `titulo` de um marco existente**: a chave deduplica notificações já enviadas. E leia antes a [política de conteúdo de saúde](#conteúdo-de-saúde-fonte-ou-nada).
 - **Benefícios com fonte** → `src/lib/beneficios.ts`.
+- **Temas educativos (unhas, escitalopram, sono…)** → `src/lib/conhecimento/temas/`. Leia antes [Temas, saúde e privacidade](#temas-saúde-e-privacidade).
 - **Etapas da trilha** (marcos de engajamento, noites de sono) → `src/lib/progressao.ts`.
 - **Respostas do motor gratuito** → `src/lib/ia/local.ts`. As ações de 5 minutos estão em `ACOES_MADRUGADA`/`MANHA`/`TARDE`/`NOITE`.
 - **Reconhecimento de hábito e ícone** → `src/lib/deteccao.ts`. Adicionar um termo é acrescentar uma palavra numa lista.
@@ -294,16 +298,44 @@ Nenhum texto do app promete recuperação, dá prazo universal ou afirma algo so
 - **Tratamento** nunca ganha benefício: o bloco se chama “O que esta etapa mostra” e diz que o contador mede só o tempo. **Sono** fala em observar o padrão, nunca em dormir mais ou melhor. **Viagem** fica com preparação e expectativa.
 - Para revisar: abra a página da fonte, compare o prazo, atualize `verificadoEm`. Se a fonte mudar o que diz, o teste que compara prazos corrigidos (`as afirmações do corpo não contradizem as da fonte`) é o lugar de atualizar.
 
+## Temas, saúde e privacidade
+
+O catálogo (`src/lib/conhecimento`) guarda **só** informação educativa com fonte. As outras três naturezas de informação nascem do uso e nunca moram nele: o que a pessoa **registra** (banco), o que o app **calcula** a partir disso (regras puras em `src/lib/rastreio`) e o que ela **percebe** (“como estou”). Sugestões práticas são marcadas como sugestões, não como afirmação de saúde.
+
+**Regras travadas por teste** (`npm test`): toda afirmação de benefício cita fonte que existe no registro; um tema só é "fontes-conferidas" se todas as suas fontes foram lidas por inteiro; o validador recusa promessa de resultado, instrução de dose, diagnóstico e telefone de emergência de outro país; nenhum tema se declara "revisado por profissional" (nenhuma revisão real aconteceu).
+
+**Os números e títulos fortes dependem de registro.** “10 dias sem roer” e “10 dias consecutivos com tomada registrada” só aparecem com 10 dias consecutivos confirmados; sem isso o app mostra a versão fraca (“10 dias desde o início informado”) e diz quantos dias estão sem informação. No medicamento há quatro contadores separados (início do tratamento, dose informada, sequência confirmada, dias com registro); trocar de dose só acrescenta uma linha ao histórico.
+
+**Privacidade**
+- Dado pessoal (nome do medicamento, dose, horário) fica **só no banco, na conta da pessoa**; nenhum seed, fixture ou código compartilhado o contém (os testes usam valores fictícios).
+- O assistente **não lê** registros de saúde por padrão. Ligar “Assistente e saúde” no Perfil é uma escolha da pessoa (tabela própria, `PreferenciaSaude`); mesmo ligado, só entram os registros necessários à pergunta. Se há provedor de IA externo, o Perfil avisa que trechos relevantes são enviados a ele.
+- O lembrete de medicamento é opt-in, com horário informado pela pessoa. O texto padrão é neutro (“Seu lembrete de hoje”); nome e dose só aparecem na notificação se ela ligar o texto detalhado, e o registro de envios guarda sempre o texto neutro.
+- Há “Apagar meus dados de saúde” no Perfil, apagar por registro e por acompanhamento, e o backup (`/api/exportar`) inclui tudo o que foi registrado.
+
+**O que o conteúdo não é.** Educativo, não substitui avaliação, diagnóstico ou orientação de profissional; o app não recomenda iniciar, aumentar, reduzir nem parar medicamento e não interpreta os registros como resposta ao tratamento.
+
+**Fontes e limites hoje**
+- Lidas por inteiro: AAD e TLC Foundation (unhas), bula brasileira do oxalato de escitalopram (genérico, publicada no portal da Novartis Brasil), MedlinePlus e NHS (escitalopram, sono, respiração, atividade física, cafeína, higiene bucal, terapia, 5 passos), CDC e NHS (parar de fumar), CVV.
+- **Não lidas:** HSE (HTTP 403), BVS/Ministério da Saúde sobre onicofagia (HTTP 503), Bulário da Anvisa. O guia brasileiro de atividade física só foi visto em resumo e não é usado como fonte.
+- A maior parte das fontes é do Reino Unido ou dos EUA. Nos temas em que isso importa (terapia, atividade física) o próprio tema avisa, e o status de terapia é “parcial”.
+- **Nenhum tema foi revisado por profissional de saúde.** Antes de tratar como definitivo, peça revisão (médico/psiquiatra para escitalopram; dermatologista e psicólogo para unhas) e confira a bula vigente no Bulário.
+
+**Adicionar um tema:** crie `src/lib/conhecimento/temas/<id>.ts`, registre as fontes em `fontes.ts` (só depois de ler a página) e inclua o tema em `catalogo.ts`. `npm test` percorre o catálogo inteiro: tema novo já entra validado. Onde a fonte **não** diz algo, escreva isso em `limites` e `notaEditorial` em vez de completar.
+
 ## Testes
 
 ```bash
-npm test                      # regras puras: datas, sono, progressão, conteúdo (sem banco)
+npm test                      # regras puras: datas, sono, progressão, catálogo, assistente, rastreio (sem banco)
 ZXP_TESTE_DB=1 npm test      # inclui os de integração, contra o banco do .env.local
 ```
 
 Os de integração (persistência, autorização entre contas, deduplicação, concorrência) **usam o banco do `.env.local`** — não há banco de teste separado. Eles só criam usuários `teste-…@zxpmark.local`, cada processo apaga apenas os que criou, e resíduos com mais de 1 h de execuções interrompidas. Sem a variável `ZXP_TESTE_DB=1` eles são pulados. Se você apontar o `.env.local` para produção, prefira rodá-los num momento calmo.
 
 ## Atualizando um banco já existente
+
+**Branch de temas e acompanhamento de saúde (`feat/conhecimento-unhas-escitalopram`).** Adiciona 8 tabelas (`HabitoAcompanhado`, `EventoHabito`, `Tratamento`, `DoseTratamento`, `TomadaDia`, `EfeitoRegistrado`, `RegistroHumor`, `PreferenciaSaude`) e nenhuma coluna em tabela existente. **Rode `npm run db:push` antes de fazer o merge/deploy**: sem as tabelas o app não cai (as telas avisam que o acompanhamento está indisponível, o lembrete e o backup pulam o trecho de saúde, e o assistente trata como “sem permissão”), mas nada de saúde é salvo até o banco ser atualizado.
+
+**Versão anterior.**
 
 Esta versão **só adiciona**: 1 coluna nullable (`Contagem.arquivadoEm`) e 4 tabelas (`Acompanhamento`, `ConquistaVista`, `Percepcao`, `Sono`). Nenhum dado existente é alterado. Antes de publicar o código desta versão, rode uma vez:
 
