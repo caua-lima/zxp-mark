@@ -13,6 +13,8 @@ import { PRESETS } from "./habitos.ts";
 import { etapasDoAcompanhamento, etapasDoMarco, etapasDoSono } from "./progressao.ts";
 
 /** Linguagem de certeza que nenhum texto de saúde do app pode usar. */
+/** "Não há prazo comprovado" é o oposto de uma promessa (o validador do catálogo faz a mesma distinção). */
+const semNegacao = (t: string) => t.replace(/(^|[^a-zç])n[aã]o (há|ha|existe|existem) [^.]*?comprovad[a-z]*/gi, "$1");
 const CERTEZA = /\b(garant\w*|cura\w*|curad[oa]s?|comprovad[oa]s?|certamente|com certeza|100%|milagr\w*|sempre melhora)\b/i;
 
 test("toda fonte tem URL https, data de verificação ISO e id igual à chave", () => {
@@ -64,7 +66,7 @@ test("catálogo de hábitos: sem as afirmações removidas na revisão de conte�
   for (const p of PRESETS) {
     for (const m of p.marcos) {
       assert.ok(!proibidos.test(m.corpo), `${p.id}/${m.chave}: ${m.corpo}`);
-      assert.ok(!CERTEZA.test(m.corpo), `${p.id}/${m.chave}: ${m.corpo}`);
+      assert.ok(!CERTEZA.test(semNegacao(m.corpo)), `${p.id}/${m.chave}: ${m.corpo}`);
     }
     // o mito dos 21 dias só pode aparecer negado, nunca afirmado
     for (const m of p.marcos.filter((x) => x.chave === "21d")) {

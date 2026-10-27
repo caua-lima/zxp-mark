@@ -21,6 +21,8 @@
  * já enviadas (Enviada), e mexer nela reenviaria tudo.
  */
 
+import { unhas as temaUnhas } from "./conhecimento/temas/unhas.ts";
+
 export const MIN = 60_000;
 export const HORA = 60 * MIN;
 export const DIA = 24 * HORA;
@@ -197,6 +199,20 @@ const CAFEINA: MarcoDef[] = [
   { chave: "30d", ms: MES, titulo: "1 mês sem cafeína", corpo: "Um mês. Se um dia voltar a tomar, que seja uma escolha e não um automático." },
 ];
 
+/**
+ * Roer unhas. Os textos dos marcos de 1 a 30 dias vêm do tema do catálogo (uma só fonte de verdade,
+ * com as fontes e os limites dele): o app não promete recuperação nem prazo. O cronômetro aqui mede o
+ * tempo desde o último episódio INFORMADO; "Registrar recaída" é "roí". Os marcos além de 30 dias são
+ * só factuais e perguntam o que a pessoa percebeu.
+ */
+const UNHAS: MarcoDef[] = [
+  ...temaUnhas.marcos.map((m) => ({ chave: `${m.limiar}d`, ms: m.limiar * DIA, titulo: m.titulo, corpo: m.texto })),
+  { chave: "60d", ms: 2 * MES, titulo: "2 meses sem roer, conforme seus registros", corpo: "Dois meses sem episódio informado. O que mudou nas situações em que a vontade aparecia? O app não mede a recuperação das unhas: o que vale aqui é o que você percebe." },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem roer, conforme seus registros", corpo: "Três meses sem episódio informado. Se a vontade voltar, ela não apaga esse caminho: registrar e retomar faz parte." },
+  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem roer, conforme seus registros", corpo: "Meio ano sem episódio informado. Vale olhar o que ajudou e guardar para os dias de tensão." },
+  { chave: "1a", ms: ANO, titulo: "1 ANO sem roer, conforme seus registros", corpo: "Um ano sem episódio informado. Guarde essa data: ela é sua." },
+];
+
 export const PRESETS: Preset[] = [
   {
     id: "cigarro",
@@ -291,6 +307,16 @@ export const PRESETS: Preset[] = [
     marcos: montar("sem cafeína", CAFEINA),
   },
   {
+    id: "unhas",
+    rotulo: "Parar de roer unhas",
+    emoji: "💅",
+    sufixo: "sem roer",
+    unidade: "episódios",
+    contexto:
+      "Hábito de roer ou morder as unhas (onicofagia), geralmente automático e ligado a tédio, estresse ou tensão. Não prometa recuperação das unhas nem dê prazo: nenhuma fonte consultada o traz. Não diagnostique ansiedade. Ajuda ocupar as mãos e reconhecer os gatilhos.",
+    marcos: UNHAS,
+  },
+  {
     id: "personalizado",
     rotulo: "Outro hábito",
     emoji: "🔥",
@@ -301,6 +327,13 @@ export const PRESETS: Preset[] = [
     marcos: montar("firme", []),
   },
 ];
+
+/** Tema do catálogo (conteúdo com fontes) que acompanha cada tipo de marco. */
+export const TEMA_DO_PRESET: Record<string, string> = {
+  cigarro: "parar-de-fumar",
+  cafeina: "cafeina",
+  unhas: "unhas",
+};
 
 export function preset(id: string): Preset {
   return PRESETS.find((p) => p.id === id) ?? PRESETS[PRESETS.length - 1];

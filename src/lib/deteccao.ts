@@ -3,7 +3,7 @@
  * escolher de uma lista: o ícone da contagem regressiva e o tipo de hábito
  * do marco (que é o que carrega a linha do tempo certa).
  */
-import { PRESETS } from "@/lib/habitos";
+import { PRESETS } from "./habitos.ts";
 
 function normalizar(t: string): string {
   return t
@@ -69,6 +69,7 @@ export function iconePara(titulo: string, descricao?: string | null): string {
 /* --------------------------- tipo do hábito ------------------------------ */
 
 const HABITOS: [string, string[]][] = [
+  ["unhas", ["roer unha", "roer unhas", "roer as unhas", "morder unha", "morder unhas", "morder as unhas", "roendo unha", "roendo unhas", "roi unha", "roi unhas", "onicofagia"]],
   ["cigarro", ["fumar", "cigarro", "cigarros", "nicotina", "tabaco", "maco", "fumo", "fumante"]],
   ["vape", ["vape", "vapear", "pod", "juul", "ignite", "cigarro eletronico", "vaporizador"]],
   ["alcool", ["beber", "bebida", "alcool", "cerveja", "vodka", "whisky", "cachaca", "vinho", "alcoolico", "bebo"]],
