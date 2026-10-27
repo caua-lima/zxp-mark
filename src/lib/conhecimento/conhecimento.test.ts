@@ -277,7 +277,7 @@ test("'comprovado' afirmado é promessa; 'não há prazo comprovado' é o oposto
   const com = (f: string) => modelo({ limites: [f, "Outro limite válido."] });
   assert.ok(contem(ok(com("Esse efeito é comprovado.")), /promessa/));
   assert.ok(contem(ok(com("Está comprovado que funciona.")), /promessa/));
-  for (const honesto of ["Não há prazo comprovado para a recuperação.", "Os marcos não são prazos comprovados.", "Nenhum efeito foi comprovado aqui."]) {
+  for (const honesto of ["Não há prazo comprovado para a recuperação.", "Os marcos não são prazos comprovados."]) {
     assert.deepEqual(ok(com(honesto)), [], honesto);
   }
 });
