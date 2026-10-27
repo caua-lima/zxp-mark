@@ -30,7 +30,17 @@ import type { Fonte } from "./conhecimento/tipos.ts";
 export { FONTES };
 export type { Fonte };
 
-export type Beneficio = { texto: string; fonteId: string; /** o que a fonte NÃO diz sobre isto; mostrado junto */ ressalva?: string };
+export type Beneficio = {
+  texto: string;
+  fonteId: string;
+  /** o que a fonte NÃO diz sobre isto, ou um cuidado; mostrado junto */
+  ressalva?: string;
+  /**
+   * true = não é um ganho, é o que COSTUMA ACONTECER nesta fase segundo a fonte (ex.: abstinência).
+   * A tela troca o rótulo para "O que costuma acontecer nesta fase".
+   */
+  fase?: boolean;
+};
 
 /**
  * Cigarro. Cada linha espelha uma linha da tabela de prazos da fonte, sempre
@@ -90,16 +100,115 @@ const BENEFICIO_DE_UNHAS_POR_ETAPA: Record<string, string> = {
   "1d": "contaminacao",
   "7d": "infeccao-local",
   "10d": "pele-e-unha",
-  "14d": "dentes",
-  "30d": "autoestima",
+  "14d": "reversao-de-habito",
+  "30d": "crescimento",
+  "90d": "dentes",
+  "180d": "autoestima",
 };
-const UNHAS: Record<string, Beneficio> = Object.fromEntries(
-  Object.entries(BENEFICIO_DE_UNHAS_POR_ETAPA).map(([chave, id]) => {
-    const b = temaUnhas.beneficios.find((x) => x.id === id);
-    if (!b) throw new Error(`tema unhas: benefício "${id}" não existe`);
-    return [chave, { texto: b.texto, fonteId: b.fontes[0], ressalva: b.ressalva }];
-  })
-);
+const UNHAS: Record<string, Beneficio> = {
+  ...Object.fromEntries(
+    Object.entries(BENEFICIO_DE_UNHAS_POR_ETAPA).map(([chave, id]) => {
+      const b = temaUnhas.beneficios.find((x) => x.id === id);
+      if (!b) throw new Error(`tema unhas: benefício "${id}" não existe`);
+      return [chave, { texto: b.texto, fonteId: b.fontes[0], ressalva: b.ressalva }];
+    })
+  ),
+  // Conta direta sobre a média do estudo (3,47 mm/mês), sem prometer nada sobre a pele.
+  "60d": {
+    texto: "Na média de um estudo com adultos jovens saudáveis, a unha da mão cresce cerca de 3,5 mm por mês: em dois meses, perto de 7 mm.",
+    fonteId: "bionumbers-unhas",
+    ressalva: "É uma média; o ritmo varia com a idade, o dedo e a pessoa. Não é um prazo para a unha voltar ao aspecto de antes.",
+  },
+};
+
+/**
+ * Vape. O vape também tem nicotina: o CDC descreve, para quem para de vapear, a mesma abstinência
+ * temporária. Os prazos vêm da página do NHS sobre abstinência de nicotina (escrita para quem para de
+ * fumar), e o texto diz isso.
+ */
+const VAPE: Record<string, Beneficio> = {
+  "6h": {
+    texto: "Segundo o NHS, a abstinência de nicotina pode começar poucas horas depois do último uso: vontade forte, inquietação, irritação, dificuldade para dormir e para se concentrar.",
+    fonteId: "nhs-abstinencia-nicotina",
+    ressalva: "A página do NHS fala de cigarro; o vape também tem nicotina, e o CDC descreve os mesmos sintomas para quem para de vapear.",
+    fase: true,
+  },
+  "3d": {
+    texto: "Segundo o NHS, os sintomas de abstinência de nicotina costumam ser mais fortes na primeira semana, principalmente nos 3 primeiros dias.",
+    fonteId: "nhs-abstinencia-nicotina",
+    fase: true,
+  },
+  "7d": {
+    texto: "Segundo o CDC, os sintomas de abstinência de quem para de vapear (irritação, inquietação, tristeza, sono ruim, fome, vontade de nicotina) são temporários e diminuem com o tempo sem nicotina.",
+    fonteId: "cdc-vape",
+    fase: true,
+  },
+  "30d": {
+    texto: "Segundo o NHS, em média os sintomas de abstinência de nicotina duram de 3 a 4 semanas; algumas pessoas sentem por mais tempo, às vezes alguns meses.",
+    fonteId: "nhs-abstinencia-nicotina",
+    fase: true,
+  },
+};
+
+/** Álcool. Abstinência pode ser grave: o aviso de emergência viaja com cada etapa das primeiras horas e dias. */
+const EMERGENCIA_ALCOOL =
+  "Abstinência de álcool pode ser grave. Convulsão, febre, confusão intensa, alucinações ou batimento irregular: emergência agora (SAMU 192). Quem bebia muito e todo dia deve parar com orientação médica.";
+const ALCOOL: Record<string, Beneficio> = {
+  "6h": {
+    texto: "Segundo o MedlinePlus, os sintomas de abstinência de álcool costumam aparecer em até 8 horas depois da última dose, mas podem surgir dias depois: ansiedade, irritação, tremor, suor, dor de cabeça, insônia e náusea estão entre eles.",
+    fonteId: "medlineplus-abstinencia-alcool",
+    ressalva: EMERGENCIA_ALCOOL,
+    fase: true,
+  },
+  "1d": {
+    texto: "Segundo o MedlinePlus, os sintomas de abstinência de álcool costumam atingir o pico entre 24 e 72 horas.",
+    fonteId: "medlineplus-abstinencia-alcool",
+    ressalva: EMERGENCIA_ALCOOL,
+    fase: true,
+  },
+  "3d": {
+    texto: "Segundo o MedlinePlus, depois do pico (24 a 72 horas) os sintomas podem continuar por semanas.",
+    fonteId: "medlineplus-abstinencia-alcool",
+    ressalva: EMERGENCIA_ALCOOL,
+    fase: true,
+  },
+  "7d": {
+    texto: "Segundo o NHS, entre os efeitos imediatos de reduzir o álcool estão acordar melhor, ficar menos cansado durante o dia, ter mais energia e uma pele com melhor aspecto.",
+    fonteId: "nhs-reduzir-alcool",
+  },
+  "30d": {
+    texto: "Segundo o NHS, reduzir o álcool pode melhorar o humor em geral e ajudar a acordar mais descansado.",
+    fonteId: "nhs-reduzir-alcool",
+  },
+  "90d": {
+    texto: "Segundo o MedlinePlus, alterações de sono, mudanças rápidas de humor e cansaço podem durar meses depois de parar. Se isso acontecer, não quer dizer que algo deu errado.",
+    fonteId: "medlineplus-abstinencia-alcool",
+    fase: true,
+  },
+  "1a": {
+    texto: "Segundo o NHS, reduzir o álcool ajuda a diminuir o risco de problemas ligados ao excesso de bebida, como câncer, diabetes, demência, AVC e doenças do coração, do fígado e dos rins.",
+    fonteId: "nhs-reduzir-alcool",
+    ressalva: "A fonte não diz em quanto tempo o risco cai; o marco de 1 ano não é um prazo.",
+  },
+};
+
+/** Cafeína. O MedlinePlus descreve a abstinência e diz que ela costuma passar em alguns dias. */
+const CAFEINA: Record<string, Beneficio> = {
+  "12h": {
+    texto: "Segundo o MedlinePlus, parar de repente o consumo regular de cafeína pode causar dor de cabeça, sonolência, irritação, náusea e dificuldade de concentração.",
+    fonteId: "medlineplus-cafeina",
+    fase: true,
+  },
+  "2d": {
+    texto: "Segundo o MedlinePlus, esses sintomas de abstinência de cafeína costumam passar em alguns dias.",
+    fonteId: "medlineplus-cafeina",
+    fase: true,
+  },
+  "7d": {
+    texto: "Segundo o MedlinePlus, cafeína em excesso pode causar inquietação, tremor, insônia, dor de cabeça, tontura, batimento acelerado e ansiedade. Repare se algo disso mudou para você.",
+    fonteId: "medlineplus-cafeina",
+  },
+};
 
 /** Vale para qualquer hábito: não é efeito de saúde, é sobre como hábitos se formam. */
 const GERAIS: Record<string, Beneficio> = {
@@ -110,13 +219,22 @@ const GERAIS: Record<string, Beneficio> = {
   },
 };
 
-const POR_PRESET: Record<string, Record<string, Beneficio>> = { cigarro: CIGARRO, unhas: UNHAS };
+const POR_PRESET: Record<string, Record<string, Beneficio>> = {
+  cigarro: CIGARRO,
+  unhas: UNHAS,
+  vape: VAPE,
+  alcool: ALCOOL,
+  cafeina: CAFEINA,
+};
 
-export function beneficioDe(presetId: string, chave: string): { texto: string; fonte: Fonte; ressalva?: string } | null {
+export function beneficioDe(
+  presetId: string,
+  chave: string
+): { texto: string; fonte: Fonte; ressalva?: string; fase?: boolean } | null {
   const b = POR_PRESET[presetId]?.[chave] ?? GERAIS[chave];
   if (!b) return null;
   const fonte = FONTES[b.fonteId];
-  return fonte ? { texto: b.texto, fonte, ressalva: b.ressalva } : null;
+  return fonte ? { texto: b.texto, fonte, ressalva: b.ressalva, fase: b.fase } : null;
 }
 
 /** Todas as chaves de etapa que têm benefício para um preset (usado nos testes). */
@@ -133,8 +251,9 @@ export const AVISO_BENEFICIO =
   "Informação geral, sem garantia individual: o ritmo é diferente para cada pessoa, e isto não substitui a orientação de um profissional de saúde.";
 
 /** O título do bloco depende do conteúdo: só o que tem fonte pode se chamar benefício. */
-export function rotuloDoBeneficio(tipo: "fonte" | "factual"): string {
-  return tipo === "fonte" ? "Benefício possível" : "O que esta etapa mostra";
+export function rotuloDoBeneficio(tipo: "fonte" | "factual", fase = false): string {
+  if (tipo === "fonte") return fase ? "O que costuma acontecer nesta fase" : "Benefício possível";
+  return "O que esta etapa mostra";
 }
 
 /* --------------------------- conteúdo de uma etapa ------------------------ */
@@ -155,7 +274,7 @@ export type ConteudoEtapa = {
   conquista: string;
   /** 2. educativo; "fonte" tem referência, "factual" é só sobre o registro */
   beneficio:
-    | { tipo: "fonte"; texto: string; fonte: Fonte; aviso: string; ressalva?: string }
+    | { tipo: "fonte"; texto: string; fonte: Fonte; aviso: string; ressalva?: string; fase?: boolean }
     | { tipo: "factual"; texto: string };
   /** o que vem depois; sempre uma frase, nunca uma cobrança */
   proximoPasso: string;
@@ -207,7 +326,7 @@ export function conteudoDaEtapa(c: ContextoEtapa): ConteudoEtapa {
     c.tipo === "marco" && c.presetId && !c.etapa.inicial ? beneficioDe(c.presetId, c.etapa.chave) : null;
 
   const beneficio: ConteudoEtapa["beneficio"] = achado
-    ? { tipo: "fonte", texto: achado.texto, fonte: achado.fonte, aviso: AVISO_BENEFICIO, ressalva: achado.ressalva }
+    ? { tipo: "fonte", texto: achado.texto, fonte: achado.fonte, aviso: AVISO_BENEFICIO, ressalva: achado.ressalva, fase: achado.fase }
     : { tipo: "factual", texto: factualDe(c) };
 
   const proximoPasso = c.proxima

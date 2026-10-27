@@ -132,26 +132,26 @@ const CIGARRO: MarcoDef[] = [
 
 /** Álcool: sem afirmação de benefício. Mantém só o aviso de segurança. */
 const ALCOOL: MarcoDef[] = [
-  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem beber", corpo: "Seis horas. Beba água e coma alguma coisa. Se você bebia muito e com frequência, não pare de repente sem orientação médica: a abstinência de álcool pode ser perigosa." },
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem beber", corpo: "Doze horas. Ansiedade e tremor leve podem aparecer em quem bebia com frequência. Se for intenso, vier com confusão mental ou convulsão, procure atendimento médico agora." },
-  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM BEBER", corpo: "Um dia inteiro. Hoje você tomou uma decisão e manteve." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 horas sem beber", corpo: "Três dias. Repare nos gatilhos: o horário, o lugar, a companhia. Sexta-feira e fim de expediente costumam ser os mais fortes." },
-  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM BEBER", corpo: "Uma semana. Sete dias de escolhas. O que ficou diferente na sua rotina?" },
+  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem beber", corpo: "Seis horas. Segundo o MedlinePlus, a abstinência de álcool costuma começar em até 8 horas depois da última dose: ansiedade, tremor, suor, dor de cabeça e insônia estão entre os sintomas. Se você bebia muito e todo dia, não pare sem orientação médica. Convulsão, febre ou confusão: SAMU 192." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem beber", corpo: "Doze horas. Ansiedade, irritação e tremor leve podem aparecer em quem bebia com frequência. Se for intenso, vier com confusão, febre, alucinação ou convulsão, procure atendimento agora (SAMU 192)." },
+  { chave: "1d", ms: DIA, titulo: "24 HORAS SEM BEBER", corpo: "Um dia inteiro. Segundo o MedlinePlus, os sintomas de abstinência costumam atingir o pico entre 24 e 72 horas. Se pesar, peça ajuda; se vier com confusão, febre ou convulsão, SAMU 192." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 horas sem beber", corpo: "Três dias. Segundo o MedlinePlus, depois do pico de 24 a 72 horas os sintomas podem continuar por semanas, mais leves para muita gente. Repare nos gatilhos: o horário, o lugar, a companhia." },
+  { chave: "7d", ms: SEMANA, titulo: "1 SEMANA SEM BEBER", corpo: "Uma semana. Segundo o NHS, entre os efeitos imediatos de reduzir o álcool estão acordar melhor, menos cansaço durante o dia e mais energia. O que você notou?" },
   { chave: "14d", ms: 2 * SEMANA, titulo: "2 semanas sem beber", corpo: "Duas semanas. Continue — e repare em como você tem passado os momentos que antes eram de bebida." },
-  { chave: "30d", ms: MES, titulo: "1 MÊS SEM BEBER", corpo: "Um mês. Olhe pra trás: quantas situações você atravessou sem beber?" },
-  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem beber", corpo: "Três meses de constância. Você tem mostrado que a sua rotina social e a sua alegria não dependem disso." },
+  { chave: "30d", ms: MES, titulo: "1 MÊS SEM BEBER", corpo: "Um mês. Segundo o NHS, reduzir o álcool pode melhorar o humor e ajudar a acordar mais descansado. Olhe pra trás: quantas situações você atravessou sem beber?" },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem beber", corpo: "Três meses de constância. Segundo o MedlinePlus, alterações de sono, de humor e cansaço podem durar meses depois de parar; não quer dizer que algo deu errado." },
   { chave: "180d", ms: 6 * MES, titulo: "6 meses sem beber", corpo: "Meio ano. Metade de um ano vivida de outro jeito." },
   { chave: "1a", ms: ANO, titulo: "1 ANO SEM BEBER", corpo: "Um ano inteiro. 365 dias de escolhas." },
 ];
 
 const VAPE: MarcoDef[] = [
   { chave: "1h", ms: HORA, titulo: "1 hora sem vape", corpo: "A primeira hora sem tragar. O reflexo de levar a mão ao bolso vai aparecer — é só um reflexo. Ocupe as mãos." },
-  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem vape", corpo: "Seis horas. Como o vape costuma ser usado o dia inteiro, a falta pode ser sentida de forma contínua. É desconfortável e dá pra atravessar." },
+  { chave: "6h", ms: 6 * HORA, titulo: "6 horas sem vape", corpo: "Seis horas. Segundo o NHS, a abstinência de nicotina pode começar poucas horas depois do último uso: vontade forte, inquietação, irritação. O vape também tem nicotina. É desconfortável e passa." },
   { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem vape", corpo: "Doze horas. Troque o gesto: água, chiclete, uma caneta na mão." },
   { chave: "1d", ms: DIA, titulo: "24 HORAS SEM VAPE", corpo: "Um dia sem vape. Você decidiu isso várias vezes hoje e manteve." },
-  { chave: "3d", ms: 3 * DIA, titulo: "72 HORAS SEM VAPE", corpo: "Três dias. Boa parte do que sobra é o hábito de levar a mão à boca — e esse você desmonta com repetição." },
-  { chave: "7d", ms: SEMANA, titulo: "1 semana sem vape", corpo: "Uma semana. Sete dias de escolhas. Note quantas vezes a mão foi ao bolso e voltou." },
-  { chave: "30d", ms: MES, titulo: "1 MÊS SEM VAPE", corpo: "Um mês inteiro. Você quebrou o ritmo do hábito." },
+  { chave: "3d", ms: 3 * DIA, titulo: "72 HORAS SEM VAPE", corpo: "Três dias. Segundo o NHS, a abstinência de nicotina costuma ser mais forte na primeira semana, principalmente nos 3 primeiros dias: você está atravessando a parte mais difícil." },
+  { chave: "7d", ms: SEMANA, titulo: "1 semana sem vape", corpo: "Uma semana. Segundo o CDC, os sintomas de quem para de vapear são temporários e diminuem com o tempo sem nicotina. Note quantas vezes a mão foi ao bolso e voltou." },
+  { chave: "30d", ms: MES, titulo: "1 MÊS SEM VAPE", corpo: "Um mês inteiro. Segundo o NHS, em média os sintomas de abstinência de nicotina duram de 3 a 4 semanas; para algumas pessoas, mais. Você quebrou o ritmo do hábito." },
 ];
 
 const ACUCAR: MarcoDef[] = [
@@ -192,9 +192,9 @@ const APOSTAS: MarcoDef[] = [
 ];
 
 const CAFEINA: MarcoDef[] = [
-  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem cafeína", corpo: "Doze horas. Dor de cabeça e sonolência podem aparecer nos primeiros dias de quem cortou. Hidrate-se bem." },
+  { chave: "12h", ms: 12 * HORA, titulo: "12 horas sem cafeína", corpo: "Doze horas. Segundo o MedlinePlus, parar de repente pode causar dor de cabeça, sonolência, irritação, náusea e dificuldade de concentração. Hidrate-se bem." },
   { chave: "1d", ms: DIA, titulo: "24 horas sem cafeína", corpo: "Um dia. Beba água ao longo do dia e durma um pouco mais cedo, se puder." },
-  { chave: "2d", ms: 2 * DIA, titulo: "48 horas sem cafeína", corpo: "Dois dias. O desconforto dos primeiros dias costuma ser temporário. Siga firme." },
+  { chave: "2d", ms: 2 * DIA, titulo: "48 horas sem cafeína", corpo: "Dois dias. Segundo o MedlinePlus, os sintomas de abstinência de cafeína costumam passar em alguns dias. Siga firme." },
   { chave: "7d", ms: SEMANA, titulo: "1 semana sem cafeína", corpo: "Uma semana. Repare no seu sono e no seu nível de energia ao longo do dia." },
   { chave: "30d", ms: MES, titulo: "1 mês sem cafeína", corpo: "Um mês. Se um dia voltar a tomar, que seja uma escolha e não um automático." },
 ];
@@ -207,9 +207,9 @@ const CAFEINA: MarcoDef[] = [
  */
 const UNHAS: MarcoDef[] = [
   ...temaUnhas.marcos.map((m) => ({ chave: `${m.limiar}d`, ms: m.limiar * DIA, titulo: m.titulo, corpo: m.texto })),
-  { chave: "60d", ms: 2 * MES, titulo: "2 meses sem roer, conforme seus registros", corpo: "Dois meses sem episódio informado. O que mudou nas situações em que a vontade aparecia? O app não mede a recuperação das unhas: o que vale aqui é o que você percebe." },
-  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem roer, conforme seus registros", corpo: "Três meses sem episódio informado. Se a vontade voltar, ela não apaga esse caminho: registrar e retomar faz parte." },
-  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem roer, conforme seus registros", corpo: "Meio ano sem episódio informado. Vale olhar o que ajudou e guardar para os dias de tensão." },
+  { chave: "60d", ms: 2 * MES, titulo: "2 meses sem roer, conforme seus registros", corpo: "Dois meses sem episódio informado. Na média de um estudo com adultos jovens saudáveis, a unha da mão cresce cerca de 3,5 mm por mês: em dois meses, perto de 7 mm. O ritmo é seu; o que você percebe?" },
+  { chave: "90d", ms: 3 * MES, titulo: "3 meses sem roer, conforme seus registros", corpo: "Três meses sem episódio informado. Em estudos pequenos, quem aprendeu a perceber a mão indo à boca e trocar por outro gesto manteve unhas maiores meses depois. Se a vontade voltar, ela não apaga esse caminho." },
+  { chave: "180d", ms: 6 * MES, titulo: "6 meses sem roer, conforme seus registros", corpo: "Meio ano sem episódio informado. Para algumas pessoas, o aspecto das unhas pesava na autoestima; repare no que mudou para você. Guarde o que ajudou para os dias de tensão." },
   { chave: "1a", ms: ANO, titulo: "1 ANO sem roer, conforme seus registros", corpo: "Um ano sem episódio informado. Guarde essa data: ela é sua." },
 ];
 

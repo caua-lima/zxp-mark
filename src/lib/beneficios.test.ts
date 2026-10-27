@@ -49,9 +49,9 @@ test("toda chave de benefício existe como etapa do hábito (sem benefício órf
   }
 });
 
-test("só cigarro e unhas têm benefício de saúde (ambos com fonte) — nenhum outro hábito ganha afirmação sem fonte", () => {
-  assert.deepEqual(Object.keys(TODOS_OS_BENEFICIOS).sort(), ["cigarro", "geral", "unhas"]);
-  for (const p of PRESETS.filter((p) => p.id !== "cigarro" && p.id !== "unhas")) {
+test("só cigarro, unhas, vape, álcool e cafeína têm conteúdo de saúde (todos com fonte) — nenhum outro hábito ganha afirmação sem fonte", () => {
+  assert.deepEqual(Object.keys(TODOS_OS_BENEFICIOS).sort(), ["alcool", "cafeina", "cigarro", "geral", "unhas", "vape"]);
+  for (const p of PRESETS.filter((p) => !["cigarro", "unhas", "vape", "alcool", "cafeina"].includes(p.id))) {
     for (const m of p.marcos) {
       const b = beneficioDe(p.id, m.chave);
       // só a nota geral sobre formação de hábito pode aparecer fora do cigarro
@@ -128,9 +128,9 @@ test("etapa com fonte mostra a referência e o aviso de que não é garantia", (
 });
 
 test("hábito sem fonte cai numa mensagem factual — nunca numa afirmação de saúde", () => {
-  const etapas = etapasDoMarco("alcool");
+  const etapas = etapasDoMarco("acucar");
   const e = etapas.find((x) => x.chave === "30d")!;
-  const r = conteudoDaEtapa({ tipo: "marco", presetId: "alcool", etapa: e, proxima: null });
+  const r = conteudoDaEtapa({ tipo: "marco", presetId: "acucar", etapa: e, proxima: null });
   assert.equal(r.beneficio.tipo, "factual");
   assert.match(r.beneficio.texto, /constância/);
   assert.match(r.proximoPasso, /fim da trilha/);
@@ -209,5 +209,33 @@ test("unhas: os benefícios das etapas vêm do tema, com fonte lida, e nenhum af
   assert.match(beneficioDe("unhas", "10d")!.ressalva ?? "", /nenhuma informa quanto tempo/);
   // etapas sem benefício caem na mensagem factual, nunca num benefício inventado
   assert.equal(beneficioDe("unhas", "3d"), null);
-  assert.equal(beneficioDe("unhas", "180d"), null);
+  assert.equal(beneficioDe("unhas", "1a"), null);
+});
+
+test("vape, álcool e cafeína: o que costuma acontecer em cada fase vem da fonte, com o rótulo de fase e não de benefício", () => {
+  for (const [preset, chave, fonte] of [
+    ["vape", "3d", "nhs-abstinencia-nicotina"],
+    ["vape", "7d", "cdc-vape"],
+    ["alcool", "1d", "medlineplus-abstinencia-alcool"],
+    ["cafeina", "2d", "medlineplus-cafeina"],
+  ] as const) {
+    const b = beneficioDe(preset, chave);
+    assert.ok(b, `${preset}/${chave}`);
+    assert.equal(b.fonte.id, fonte);
+    assert.equal(b.fase, true, `${preset}/${chave} é fase, não ganho`);
+    assert.equal(b.fonte.verificacao, "pagina lida");
+  }
+  assert.equal(rotuloDoBeneficio("fonte", true), "O que costuma acontecer nesta fase");
+  assert.equal(rotuloDoBeneficio("fonte"), "Benefício possível");
+});
+
+test("álcool: toda etapa das primeiras horas e dias leva o aviso de emergência com o SAMU 192", () => {
+  for (const chave of ["6h", "1d", "3d"]) {
+    const b = beneficioDe("alcool", chave)!;
+    assert.match(b.ressalva ?? "", /SAMU 192/, chave);
+    assert.match(b.ressalva ?? "", /orientação médica/, chave);
+  }
+  for (const m of PRESETS.find((p) => p.id === "alcool")!.marcos.filter((x) => ["6h", "12h", "1d"].includes(x.chave))) {
+    assert.match(m.corpo, /192/, m.chave);
+  }
 });

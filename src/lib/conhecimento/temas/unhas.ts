@@ -70,6 +70,21 @@ export const unhas: Tema = {
         "Para algumas pessoas, o aspecto das unhas pesa na autoestima e traz constrangimento; cuidar delas pode aliviar esse peso.",
       fontes: ["bfrb-unhas"],
     },
+    {
+      id: "crescimento",
+      texto:
+        "Em média, a unha da mão cresce cerca de 3,5 mm por mês, segundo um estudo com adultos jovens saudáveis. Sem roer, esse é o comprimento que deixa de ser perdido a cada mês.",
+      fontes: ["bionumbers-unhas"],
+      ressalva:
+        "É uma média: o ritmo varia com a idade, o dedo e a pessoa. É o crescimento da unha, não um prazo para a pele ao redor ou para a unha voltar ao aspecto de antes.",
+    },
+    {
+      id: "reversao-de-habito",
+      texto:
+        "Em estudos pequenos, a reversão de hábito (aprender a perceber quando a mão vai à boca e trocar por outro gesto) aumentou o comprimento das unhas em comparação com quem não fez: em adultos, 22% ao fim do tratamento, mantendo 19% cinco meses depois; em crianças, 8 de 30 pararam por completo em três meses.",
+      fontes: ["twohig-2003-unhas", "ghanizadeh-2013-unhas"],
+      ressalva: "Estudos com poucas pessoas; mostram o que aconteceu nos grupos, não o que vai acontecer com você.",
+    },
   ],
 
   marcos: [
@@ -123,22 +138,24 @@ export const unhas: Tema = {
       limiar: 14,
       titulo: "14 dias sem roer, conforme seus registros",
       texto:
-        "Duas semanas registradas. Se a vontade apertar de novo, um episódio não apaga nada: ele mostra uma situação em que o hábito apareceu. O que aconteceu antes?",
+        "Duas semanas registradas. Se a vontade apertar de novo, um episódio não apaga nada: ele mostra uma situação em que o hábito apareceu. O que aconteceu antes? Em estudos pequenos, perceber quando a mão vai à boca e trocar por outro gesto (reversão de hábito) ajudou as unhas a crescer.",
       tituloSemRegistro: "14 dias desde o início informado",
       textoSemRegistro:
         "Passaram duas semanas desde o início informado, com dias sem registro. Marcar os dias que faltam deixa o histórico fiel.",
       acoes: ["registrar-gatilho"],
+      afirmacoes: ["reversao-de-habito"],
     },
     {
       chave: "30d",
       limiar: 30,
       titulo: "30 dias sem roer, conforme seus registros",
       texto:
-        "Um mês de registros sem roer. Olhe o histórico: em quais situações foi mais fácil? Planeje o que fazer nas que ainda são difíceis. Se, mesmo com as estratégias, o hábito continuar difícil, conversar com um profissional é uma opção legítima.",
+        "Um mês de registros sem roer. Para ter uma referência: em média, a unha da mão cresce cerca de 3,5 mm por mês, segundo um estudo com adultos jovens saudáveis; o ritmo varia de pessoa para pessoa. Olhe o histórico: em quais situações foi mais fácil? Planeje o que fazer nas que ainda são difíceis. Se, mesmo com as estratégias, o hábito continuar difícil, conversar com um profissional é uma opção legítima.",
       tituloSemRegistro: "30 dias desde o início informado",
       textoSemRegistro:
         "Passou um mês desde o início informado, com dias sem registro. O histórico é seu: complete o que lembrar para ele refletir a realidade.",
       acoes: ["ver-historico"],
+      afirmacoes: ["crescimento"],
       momentoDeConsulta: true,
     },
   ],
@@ -230,7 +247,15 @@ export const unhas: Tema = {
       resposta:
         "O app não consegue dizer isso. O contador mostra os dias que você registrou, não o estado das suas unhas, e as fontes consultadas (AAD e TLC) não informam quanto tempo a pele e as unhas levam para se recuperar. Quem pode avaliar é você, olhando as suas unhas, e um dermatologista, se quiser uma opinião profissional.",
       fontes: ["aad-unhas", "bfrb-unhas"],
-      termos: ["recuperou", "recuperadas", "recuperar", "crescer", "quanto tempo", "cicatrizar", "ja melhorou", "melhorou"],
+      termos: ["recuperou", "recuperadas", "recuperar", "cicatrizar", "ja melhorou", "melhorou"],
+    },
+    {
+      id: "quanto-cresce",
+      pergunta: "Quanto tempo a unha leva para crescer?",
+      resposta:
+        "Em média, a unha da mão cresce cerca de 3,5 mm por mês (perto de 0,1 mm por dia), segundo um estudo com adultos jovens saudáveis dos EUA. O ritmo varia com a idade, o dedo e a pessoa. Isso é o crescimento da unha, não um prazo para a pele ao redor ou para a unha voltar ao aspecto de antes: as fontes consultadas não dão esse prazo.",
+      fontes: ["bionumbers-unhas"],
+      termos: ["crescer", "cresce", "quanto tempo", "milimetros", "tamanho", "comprimento"],
     },
     {
       id: "sinal-de-ansiedade",

@@ -256,7 +256,7 @@ function DetalheDaEtapa({ painel, etapa }: { painel: PainelProgresso; etapa: Eta
       {/* Só é "benefício" quando há fonte. Sem ela o texto é sobre o registro, e
           chamá-lo de benefício sugeriria um ganho que o conteúdo nega. */}
       <Bloco
-        rotulo={rotuloDoBeneficio(c.beneficio.tipo)}
+        rotulo={rotuloDoBeneficio(c.beneficio.tipo, c.beneficio.tipo === "fonte" && c.beneficio.fase)}
         tom="suave"
       >
         <p>{c.beneficio.texto}</p>
