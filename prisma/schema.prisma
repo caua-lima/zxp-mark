@@ -52,6 +52,7 @@ model User {
   sonos            Sono[]
   habitos          HabitoAcompanhado[]
   tratamentos      Tratamento[]
+  humores          RegistroHumor[]
 
   @@index([email])
 }
@@ -387,5 +388,26 @@ model EfeitoRegistrado {
   criadoEm      DateTime @default(now())
 
   @@index([tratamentoId, dia])
+  @@index([userId])
+}
+
+/// "Como estou": um registro por dia, editável. Dado da pessoa; o app mostra lado a lado
+/// com sono e hábitos, mas NUNCA afirma que um causou o outro.
+model RegistroHumor {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// dia local "YYYY-MM-DD"
+  dia          String
+  /// 1 (difícil) a 5 (muito bem)
+  humor        Int
+  energia      Int?
+  ansiedade    Int?
+  nota         String?  @db.Text
+  criadoEm     DateTime @default(now())
+  atualizadaEm DateTime @updatedAt
+
+  @@unique([userId, dia])
   @@index([userId])
 }
