@@ -54,6 +54,8 @@ async function dadosTratamento(uid: string, temaId: string, tz: string): Promise
         nome: c.tratamento.nome,
         inicio: diaLocalDe(c.tratamento.inicio, tz),
         horario: c.tratamento.horario,
+        lembrete: c.tratamento.lembrete,
+        lembreteDetalhado: c.tratamento.lembreteDetalhado,
         doCatalogo: c.tratamento.medicamentoId === temaId,
         resumo: c.resumo,
         cartoes: c.cartoes,

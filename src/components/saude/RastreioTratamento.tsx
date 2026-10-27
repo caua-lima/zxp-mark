@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Botao } from "@/components/ui";
+import { Botao, Chave } from "@/components/ui";
 import type { ResumoTratamento, SituacaoCartao } from "@/lib/rastreio/medicamento";
 import type { AcaoDoMarco } from "@/lib/conhecimento/tipos";
 import { chamar, diaCurto, Erro, Opcoes, Texto } from "./campos";
@@ -13,6 +13,8 @@ export type TratamentoUI = {
   nome: string;
   inicio: string;
   horario: string | null;
+  lembrete: boolean;
+  lembreteDetalhado: boolean;
   /** o conteúdo do catálogo se aplica a este medicamento */
   doCatalogo: boolean;
   resumo: ResumoTratamento;
@@ -426,6 +428,8 @@ function Ativo({ t, hoje }: { t: TratamentoUI; hoje: string }) {
         )}
       </div>
 
+      <ConfigLembrete t={t} />
+
       <details id={`consulta-${t.id}`} className="rounded-2xl border border-borda bg-white/[0.03] p-4">
         <summary className="cursor-pointer text-[14px] font-medium">Resumo para levar à consulta</summary>
         <pre className="mt-3 whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed text-suave">{t.resumoParaConsulta}</pre>
@@ -469,6 +473,82 @@ function Ativo({ t, hoje }: { t: TratamentoUI; hoje: string }) {
         )}
       </div>
     </section>
+  );
+}
+
+/**
+ * Lembrete: opt-in, com horário informado pela pessoa. O texto padrão é neutro (sem nome nem dose);
+ * o detalhado, que aparece na tela bloqueada, é uma segunda escolha, também desligada por padrão.
+ */
+function ConfigLembrete({ t }: { t: TratamentoUI }) {
+  const router = useRouter();
+  const [horario, setHorario] = useState(t.horario ?? "");
+  const [lembrete, setLembrete] = useState(t.lembrete);
+  const [detalhado, setDetalhado] = useState(t.lembreteDetalhado);
+  const [erro, setErro] = useState("");
+  const [ocupado, setOcupado] = useState(false);
+
+  async function enviar(corpo: Record<string, unknown>) {
+    setOcupado(true);
+    setErro("");
+    const r = await chamar(`/api/tratamentos/${t.id}`, "PATCH", corpo);
+    setOcupado(false);
+    if (!r.ok) {
+      setErro(r.erro);
+      return false;
+    }
+    router.refresh();
+    return true;
+  }
+
+  return (
+    <details className="rounded-2xl border border-borda bg-white/[0.03] p-4">
+      <summary className="cursor-pointer text-[14px] font-medium">Lembrete de registro</summary>
+      <div className="mt-3 space-y-3">
+        <p className="text-[13px] leading-relaxed text-suave">
+          Opcional. O lembrete só pergunta se você quer registrar; não cobra nem conta sequência. Precisa das notificações ligadas
+          no Perfil.
+        </p>
+        <label className="block">
+          <span className="text-[13px] text-suave">Horário previsto (o da sua prescrição)</span>
+          <div className="mt-1.5 flex gap-2">
+            <input
+              type="time"
+              value={horario}
+              onChange={(e) => setHorario(e.target.value)}
+              className="min-w-0 flex-1 rounded-xl border border-borda bg-white/[0.04] px-3.5 py-3 text-[15px] text-tinta focus:border-brand/60 focus:outline-none"
+            />
+            <Botao type="button" variante="vazio" carregando={ocupado} className="!px-4" onClick={() => enviar({ horario: horario || null })}>
+              Salvar
+            </Botao>
+          </div>
+        </label>
+        <div className="divide-y divide-white/6">
+          <Chave
+            ligado={lembrete}
+            aoMudar={async (v) => {
+              setLembrete(v);
+              if (!(await enviar({ lembrete: v }))) setLembrete(!v);
+              else if (!v) setDetalhado(false);
+            }}
+            rotulo="Lembrar de registrar"
+            descricao={t.horario ? "Texto neutro: “Seu lembrete de hoje”." : "Salve um horário primeiro."}
+          />
+          {lembrete && (
+            <Chave
+              ligado={detalhado}
+              aoMudar={async (v) => {
+                setDetalhado(v);
+                if (!(await enviar({ lembreteDetalhado: v }))) setDetalhado(!v);
+              }}
+              rotulo="Mostrar nome e dose na notificação"
+              descricao="Aparece na tela bloqueada. Desligado, ninguém que vir o seu celular sabe qual é o medicamento."
+            />
+          )}
+        </div>
+        <Erro>{erro}</Erro>
+      </div>
+    </details>
   );
 }
 
